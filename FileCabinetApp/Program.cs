@@ -119,7 +119,12 @@ namespace FileCabinetApp
             var lastName = Console.ReadLine();
             Console.Write("Date of birth: ");
             DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine());
-            fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth);
+            short ago = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
+            Console.Write("Salary: ");
+            var salary = decimal.Parse(Console.ReadLine());
+            Console.Write("Any character: ");
+            var symbol = char.Parse(Console.ReadLine());
+            fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth, ago, salary, symbol);
         }
 
         private static void List(string parameters)
@@ -127,7 +132,7 @@ namespace FileCabinetApp
             var list = fileCabinetService.GetRecords();
             foreach (var item in list)
             {
-                Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth.ToString("yyyy-MMM-dd")}");
+                Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth.ToString("yyyy-MMM-dd")}, {item.Age}, {item.Salary}, {item.Symbol}");
             }
         }
     }
