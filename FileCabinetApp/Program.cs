@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace FileCabinetApp
 {
@@ -9,6 +10,7 @@ namespace FileCabinetApp
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
+        private static FileCabinetService fileCabinetService = new FileCabinetService();
 
         private static bool isRunning = true;
 
@@ -18,14 +20,16 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("exit", Exit),
             new Tuple<string, Action<string>>("start", Stat),
             new Tuple<string, Action<string>>("create", Create),
+            new Tuple<string, Action<string>>("list", List),
         };
 
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
-            new string[] {"start", "start the application", "The 'start' command exits the application." },
-            new string[] {"create", "create a record", "The 'create' command will create a new record in the sheet"},
+            new string[] { "start", "start the application", "The 'start' command exits the application." },
+            new string[] { "create", "create a record", "The 'create' command will create a new record in the sheet." },
+            new string[] { "list", "output list", "Commands 'list' outputs list." },
         };
 
         public static void Main(string[] args)
@@ -103,14 +107,12 @@ namespace FileCabinetApp
 
         private static void Stat(string parameters)
         {
-            FileCabinetService fileCabinetService = new FileCabinetService();
             var recordsCount = fileCabinetService.GetStat();
             Console.WriteLine($"{recordsCount} record(s).");
         }
 
         private static void Create(string parameters)
         {
-            FileCabinetService fileCabinetService = new FileCabinetService();
             Console.Write("First Name: ");
             var firstName = Console.ReadLine();
             Console.Write("Last Name: ");
@@ -118,6 +120,15 @@ namespace FileCabinetApp
             Console.Write("Date of birth: ");
             DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine());
             fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth);
+        }
+
+        private static void List(string parameters)
+        {
+            var list = fileCabinetService.GetRecords();
+            foreach (var item in list)
+            {
+                Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth.ToString("yyyy-MMM-dd")}");
+            }
         }
     }
 }
