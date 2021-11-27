@@ -176,6 +176,22 @@ namespace FileCabinetApp
                     Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
                 }
             }
+            else if (str[0].ToLower() == "lastname")
+            {
+                var list = fileCabinetService.FindByLastName(str[1].Trim('"'));
+                foreach (var item in list)
+                {
+                    Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
+                }
+            }
+            else if (str[0].ToLower() == "dateofbirth")
+            {
+                var list = fileCabinetService.FindByDateOfBirth(str[1].Trim('"'));
+                foreach (var item in list)
+                {
+                    Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
+                }
+            }
         }
 
         private static string FirstName()
@@ -209,7 +225,7 @@ namespace FileCabinetApp
         private static DateTime DateOfBirth()
         {
             Console.Write("Date of birth: ");
-            DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("/", "."));
+            DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("-", "."));
             while (dateOfBirth > DateTime.Now || dateOfBirth < new DateTime(1950, 01, 01))
             {
                 Console.WriteLine("Incorrect data in the 'Date of birth' fields, the minimum date is 01/01/1950, and the maximum is now.");

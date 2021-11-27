@@ -98,5 +98,34 @@ namespace FileCabinetApp
 
             return first.ToArray();
         }
+
+        public FileCabinetRecord[] FindByLastName(string lastname)
+        {
+            List<FileCabinetRecord> first = new List<FileCabinetRecord>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].LastName.ToLower() == lastname.ToLower())
+                {
+                    first.Add(list[i]);
+                }
+            }
+
+            return first.ToArray();
+        }
+
+        public FileCabinetRecord[] FindByDateOfBirth(string date)
+        {
+            List<FileCabinetRecord> first = new List<FileCabinetRecord>();
+            DateTime dateOfBirth = Convert.ToDateTime(date);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].DateOfBirth.ToString("yyyy-MMM-dd") == dateOfBirth.ToString("yyyy-MMM-dd"))
+                {
+                    first.Add(list[i]);
+                }
+            }
+
+            return first.ToArray();
+        }
     }
 }
