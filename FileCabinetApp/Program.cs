@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
+#pragma warning disable CA1305
+#pragma warning disable IDE0090
+#pragma warning disable IDE0060
+
 namespace FileCabinetApp
 {
     public static class Program
@@ -118,13 +122,48 @@ namespace FileCabinetApp
             Console.Write("Last Name: ");
             var lastName = Console.ReadLine();
             Console.Write("Date of birth: ");
-            DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine());
+            DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("/", "."));
             short ago = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
             Console.Write("Salary: ");
-            var salary = decimal.Parse(Console.ReadLine());
+            var salary = decimal.Parse(Console.ReadLine().Replace(".", ","));
             Console.Write("Any character: ");
+            if (Console.ReadLine().Length != 1)
+            {
+                Console.WriteLine("The size of the string character is equal to one element");
+                Create(parameters);
+            }
+
             var symbol = char.Parse(Console.ReadLine());
-            fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth, ago, salary, symbol);
+            if (!CheckName(firstName) || !CheckName(lastName) || !CheckDate(dateOfBirth))
+            {
+                Create(parameters);
+            }
+            else
+            {
+                fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth, ago, salary, symbol);
+            }
+        }
+
+        private static bool CheckName(string name)
+        {
+            if (name.Length < 2 || name.Length > 60 || name.Contains(" ") || string.IsNullOrEmpty(name))
+            {
+                Console.WriteLine("Incorrect data in the First or last name field, size from 2 to 60 character.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool CheckDate(DateTime dateOfBirth)
+        {
+            if (dateOfBirth > DateTime.Now || dateOfBirth < new DateTime(1950, 01, 01))
+            {
+                Console.WriteLine("Incorrect data in the date of birth fields, the minimum date is 01/01/1950, and the maximum is now.");
+                return false;
+            }
+
+            return true;
         }
 
         private static void List(string parameters)
@@ -132,7 +171,7 @@ namespace FileCabinetApp
             var list = fileCabinetService.GetRecords();
             foreach (var item in list)
             {
-                Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth.ToString("yyyy-MMM-dd")}, {item.Age}, {item.Salary}, {item.Symbol}");
+                Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
             }
         }
     }
