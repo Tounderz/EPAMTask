@@ -15,7 +15,6 @@ namespace FileCabinetApp
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
         private static FileCabinetService fileCabinetService = new FileCabinetService();
-
         private static bool isRunning = true;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
@@ -25,15 +24,17 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("start", Stat),
             new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("list", List),
+            new Tuple<string, Action<string>>("edit", Edit),
         };
 
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
-            new string[] { "start", "start the application", "The 'start' command exits the application." },
+            new string[] { "start", "start the application", "The 'start' command outputs the amount of data in the shee" },
             new string[] { "create", "create a record", "The 'create' command will create a new record in the sheet." },
             new string[] { "list", "output list", "Commands 'list' outputs list." },
+            new string[] { "edit", "editor", "The 'edit' command allows you to edit data by id." },
         };
 
         public static void Main(string[] args)
@@ -117,53 +118,14 @@ namespace FileCabinetApp
 
         private static void Create(string parameters)
         {
-            Console.Write("First Name: ");
-            var firstName = Console.ReadLine();
-            Console.Write("Last Name: ");
-            var lastName = Console.ReadLine();
-            Console.Write("Date of birth: ");
-            DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("/", "."));
-            short ago = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
-            Console.Write("Salary: ");
-            var salary = decimal.Parse(Console.ReadLine().Replace(".", ","));
-            Console.Write("Any character: ");
-            if (Console.ReadLine().Length != 1)
-            {
-                Console.WriteLine("The size of the string character is equal to one element");
-                Create(parameters);
-            }
+            var firstName = FirstName();
+            var lastName = LastName();
+            DateTime dateOfBirth = DateOfBirth();
+            short age = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
+            var salary = Salary();
+            char symbol = Symbol();
 
-            var symbol = char.Parse(Console.ReadLine());
-            if (!CheckName(firstName) || !CheckName(lastName) || !CheckDate(dateOfBirth))
-            {
-                Create(parameters);
-            }
-            else
-            {
-                fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth, ago, salary, symbol);
-            }
-        }
-
-        private static bool CheckName(string name)
-        {
-            if (name.Length < 2 || name.Length > 60 || name.Contains(" ") || string.IsNullOrEmpty(name))
-            {
-                Console.WriteLine("Incorrect data in the First or last name field, size from 2 to 60 character.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool CheckDate(DateTime dateOfBirth)
-        {
-            if (dateOfBirth > DateTime.Now || dateOfBirth < new DateTime(1950, 01, 01))
-            {
-                Console.WriteLine("Incorrect data in the date of birth fields, the minimum date is 01/01/1950, and the maximum is now.");
-                return false;
-            }
-
-            return true;
+            fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth, age, salary, symbol);
         }
 
         private static void List(string parameters)
@@ -173,6 +135,106 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
             }
+        }
+
+        private static void Edit(string parameters)
+        {
+            int id = int.Parse(parameters);
+            if (id < 1 || id > fileCabinetService.GetRecords().Length)
+            {
+                Console.WriteLine($"#{id} record is not found.");
+            }
+            else
+            {
+                var list = fileCabinetService.GetRecords();
+                for (int i = 0; i < list.Length; i++)
+                {
+                    if (i + 1 == id)
+                    {
+                        list[i].FirstName = FirstName();
+                        list[i].LastName = LastName();
+                        list[i].DateOfBirth = DateOfBirth();
+                        list[i].Age = Convert.ToInt16(DateTime.Now.Year - list[i].DateOfBirth.Year);
+                        list[i].Salary = Salary();
+                        list[i].Symbol = Symbol();
+                    }
+
+                    Console.WriteLine($"Record #{id} is updated.");
+                }
+            }
+        }
+
+        private static string FirstName()
+        {
+            Console.Write($"First Name: ");
+            var name = Console.ReadLine();
+            while (name.Length < 2 || name.Length > 60 || name.Contains(" ") || string.IsNullOrEmpty(name))
+            {
+                Console.WriteLine("Incorrect data in the 'First name' field, size from 2 to 60 character.");
+                Console.Write($"First Name: ");
+                name = Console.ReadLine();
+            }
+
+            return name;
+        }
+
+        private static string LastName()
+        {
+            Console.Write($"First Name: ");
+            var name = Console.ReadLine();
+            while (name.Length < 2 || name.Length > 60 || name.Contains(" ") || string.IsNullOrEmpty(name))
+            {
+                Console.WriteLine("Incorrect data in the 'Last name' field, size from 2 to 60 character.");
+                Console.Write($"First Name: ");
+                name = Console.ReadLine();
+            }
+
+            return name;
+        }
+
+        private static DateTime DateOfBirth()
+        {
+            Console.Write("Date of birth: ");
+            DateTime dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("/", "."));
+            while (dateOfBirth > DateTime.Now || dateOfBirth < new DateTime(1950, 01, 01))
+            {
+                Console.WriteLine("Incorrect data in the 'Date of birth' fields, the minimum date is 01/01/1950, and the maximum is now.");
+                Console.Write("Date of birth: ");
+                dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("/", "."));
+            }
+
+            return dateOfBirth;
+        }
+
+        private static decimal Salary()
+        {
+            Console.Write("Salary: ");
+            string str = Console.ReadLine();
+            for (int i = 0; i < str.Length; i++)
+            {
+                while (char.IsLetter(str[i]))
+                {
+                    Console.WriteLine("The 'salary' line consists only of digits and a dot or comma for the fractional part.");
+                    Console.Write("Salary: ");
+                    str = Console.ReadLine();
+                }
+            }
+
+            return decimal.Parse(str.Replace(".", ","));
+        }
+
+        private static char Symbol()
+        {
+            Console.Write("Any character: ");
+            string str = Console.ReadLine();
+            while (str.Length != 1)
+            {
+                Console.WriteLine("The 'Any character' field must contain one character.");
+                Console.Write("Any character: ");
+                str = Console.ReadLine();
+            }
+
+            return char.Parse(str);
         }
     }
 }

@@ -72,5 +72,17 @@ namespace FileCabinetApp
             // добавьте реализацию метода
             return this.list.Count;
         }
+
+        public void EditRecord(int id, string firstName, string lastName, DateTime dateOfBirth, short age, decimal salary, char symbol)
+        {
+            if (id > list.Count || id < 1)
+            {
+                throw new ArgumentException(null, nameof(id));
+            }
+            else
+            {
+                GetRecords();
+            }
+        }
     }
 }
