@@ -25,6 +25,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("edit", Edit),
+            new Tuple<string, Action<string>>("find", Find),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -164,9 +165,22 @@ namespace FileCabinetApp
             }
         }
 
+        private static void Find(string parameters)
+        {
+            string[] str = parameters.Split(' ');
+            if (str[0].ToLower() == "firstname")
+            {
+                var list = fileCabinetService.FindByFirstName(str[1].Trim('"'));
+                foreach (var item in list)
+                {
+                    Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
+                }
+            }
+        }
+
         private static string FirstName()
         {
-            Console.Write($"First Name: ");
+            Console.Write($"First name: ");
             var name = Console.ReadLine();
             while (name.Length < 2 || name.Length > 60 || name.Contains(" ") || string.IsNullOrEmpty(name))
             {
@@ -180,7 +194,7 @@ namespace FileCabinetApp
 
         private static string LastName()
         {
-            Console.Write($"First Name: ");
+            Console.Write($"Last name: ");
             var name = Console.ReadLine();
             while (name.Length < 2 || name.Length > 60 || name.Contains(" ") || string.IsNullOrEmpty(name))
             {
