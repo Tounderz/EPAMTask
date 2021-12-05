@@ -1,29 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
-#pragma warning disable CA1305
-#pragma warning disable IDE0090
-#pragma warning disable IDE0060
 #pragma warning disable CA1304
+#pragma warning disable CA1305
+#pragma warning disable SA1600
+#pragma warning disable S1450
+#pragma warning disable S4487
+#pragma warning disable IDE0052
 
 namespace FileCabinetApp
 {
     public static class Program
     {
         private const string DeveloperName = "Dmitry Grudinsky";
+        private const string DefaultValidation = "Using default validation rules.";
+        private const string CustomValidation = "Using custom validation rules.";
+        private const string Default = "defaul";
+        private const string Custom = "custom";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-        private static FileCabinetService fileCabinetService = new FileCabinetService();
+        private static string serviceParameter = string.Empty;
         private static bool isRunning = true;
-        private static AddCabinetRecord addCabinetRecordeck = new AddCabinetRecord();
+        private static FileCabinetService cabinetService = new ();
+        private static FileCabinetDefaultService defaultService = new ();
+        private static FileCabinetRecord cabinetRecord = new ();
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
-            new Tuple<string, Action<string>>("start", Stat),
+            new Tuple<string, Action<string>>("start", Start),
             new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("edit", Edit),
@@ -38,11 +46,48 @@ namespace FileCabinetApp
             new string[] { "create", "create a record", "The 'create' command will create a new record in the sheet." },
             new string[] { "list", "output list", "Commands 'list' outputs list." },
             new string[] { "edit", "editor", "The 'edit' command allows you to edit data by id." },
+            new string[] { "find", "search model: find search parameter \"search criteria\"", "Search by parameters 'firstname or lastname or dateofbirth', search model: find search parameter \"search criteria\"." },
         };
 
         public static void Main(string[] args)
         {
+            int checkValidationRules = 0;
+            foreach (string arg in args)
+            {
+                if (arg.ToLower().Contains(Default))
+                {
+                    checkValidationRules = 1;
+                    break;
+                }
+                else if (arg.ToLower().Contains(Custom))
+                {
+                    checkValidationRules = -1;
+                    break;
+                }
+            }
+
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+            switch (checkValidationRules)
+            {
+                case 0:
+                case 1:
+                    {
+                        Console.WriteLine(DefaultValidation);
+                        serviceParameter = "default";
+                        break;
+                    }
+
+                case -1:
+                    {
+                        Console.WriteLine(CustomValidation);
+                        serviceParameter = "custom";
+                        break;
+                    }
+
+                default:
+                    break;
+            }
+
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
@@ -113,26 +158,22 @@ namespace FileCabinetApp
             isRunning = false;
         }
 
-        private static void Stat(string parameters)
+        private static void Start(string parameters)
         {
-            var recordsCount = fileCabinetService.GetStat();
+            var recordsCount = cabinetService.GetStart();
             Console.WriteLine($"{recordsCount} record(s).");
         }
 
         private static void Create(string parameters)
         {
-            string firstName = addCabinetRecordeck.FirstName;
-            var lastName = addCabinetRecordeck.LastName;
-            DateTime dateOfBirth = addCabinetRecordeck.DateOfBirth;
-            short age = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
-            var salary = addCabinetRecordeck.Salary;
-            char symbol = addCabinetRecordeck.Symbol;
-            fileCabinetService.CreateRecord(firstName, lastName, dateOfBirth, age, salary, symbol);
+            int id = cabinetService.GetStart() + 1;
+            cabinetRecord = defaultService.Valideters(id);
+            cabinetService.CreateRecord(cabinetRecord);
         }
 
         private static void List(string parameters)
         {
-            var list = fileCabinetService.GetRecords();
+            var list = cabinetService.GetRecords();
             foreach (var item in list)
             {
                 Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
@@ -141,41 +182,54 @@ namespace FileCabinetApp
 
         private static void Edit(string parameters)
         {
-            int id = int.Parse(parameters);
-            if (id < 1 || id > fileCabinetService.GetRecords().Length)
+            while (CkeckEdit(parameters))
             {
-                Console.WriteLine($"#{id} record is not found.");
-            }
-            else
-            {
-                var firstName = addCabinetRecordeck.FirstName;
-                var lastName = addCabinetRecordeck.LastName;
-                DateTime dateOfBirth = addCabinetRecordeck.DateOfBirth;
-                short age = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
-                var salary = addCabinetRecordeck.Salary;
-                char symbol = addCabinetRecordeck.Symbol;
-                fileCabinetService.EditRecord(id, firstName, lastName, dateOfBirth, age, salary, symbol);
-                Console.WriteLine($"Record #{id} is updated.");
+                int id = int.Parse(parameters);
+                if (id < 1 || id > cabinetService.GetStart())
+                {
+                    Console.WriteLine($"#{id} record is not found.");
+                    break;
+                }
+                else
+                {
+                    cabinetRecord = defaultService.Valideters(id);
+                    cabinetService.EditRecord(id, cabinetRecord);
+                    Console.WriteLine($"Record #{id} is updated.");
+                    break;
+                }
             }
         }
 
         private static void Find(string parameters)
         {
             string[] str = parameters.Split(' ');
-            if (str[0].ToLower() == "firstname")
+            parameters = str[1].Trim('"').ToUpper();
+            switch (str[0].ToLower())
             {
-                var record = fileCabinetService.FindByFirstName(str[1].Trim('"'));
-                PrintFind(record);
-            }
-            else if (str[0].ToLower() == "lastname")
-            {
-                var record = fileCabinetService.FindByLastName(str[1].Trim('"'));
-                PrintFind(record);
-            }
-            else if (str[0].ToLower() == "dateofbirth")
-            {
-                var record = fileCabinetService.FindByDateOfBirth(str[1].Trim('"'));
-                PrintFind(record);
+                case "firstname":
+                    {
+                        var record = cabinetService.FindByFirstName(parameters);
+                        PrintFind(record);
+                        break;
+                    }
+
+                case "lastname":
+                    {
+                        var record = cabinetService.FindByLastName(parameters);
+                        PrintFind(record);
+                        break;
+                    }
+
+                case "dateofbirth":
+                    {
+                        var record = cabinetService.FindByDateOfBirth(parameters);
+                        PrintFind(record);
+                        break;
+                    }
+
+                default:
+                    Console.WriteLine("Incorrect input!");
+                    break;
             }
         }
 
@@ -185,6 +239,26 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
             }
+        }
+
+        private static bool CkeckEdit(string parameters)
+        {
+            bool ckeck = true;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (!char.IsDigit(parameters[i]))
+                {
+                    Console.WriteLine("The parameter must be numeric.");
+                    ckeck = false;
+                    break;
+                }
+                else
+                {
+                    ckeck = true;
+                }
+            }
+
+            return ckeck;
         }
     }
 }
