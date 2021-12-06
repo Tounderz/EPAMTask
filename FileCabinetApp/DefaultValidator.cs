@@ -7,17 +7,16 @@ using System.Threading.Tasks;
 #pragma warning disable SA1600
 #pragma warning disable CA1305
 #pragma warning disable S3928
-#pragma warning disable SA1202
-#pragma warning disable CA1822
 
 namespace FileCabinetApp
 {
-    public class FileCabinetDefaultService
+    public class DefaultValidator : IRecordValidator
     {
         private const string Space = " ";
 
-        private string FirstName()
+        public string FirstName()
         {
+
             Console.Write($"First name: ");
             string firstName = Console.ReadLine();
             while (firstName.Length < 2 || firstName.Length > 60 || firstName.Contains(Space) || string.IsNullOrEmpty(firstName))
@@ -30,7 +29,7 @@ namespace FileCabinetApp
             return firstName;
         }
 
-        private string LastName()
+        public string LastName()
         {
             Console.Write($"Last name: ");
             string lastName = Console.ReadLine();
@@ -44,7 +43,7 @@ namespace FileCabinetApp
             return lastName;
         }
 
-        private DateTime DateOfBirth()
+        public DateTime DateOfBirth()
         {
             Console.Write("Date of birth: ");
             var dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("-", "."));
@@ -58,7 +57,7 @@ namespace FileCabinetApp
             return dateOfBirth;
         }
 
-        private decimal Salary()
+        public decimal Salary()
         {
             Console.Write("Salary: ");
             string str = Console.ReadLine();
@@ -76,7 +75,7 @@ namespace FileCabinetApp
             return salary;
         }
 
-        private char Symbol()
+        public char Symbol()
         {
             Console.Write("Any character: ");
             string str = Console.ReadLine();
@@ -91,7 +90,7 @@ namespace FileCabinetApp
             return symbol;
         }
 
-        public FileCabinetRecord Valideters(int id)
+        public FileCabinetRecord AddRecord(int id)
         {
             var firstName = this.FirstName();
             var lastName = this.LastName();

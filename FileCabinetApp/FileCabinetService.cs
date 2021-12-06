@@ -43,34 +43,32 @@ namespace FileCabinetApp
             this.list[id - 1] = record;
         }
 
-        public FileCabinetRecord[] GetRecords()
+        public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
-            // добавьте реализацию метода
-            return this.list.ToArray();
+            return this.list.AsReadOnly();
         }
 
         public int GetStart()
         {
-            // добавьте реализацию метода
             return this.list.Count;
         }
 
-        public FileCabinetRecord[] FindByFirstName(string firstName)
+        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             List<FileCabinetRecord> firstNameList = this.firstNameDictionary[firstName];
-            return firstNameList.ToArray();
+            return firstNameList.AsReadOnly();
         }
 
-        public FileCabinetRecord[] FindByLastName(string lastName)
+        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
             List<FileCabinetRecord> lastNameList = this.lastNameDictionary[lastName];
-            return lastNameList.ToArray();
+            return lastNameList.AsReadOnly();
         }
 
-        public FileCabinetRecord[] FindByDateOfBirth(string dateOfBirth)
+        public ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
             List<FileCabinetRecord> dateOfBirthList = this.dateOfBirthDictionary[dateOfBirth];
-            return dateOfBirthList.ToArray();
+            return dateOfBirthList.AsReadOnly();
         }
 
         private static void AddDitionary(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)

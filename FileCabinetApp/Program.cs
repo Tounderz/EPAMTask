@@ -5,8 +5,6 @@ using System.Collections.ObjectModel;
 #pragma warning disable CA1305
 #pragma warning disable SA1600
 #pragma warning disable S1450
-#pragma warning disable S4487
-#pragma warning disable IDE0052
 
 namespace FileCabinetApp
 {
@@ -21,10 +19,9 @@ namespace FileCabinetApp
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
-        private static string serviceParameter = string.Empty;
         private static bool isRunning = true;
-        private static FileCabinetService cabinetService = new ();
-        private static FileCabinetDefaultService defaultService = new ();
+        private static FileCabinetService cabinetService = new FileCabinetService();
+        private static IRecordValidator recordValidator;
         private static FileCabinetRecord cabinetRecord = new ();
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
@@ -73,14 +70,14 @@ namespace FileCabinetApp
                 case 1:
                     {
                         Console.WriteLine(DefaultValidation);
-                        serviceParameter = "default";
+                        recordValidator = new DefaultValidator();
                         break;
                     }
 
                 case -1:
                     {
                         Console.WriteLine(CustomValidation);
-                        serviceParameter = "custom";
+                        recordValidator = new CustomValidator();
                         break;
                     }
 
@@ -167,7 +164,7 @@ namespace FileCabinetApp
         private static void Create(string parameters)
         {
             int id = cabinetService.GetStart() + 1;
-            cabinetRecord = defaultService.Valideters(id);
+            cabinetRecord = recordValidator.AddRecord(id);
             cabinetService.CreateRecord(cabinetRecord);
         }
 
@@ -192,7 +189,7 @@ namespace FileCabinetApp
                 }
                 else
                 {
-                    cabinetRecord = defaultService.Valideters(id);
+                    cabinetRecord = recordValidator.AddRecord(id);
                     cabinetService.EditRecord(id, cabinetRecord);
                     Console.WriteLine($"Record #{id} is updated.");
                     break;
@@ -233,7 +230,7 @@ namespace FileCabinetApp
             }
         }
 
-        private static void PrintFind(FileCabinetRecord[] record)
+        private static void PrintFind(ReadOnlyCollection<FileCabinetRecord> record)
         {
             foreach (var item in record)
             {
