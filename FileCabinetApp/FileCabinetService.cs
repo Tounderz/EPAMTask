@@ -6,6 +6,7 @@ using System.Globalization;
 #pragma warning disable SA1600
 #pragma warning disable CA1305
 #pragma warning disable SA1203
+#pragma warning disable SA1101
 
 namespace FileCabinetApp
 {
@@ -20,9 +21,9 @@ namespace FileCabinetApp
         public int CreateRecord(FileCabinetRecord record)
         {
             this.list.Add(record);
-            AddDitionary(record.FirstName, record, this.firstNameDictionary);
-            AddDitionary(record.LastName, record, this.lastNameDictionary);
-            AddDitionary(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
+            AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
+            AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
+            AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
 
             return record.Id;
         }
@@ -34,12 +35,12 @@ namespace FileCabinetApp
                 throw new ArgumentException(null, nameof(id));
             }
 
-            RemoveDitionary(id, this.firstNameDictionary);
-            AddDitionary(record.FirstName, record, this.firstNameDictionary);
-            RemoveDitionary(id, this.lastNameDictionary);
-            AddDitionary(record.LastName, record, this.lastNameDictionary);
-            RemoveDitionary(id, this.dateOfBirthDictionary);
-            AddDitionary(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
+            RemoveDitionaryItem(id, this.firstNameDictionary);
+            AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
+            RemoveDitionaryItem(id, this.lastNameDictionary);
+            AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
+            RemoveDitionaryItem(id, this.dateOfBirthDictionary);
+            AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
             this.list[id - 1] = record;
         }
 
@@ -48,7 +49,7 @@ namespace FileCabinetApp
             return this.list.AsReadOnly();
         }
 
-        public int GetStart()
+        public int GetRecordsCount()
         {
             return this.list.Count;
         }
@@ -71,7 +72,7 @@ namespace FileCabinetApp
             return dateOfBirthList.AsReadOnly();
         }
 
-        private static void AddDitionary(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)
+        private void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
             if (!dictionary.ContainsKey(keyStr))
@@ -82,7 +83,7 @@ namespace FileCabinetApp
             dictionary[keyStr].Add(record);
         }
 
-        private static void RemoveDitionary(int id, Dictionary<string, List<FileCabinetRecord>> dictionary)
+        private void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) // удаление данных из словаря по id
         {
             foreach (var item in dictionary)
             {

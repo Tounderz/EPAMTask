@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 #pragma warning disable CA1304
 #pragma warning disable CA1305
@@ -20,7 +21,7 @@ namespace FileCabinetApp
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
         private static bool isRunning = true;
-        private static FileCabinetService cabinetService = new FileCabinetService();
+        private static FileCabinetService cabinetService = new ();
         private static IRecordValidator recordValidator;
         private static FileCabinetRecord cabinetRecord = new ();
 
@@ -48,15 +49,17 @@ namespace FileCabinetApp
 
         public static void Main(string[] args)
         {
+            Console.Write("Enter the validation option (default or custom): ");
+            string validator = Console.ReadLine().ToLower();
             int checkValidationRules = 0;
-            foreach (string arg in args)
+            foreach (var item in validator) // какая валидация выбрана пользователем
             {
-                if (arg.ToLower().Contains(Default))
+                if (validator.ToLower().Contains(Default))
                 {
                     checkValidationRules = 1;
                     break;
                 }
-                else if (arg.ToLower().Contains(Custom))
+                else if (validator.ToLower().Contains(Custom))
                 {
                     checkValidationRules = -1;
                     break;
@@ -64,25 +67,28 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
-            switch (checkValidationRules)
+            switch (checkValidationRules) // согласно выбранной вадилидацией пользователем, создание объекта нужного класса
             {
                 case 0:
                 case 1:
                     {
                         Console.WriteLine(DefaultValidation);
-                        recordValidator = new DefaultValidator();
+                        recordValidator = new DefaultValidator(); // для default
                         break;
                     }
 
                 case -1:
                     {
                         Console.WriteLine(CustomValidation);
-                        recordValidator = new CustomValidator();
+                        recordValidator = new CustomValidator(); // для cusmot
                         break;
                     }
 
                 default:
-                    break;
+                    {
+                        Console.WriteLine("Не верные данные");
+                        break;
+                    }
             }
 
             Console.WriteLine(Program.HintMessage);
@@ -155,20 +161,20 @@ namespace FileCabinetApp
             isRunning = false;
         }
 
-        private static void Start(string parameters)
+        private static void Start(string parameters) // вывод количества объектов в списке
         {
-            var recordsCount = cabinetService.GetStart();
+            var recordsCount = cabinetService.GetRecordsCount();
             Console.WriteLine($"{recordsCount} record(s).");
         }
 
-        private static void Create(string parameters)
+        private static void Create(string parameters) // добовление нового объекта
         {
-            int id = cabinetService.GetStart() + 1;
-            cabinetRecord = recordValidator.AddRecord(id);
+            int id = cabinetService.GetRecordsCount() + 1;
+            cabinetRecord = AddParametor(id);
             cabinetService.CreateRecord(cabinetRecord);
         }
 
-        private static void List(string parameters)
+        private static void List(string parameters) // вывод всех объектов в листе
         {
             var list = cabinetService.GetRecords();
             foreach (var item in list)
@@ -177,19 +183,19 @@ namespace FileCabinetApp
             }
         }
 
-        private static void Edit(string parameters)
+        private static void Edit(string parameters) // изменение данных по id
         {
             while (CkeckEdit(parameters))
             {
                 int id = int.Parse(parameters);
-                if (id < 1 || id > cabinetService.GetStart())
+                if (id < 1 || id > cabinetService.GetRecordsCount())
                 {
                     Console.WriteLine($"#{id} record is not found.");
                     break;
                 }
                 else
                 {
-                    cabinetRecord = recordValidator.AddRecord(id);
+                    cabinetRecord = AddParametor(id);
                     cabinetService.EditRecord(id, cabinetRecord);
                     Console.WriteLine($"Record #{id} is updated.");
                     break;
@@ -197,40 +203,49 @@ namespace FileCabinetApp
             }
         }
 
-        private static void Find(string parameters)
+        private static void Find(string parameters) // поиск всех одинаковых данных одного из полей, при помощи словаря
         {
-            string[] str = parameters.Split(' ');
-            parameters = str[1].Trim('"').ToUpper();
-            switch (str[0].ToLower())
+            if (string.IsNullOrEmpty(parameters))
             {
-                case "firstname":
-                    {
-                        var record = cabinetService.FindByFirstName(parameters);
-                        PrintFind(record);
-                        break;
-                    }
+                Console.WriteLine("Specify the search criteria");
+            }
+            else
+            {
+                string[] str = parameters.Split(' ');
+                switch (str[0].ToLower())
+                {
+                    case "firstname":
+                        {
+                            parameters = str[1].Trim('"').ToUpper();
+                            var record = cabinetService.FindByFirstName(parameters);
+                            PrintFind(record);
+                            break;
+                        }
 
-                case "lastname":
-                    {
-                        var record = cabinetService.FindByLastName(parameters);
-                        PrintFind(record);
-                        break;
-                    }
+                    case "lastname":
+                        {
+                            parameters = str[1].Trim('"').ToUpper();
+                            var record = cabinetService.FindByLastName(parameters);
+                            PrintFind(record);
+                            break;
+                        }
 
-                case "dateofbirth":
-                    {
-                        var record = cabinetService.FindByDateOfBirth(parameters);
-                        PrintFind(record);
-                        break;
-                    }
+                    case "dateofbirth":
+                        {
+                            parameters = str[1].Trim('"').ToUpper();
+                            var record = cabinetService.FindByDateOfBirth(parameters);
+                            PrintFind(record);
+                            break;
+                        }
 
-                default:
-                    Console.WriteLine("Incorrect input!");
-                    break;
+                    default:
+                        Console.WriteLine("Incorrect input!");
+                        break;
+                }
             }
         }
 
-        private static void PrintFind(ReadOnlyCollection<FileCabinetRecord> record)
+        private static void PrintFind(ReadOnlyCollection<FileCabinetRecord> record) // метод для вывода в консоль данных по запросу из метода Find
         {
             foreach (var item in record)
             {
@@ -238,9 +253,15 @@ namespace FileCabinetApp
             }
         }
 
-        private static bool CkeckEdit(string parameters)
+        private static bool CkeckEdit(string parameters) // проверка параметра на отстутствие не числовых данных, для метода Edit
         {
             bool ckeck = true;
+            if (parameters.Length == 0)
+            {
+                Console.WriteLine("Enter the 'edit' 'number' to change separated by a space.");
+                return false;
+            }
+
             for (int i = 0; i < parameters.Length; i++)
             {
                 if (!char.IsDigit(parameters[i]))
@@ -256,6 +277,109 @@ namespace FileCabinetApp
             }
 
             return ckeck;
+        }
+
+        private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
+        {
+            do
+            {
+                T value;
+
+                var input = Console.ReadLine();
+                var conversionResult = converter(input);
+
+                if (!conversionResult.Item1)
+                {
+                    Console.WriteLine($"Conversion failed: {conversionResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                value = conversionResult.Item3;
+
+                var validationResult = validator(value);
+                if (!validationResult.Item1)
+                {
+                    Console.WriteLine($"Validation failed: {validationResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                return value;
+            }
+            while (true);
+        }
+
+        private static Tuple<bool, string, string> StringConverter(string str)
+        {
+            if (!str.All(char.IsLetter))
+            {
+                return new Tuple<bool, string, string>(false, "There should be only letters and not be empty", str);
+            }
+
+            return new Tuple<bool, string, string>(true, null, str);
+        }
+
+        private static Tuple<bool, string, DateTime> DateConverter(string str)
+        {
+            try
+            {
+                DateTime value = Convert.ToDateTime(str.Replace("/", "."));
+                return new Tuple<bool, string, DateTime>(true, null, value);
+            }
+            catch (Exception)
+            {
+                return new Tuple<bool, string, DateTime>(false, "Incorrect date format", default);
+            }
+        }
+
+        private static Tuple<bool, string, decimal> DecimalConverter(string str)
+        {
+            try
+            {
+                decimal value = decimal.Parse(str.Replace(".", ","));
+                return new Tuple<bool, string, decimal>(true, null, value);
+            }
+            catch (Exception)
+            {
+                return new Tuple<bool, string, decimal>(false, "Only numbers and a comma or dot, to separate the fractional part", 0);
+            }
+        }
+
+        private static Tuple<bool, string, char> CharConverter(string str)
+        {
+            if (str.Length != 1)
+            {
+                return new Tuple<bool, string, char>(false, "It cannot be empty and more than one character.", ' ');
+            }
+
+            return new Tuple<bool, string, char>(true, null, char.Parse(str));
+        }
+
+        private static FileCabinetRecord AddParametor(int id)
+        {
+            Console.Write($"First name: ");
+            string firstName = ReadInput(StringConverter, recordValidator.ValidateFirstName);
+            Console.Write($"Last name: ");
+            string lastName = ReadInput(StringConverter, recordValidator.ValidateLastName);
+            Console.Write("Date of birth: ");
+            DateTime dateOfBirth = ReadInput(DateConverter, recordValidator.ValidateDateOfBirth);
+            short age = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
+            Console.Write("Salary: ");
+            decimal salary = ReadInput(DecimalConverter, recordValidator.ValidateSalary);
+            Console.Write("Any character: ");
+            char symbol = ReadInput(CharConverter, recordValidator.ValidateSymbol);
+
+            var record = new FileCabinetRecord
+            {
+                Id = id,
+                FirstName = firstName,
+                LastName = lastName,
+                DateOfBirth = dateOfBirth,
+                Age = age,
+                Salary = salary,
+                Symbol = symbol,
+            };
+
+            return record;
         }
     }
 }

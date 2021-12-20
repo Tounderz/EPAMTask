@@ -10,16 +10,14 @@ namespace FileCabinetApp
 {
     public interface IRecordValidator
     {
-        public string FirstName();
+        public Tuple<bool, string> ValidateFirstName(string firstName);
 
-        public string LastName();
+        public Tuple<bool, string> ValidateLastName(string lastName);
 
-        public DateTime DateOfBirth();
+        public Tuple<bool, string> ValidateDateOfBirth(DateTime dateOfBirth);
 
-        public decimal Salary();
+        public Tuple<bool, string> ValidateSalary(decimal salary);
 
-        public char Symbol();
-
-        public FileCabinetRecord AddRecord(int id);
+        public Tuple<bool, string> ValidateSymbol(char symbol);
     }
 }

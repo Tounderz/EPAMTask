@@ -6,140 +6,117 @@ using System.Threading.Tasks;
 
 #pragma warning disable SA1600
 #pragma warning disable CA1305
-#pragma warning disable S3928
 
 namespace FileCabinetApp
 {
     public class CustomValidator : IRecordValidator
     {
-        private const string Space = " ";
-
-        public string FirstName()
+        public Tuple<bool, string> ValidateFirstName(string firstName)
         {
-            Console.Write($"First name: ");
-            string firstName = Console.ReadLine();
-            while (firstName.Length < 2 || firstName.Length > 15 || firstName.Contains(Space) || string.IsNullOrEmpty(firstName) || firstName.All(char.IsDigit))
+            if (firstName.Length < 2 || firstName.Length > 15 || !firstName.All(char.IsLetter))
             {
-                Console.WriteLine("Incorrect data in the 'First Name' field, size from 2 to 15 characters and should contain only letters.");
-                Console.Write($"First Name: ");
-                firstName = Console.ReadLine();
+                return new Tuple<bool, string>(false, $"The {nameof(firstName)} size is from 2 to 15 characters and there should be no spaces");
             }
 
-            return firstName;
+            return new Tuple<bool, string>(true, null);
         }
 
-        public string LastName()
+        public Tuple<bool, string> ValidateLastName(string lastName)
         {
-            Console.Write($"Last name: ");
-            string lastName = Console.ReadLine();
-            while (lastName.Length < 2 || lastName.Length > 30 || lastName.Contains(Space) || string.IsNullOrEmpty(lastName) || lastName.All(char.IsDigit))
+            if (lastName.Length < 2 || lastName.Length > 30)
             {
-                Console.WriteLine("Incorrect data in the 'Last name' field, size from 2 to 25 character and should contain only letters.");
-                Console.Write($"Last Name: ");
-                lastName = Console.ReadLine();
+                return new Tuple<bool, string>(false, $"The {nameof(lastName)} size is from 2 to 30 characters and there should be no spaces");
             }
 
-            return lastName;
+            return new Tuple<bool, string>(true, null);
         }
 
-        public DateTime DateOfBirth()
+        public Tuple<bool, string> ValidateDateOfBirth(DateTime dateOfBirth)
         {
-            Console.Write("Date of birth: ");
-            var dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("-", "."));
-            while (dateOfBirth > new DateTime(2015, 12, 31) || dateOfBirth < new DateTime(1950, 01, 01))
+            if (dateOfBirth > new DateTime(2015, 12, 31) || dateOfBirth < new DateTime(1950, 01, 01))
             {
-                Console.WriteLine("Incorrect data in the 'Date of birth' fields, the minimum date is 01/01/1950, and the maximum is 12.31.2015.");
-                Console.Write("Date of birth: ");
-                dateOfBirth = Convert.ToDateTime(Console.ReadLine().Replace("/", "."));
+                return new Tuple<bool, string>(false, $"{nameof(dateOfBirth)} - Minimum date is 01/01/1950, and the maximum is 12.31.2015.");
             }
 
-            return dateOfBirth;
+            return new Tuple<bool, string>(true, null);
         }
 
-        public decimal Salary()
+        public Tuple<bool, string> ValidateSalary(decimal salary)
         {
-            Console.Write("Salary: ");
-            string str = Console.ReadLine();
-            for (int i = 0; i < str.Length; i++)
+            if (salary < 500 || salary > 1000000)
             {
-                while (char.IsLetter(str[i]))
-                {
-                    Console.WriteLine("The 'salary' line consists only of digits and a dot or comma for the fractional part.");
-                    Console.Write("Salary: ");
-                    str = Console.ReadLine();
-                }
+                return new Tuple<bool, string>(false, $"The salary should not be less than 500 or more than a million");
             }
 
-            var salary = decimal.Parse(str.Replace(".", ","));
-            return salary;
+            return new Tuple<bool, string>(true, null);
         }
 
-        public char Symbol()
+        public Tuple<bool, string> ValidateSymbol(char symbol)
         {
-            Console.Write("Any character: ");
-            string str = Console.ReadLine();
-            while (str.Length != 1 || str.All(char.IsLetter))
+            if (symbol.ToString().Length != 1 || char.IsLetter(symbol))
             {
-                Console.WriteLine("The 'Any character' field must contain one character and must not be a letter.");
-                Console.Write("Any character: ");
-                str = Console.ReadLine();
+                return new Tuple<bool, string>(false, $"The {nameof(symbol)} field must contain one character and must not be a letter.");
             }
 
-            char symbol = char.Parse(str);
-            return symbol;
+            return new Tuple<bool, string>(true, null);
         }
 
-        public FileCabinetRecord AddRecord(int id)
+        public string ValidateParameters(FileCabinetRecord record)
         {
-            var firstName = this.FirstName();
-            var lastName = this.LastName();
-            var dateOfBirth = this.DateOfBirth();
-            var age = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
-            var salary = this.Salary();
-            var symbol = this.Symbol();
+            string firstName = record.FirstName;
+            string lastName = record.LastName;
+            DateTime dateOfBirth = record.DateOfBirth;
+            short age = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
+            string salary = record.Salary.ToString();
+            string symbol = record.Symbol.ToString();
+            string error = "Validation is successful.";
 
             if (firstName is null)
             {
-                throw new ArgumentNullException(nameof(firstName), $"{nameof(firstName)} can't be null");
+                error = $"{nameof(firstName)} can't be null";
+                return error;
             }
 
-            if (firstName.Length < 2 || firstName.Length > 60 || firstName.Contains(Space))
+            if (firstName.Length < 2 || firstName.Length > 15 || !firstName.All(char.IsLetter))
             {
-                throw new ArgumentException($"The {nameof(firstName)} size is from 2 to 60 characters and there should be no spaces");
+                error = $"The {nameof(firstName)} size is from 2 to 15 characters and there should be no spaces";
+                return error;
             }
 
             if (lastName is null)
             {
-                throw new ArgumentNullException(nameof(lastName), $"{nameof(lastName)} can't be null");
+                error = $"{nameof(lastName)} can't be null";
+                return error;
             }
 
-            if (lastName.Length < 2 || lastName.Length > 60 || lastName.Contains(Space))
+            if (lastName.Length < 2 || lastName.Length > 30 || !lastName.All(char.IsLetter))
             {
-                throw new ArgumentException($"The {nameof(lastName)} size is from 2 to 60 characters and there should be no spaces");
+                error = $"The {nameof(lastName)} size is from 2 to 30 characters and there should be no spaces";
+                return error;
             }
 
-            if (dateOfBirth > DateTime.Now || dateOfBirth < new DateTime(1950, 01, 01))
+            if (dateOfBirth > new DateTime(2015, 12, 31) || dateOfBirth < new DateTime(1950, 01, 01))
             {
-                throw new ArgumentException($"{nameof(dateOfBirth)} - Minimum date of birth 01/01/1950, and maximum - DateTime.Now");
+                error = $"{nameof(dateOfBirth)} - Minimum date is 01/01/1950, and the maximum is 12.31.2015.";
+                return error;
             }
 
-            if (symbol.ToString().Length != 1)
+            if (symbol.Length != 1 || symbol.All(char.IsLetter))
             {
-                throw new ArgumentException($"The {nameof(symbol)} size of the string character is equal to one element");
+                error = $"The {nameof(symbol)} field must contain one character and must not be a letter.";
+                return error;
             }
 
-            var record = new FileCabinetRecord
+            for (int i = 0; i < salary.Length; i++)
             {
-                Id = id,
-                FirstName = firstName,
-                LastName = lastName,
-                DateOfBirth = dateOfBirth,
-                Age = age,
-                Salary = salary,
-                Symbol = symbol,
-            };
+                if (char.IsLetter(salary[i]))
+                {
+                    error = $"The {nameof(salary)} parameter must contain only numeric value";
+                    return error;
+                }
+            }
 
-            return record;
+            return error;
         }
     }
 }
