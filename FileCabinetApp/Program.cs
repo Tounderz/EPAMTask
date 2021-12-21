@@ -6,6 +6,7 @@ using System.Linq;
 #pragma warning disable CA1305
 #pragma warning disable SA1600
 #pragma warning disable S1450
+#pragma warning disable SA1108
 
 namespace FileCabinetApp
 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 
+#pragma warning disable CA1822
 #pragma warning disable SA1600
 #pragma warning disable CA1305
 #pragma warning disable SA1203
