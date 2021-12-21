@@ -1,133 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-#pragma warning disable IDE0090
-#pragma warning disable CA1304
-#pragma warning disable CA1062
+#pragma warning disable CA1822
+#pragma warning disable SA1600
 #pragma warning disable CA1305
-#pragma warning disable IDE0060
+#pragma warning disable SA1203
+#pragma warning disable SA1101
 
 namespace FileCabinetApp
 {
     public class FileCabinetService
     {
-        private readonly List<FileCabinetRecord> list = new List<FileCabinetRecord>();
-        public readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new Dictionary<string, List<FileCabinetRecord>>();
-        private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new Dictionary<string, List<FileCabinetRecord>>();
-        private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new Dictionary<string, List<FileCabinetRecord>>();
+        private readonly List<FileCabinetRecord> list = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
+        private const string FormatDate = "yyyy-MMM-dd";
 
-        public int CreateRecord(string firstName, string lastName, DateTime dateOfBirth, short age, decimal salary, char symbol)
+        public int CreateRecord(FileCabinetRecord record)
         {
-            // добавьте реализацию метода
-            if (string.IsNullOrEmpty(firstName))
-            {
-                throw new ArgumentNullException(nameof(firstName), "Can't be null");
-            }
-
-            if (firstName.Length < 2 || firstName.Length > 60 || firstName.Contains(" "))
-            {
-                throw new ArgumentException("The size is from 2 to 60 characters and there should be no spaces", nameof(firstName));
-            }
-
-            if (string.IsNullOrEmpty(lastName))
-            {
-                throw new ArgumentNullException(nameof(lastName), "Can't be null");
-            }
-
-            if (lastName.Length < 2 || lastName.Length > 60 || lastName.Contains(" "))
-            {
-                throw new ArgumentException("The size is from 2 to 60 characters and there should be no spaces", nameof(lastName));
-            }
-
-            if (dateOfBirth > DateTime.Now || dateOfBirth < new DateTime(1950, 01, 01))
-            {
-                throw new ArgumentException("Minimum date of birth 01/01/1950, and maximum - DateTime.Now", nameof(dateOfBirth));
-            }
-
-            if (symbol.ToString().Length != 1)
-            {
-                throw new ArgumentException("The size of the string character is equal to one element", nameof(symbol));
-            }
-
-            var record = AddRecord(this.list.Count + 1, firstName, lastName, dateOfBirth, age, salary, symbol);
-
             this.list.Add(record);
-            AddDitionary(firstName, record, this.firstNameDictionary);
-            AddDitionary(lastName, record, this.lastNameDictionary);
-            AddDitionary(dateOfBirth.ToString("yyyy-MMM-dd"), record, this.dateOfBirthDictionary);
+            AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
+            AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
+            AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
 
             return record.Id;
         }
 
-        public FileCabinetRecord[] GetRecords()
-        {
-            // добавьте реализацию метода
-            return this.list.ToArray();
-        }
-
-        public int GetStat()
-        {
-            // добавьте реализацию метода
-            return this.list.Count;
-        }
-
-        public void EditRecord(int id, string firstName, string lastName, DateTime dateOfBirth, short age, decimal salary, char symbol)
+        public void EditRecord(int id, FileCabinetRecord record)
         {
             if (id > this.list.Count || id < 1)
             {
                 throw new ArgumentException(null, nameof(id));
             }
 
-            var record = AddRecord(id, firstName, lastName, dateOfBirth, age, salary, symbol);
-            RemoveDitionary(id, this.firstNameDictionary);
-            AddDitionary(firstName, record, this.firstNameDictionary);
-            RemoveDitionary(id, this.lastNameDictionary);
-            AddDitionary(lastName, record, this.lastNameDictionary);
-            RemoveDitionary(id, this.dateOfBirthDictionary);
-            AddDitionary(dateOfBirth.ToString("yyyy-MMM-dd"), record, this.dateOfBirthDictionary);
+            RemoveDitionaryItem(id, this.firstNameDictionary);
+            AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
+            RemoveDitionaryItem(id, this.lastNameDictionary);
+            AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
+            RemoveDitionaryItem(id, this.dateOfBirthDictionary);
+            AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
             this.list[id - 1] = record;
         }
 
-        public FileCabinetRecord[] FindByFirstName(string firstName)
+        public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
-            List<FileCabinetRecord> first = this.firstNameDictionary[firstName.ToUpper()];
-            return first.ToArray();
+            return this.list.AsReadOnly();
         }
 
-        public FileCabinetRecord[] FindByLastName(string lastname)
+        public int GetRecordsCount()
         {
-            List<FileCabinetRecord> first = this.lastNameDictionary[lastname.ToUpper()];
-            return first.ToArray();
+            return this.list.Count;
         }
 
-        public FileCabinetRecord[] FindByDateOfBirth(string date)
+        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            DateTime dateOfBirth = Convert.ToDateTime(date);
-            List<FileCabinetRecord> first = this.dateOfBirthDictionary[dateOfBirth.ToString("yyyy-MMM-dd")];
-            return first.ToArray();
+            List<FileCabinetRecord> firstNameList = this.firstNameDictionary[firstName];
+            return firstNameList.AsReadOnly();
         }
 
-        private static FileCabinetRecord AddRecord(int id, string firstName, string lastName, DateTime dateOfBirth, short age, decimal salary, char symbol)
+        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
-            var record = new FileCabinetRecord
-            {
-                Id = id,
-                FirstName = firstName,
-                LastName = lastName,
-                DateOfBirth = dateOfBirth,
-                Age = age,
-                Salary = salary,
-                Symbol = symbol,
-            };
-
-            return record;
+            List<FileCabinetRecord> lastNameList = this.lastNameDictionary[lastName];
+            return lastNameList.AsReadOnly();
         }
 
-        private static void AddDitionary(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)
+        public ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
+        {
+            List<FileCabinetRecord> dateOfBirthList = this.dateOfBirthDictionary[dateOfBirth];
+            return dateOfBirthList.AsReadOnly();
+        }
+
+        private void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
             if (!dictionary.ContainsKey(keyStr))
@@ -138,7 +84,7 @@ namespace FileCabinetApp
             dictionary[keyStr].Add(record);
         }
 
-        private static void RemoveDitionary(int id, Dictionary<string, List<FileCabinetRecord>> dictionary)
+        private void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) // удаление данных из словаря по id
         {
             foreach (var item in dictionary)
             {
