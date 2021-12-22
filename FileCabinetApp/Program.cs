@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 
 #pragma warning disable CA1304
@@ -25,6 +26,8 @@ namespace FileCabinetApp
         private static FileCabinetService cabinetService = new ();
         private static IRecordValidator recordValidator;
         private static FileCabinetRecord cabinetRecord = new ();
+        private static StreamWriter streamWriter;
+        private const string PathCSV = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -35,6 +38,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("find", Find),
+            new Tuple<string, Action<string>>("export", Export),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -46,6 +50,7 @@ namespace FileCabinetApp
             new string[] { "list", "output list", "Commands 'list' outputs list." },
             new string[] { "edit", "editor", "The 'edit' command allows you to edit data by id." },
             new string[] { "find", "search model: find search parameter \"search criteria\"", "Search by parameters 'firstname or lastname or dateofbirth', search model: find search parameter \"search criteria\"." },
+            new string[] { "export", "writing to a 'csv or xml' file", "The 'export' command writes a file in csv or xml format" },
         };
 
         public static void Main(string[] args)
@@ -218,27 +223,108 @@ namespace FileCabinetApp
                     case "firstname":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            var record = cabinetService.FindByFirstName(parameters);
-                            PrintFind(record);
-                            break;
+                            if (string.IsNullOrEmpty(parameters) || cabinetService.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == parameters.ToLower()) == null)
+                            {
+                                Console.WriteLine("Specify the search criteria");
+                                break;
+                            }
+                            else
+                            {
+                                var record = cabinetService.FindByFirstName(parameters);
+                                PrintFind(record);
+                                break;
+                            }
                         }
 
                     case "lastname":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            var record = cabinetService.FindByLastName(parameters);
-                            PrintFind(record);
-                            break;
+                            if (string.IsNullOrEmpty(parameters) || cabinetService.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == parameters.ToLower()) == null)
+                            {
+                                Console.WriteLine("Specify the search criteria");
+                                break;
+                            }
+                            else
+                            {
+                                var record = cabinetService.FindByLastName(parameters);
+                                PrintFind(record);
+                                break;
+                            }
                         }
 
                     case "dateofbirth":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            var record = cabinetService.FindByDateOfBirth(parameters);
-                            PrintFind(record);
+                            if (string.IsNullOrEmpty(parameters) || (cabinetService.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == parameters.ToLower()) == null))
+                            {
+                                Console.WriteLine("You didn't enter the search parameter or you entered it incorrectly. It takes a year (xxxx), a month (the first three letters), a day with two digits if the date is less than 10, then add 0 (xx)");
+                                break;
+                            }
+                            else
+                            {
+                                var record = cabinetService.FindByDateOfBirth(parameters);
+                                PrintFind(record);
+                                break;
+                            }
+                        }
+
+                    default:
+                        Console.WriteLine("Incorrect input!");
+                        break;
+                }
+            }
+        }
+
+        private static void Export(string parameters)
+        {
+            if (string.IsNullOrEmpty(parameters))
+            {
+                Console.WriteLine("Specify the search criteria");
+            }
+            else
+            {
+                string[] str = parameters.Split();
+                parameters = str[1];
+                switch (str[0].ToLower())
+                {
+                    case "csv":
+                        if (parameters == PathCSV || parameters == "records.csv")
+                        {
+                            if (File.Exists(PathCSV))
+                            {
+                                Console.Write($"File is exist - rewrite {PathCSV}? [Y/n] ");
+                                string checkToRewrite = Console.ReadLine().ToLower();
+                                if (checkToRewrite == "y")
+                                {
+                                    streamWriter = new StreamWriter(PathCSV);
+                                    cabinetService.MakeSnapshot(streamWriter);
+                                    streamWriter.Close();
+                                    Console.WriteLine("All records are exported to file records.csv.");
+                                    break;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                streamWriter = new StreamWriter(PathCSV);
+                                cabinetService.MakeSnapshot(streamWriter);
+                                streamWriter.Close();
+                                Console.WriteLine("All records are exported to file records.csv.");
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Export failed: can't open file {parameters}");
                             break;
                         }
 
+                    case "xml":
+
+                        break;
                     default:
                         Console.WriteLine("Incorrect input!");
                         break;
