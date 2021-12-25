@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Serialization;
 
 #pragma warning disable SA1600
 

@@ -47,10 +47,10 @@ namespace FileCabinetApp
             this.list[id - 1] = record;
         }
 
-        public void MakeSnapshot(StreamWriter streamWriter)
+        public FileCabinetServiceSnapshot MakeSnapshot()
         {
             fileCabinetServiceSnapshot.FileCabinetRecords = list;
-            fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
+            return fileCabinetServiceSnapshot;
         }
 
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()

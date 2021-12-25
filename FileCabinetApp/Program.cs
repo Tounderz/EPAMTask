@@ -8,6 +8,8 @@ using System.Linq;
 #pragma warning disable SA1600
 #pragma warning disable S1450
 #pragma warning disable SA1108
+#pragma warning disable SA1203
+#pragma warning disable S1075
 
 namespace FileCabinetApp
 {
@@ -26,8 +28,10 @@ namespace FileCabinetApp
         private static FileCabinetService cabinetService = new ();
         private static IRecordValidator recordValidator;
         private static FileCabinetRecord cabinetRecord = new ();
+        private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
         private static StreamWriter streamWriter;
-        private const string PathCSV = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
+        private const string PathCsv = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
+        private const string PathXml = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.xml";
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -283,23 +287,20 @@ namespace FileCabinetApp
             }
             else
             {
-                string[] str = parameters.Split();
-                parameters = str[1];
-                switch (str[0].ToLower())
+                string[] parameterArray = parameters.Split();
+                parameters = parameterArray[1];
+                switch (parameterArray[0].ToLower())
                 {
                     case "csv":
-                        if (parameters == PathCSV || parameters == "records.csv")
+                        if (parameters == "records.csv" || parameters == PathCsv)
                         {
-                            if (File.Exists(PathCSV))
+                            if (File.Exists(PathCsv))
                             {
-                                Console.Write($"File is exist - rewrite {PathCSV}? [Y/n] ");
+                                Console.Write($"File is exist - rewrite {PathCsv}? [Y/n] ");
                                 string checkToRewrite = Console.ReadLine().ToLower();
                                 if (checkToRewrite == "y")
                                 {
-                                    streamWriter = new StreamWriter(PathCSV);
-                                    cabinetService.MakeSnapshot(streamWriter);
-                                    streamWriter.Close();
-                                    Console.WriteLine("All records are exported to file records.csv.");
+                                    GetSaveToCsv();
                                     break;
                                 }
                                 else
@@ -309,10 +310,7 @@ namespace FileCabinetApp
                             }
                             else
                             {
-                                streamWriter = new StreamWriter(PathCSV);
-                                cabinetService.MakeSnapshot(streamWriter);
-                                streamWriter.Close();
-                                Console.WriteLine("All records are exported to file records.csv.");
+                                GetSaveToCsv();
                                 break;
                             }
                         }
@@ -323,8 +321,34 @@ namespace FileCabinetApp
                         }
 
                     case "xml":
+                        if (parameters == "records.xml" || parameters == PathXml)
+                        {
+                            if (File.Exists(PathXml))
+                            {
+                                Console.Write($"File is exist - rewrite {PathXml}? [Y/n] ");
+                                string checkToRewrite = Console.ReadLine().ToLower();
+                                if (checkToRewrite == "y")
+                                {
+                                    GetSaveToXml();
+                                    break;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                GetSaveToXml();
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Export failed: can't open file {parameters}");
+                            break;
+                        }
 
-                        break;
                     default:
                         Console.WriteLine("Incorrect input!");
                         break;
@@ -467,6 +491,24 @@ namespace FileCabinetApp
             };
 
             return record;
+        }
+
+        private static void GetSaveToCsv()
+        {
+            streamWriter = new StreamWriter(PathCsv);
+            fileCabinetServiceSnapshot = cabinetService.MakeSnapshot();
+            fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
+            streamWriter.Close();
+            Console.WriteLine("All records are exported to file records.csv.");
+        }
+
+        private static void GetSaveToXml()
+        {
+            streamWriter = new StreamWriter(PathXml);
+            fileCabinetServiceSnapshot = cabinetService.MakeSnapshot();
+            fileCabinetServiceSnapshot.SaveToXml(streamWriter);
+            streamWriter.Close();
+            Console.WriteLine("All records are exported to file records.xml.");
         }
     }
 }
