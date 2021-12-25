@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 
 #pragma warning disable CA1822
 #pragma warning disable SA1600
@@ -13,6 +14,7 @@ namespace FileCabinetApp
 {
     public class FileCabinetService
     {
+        private readonly FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
         private readonly List<FileCabinetRecord> list = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
@@ -43,6 +45,12 @@ namespace FileCabinetApp
             RemoveDitionaryItem(id, this.dateOfBirthDictionary);
             AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
             this.list[id - 1] = record;
+        }
+
+        public FileCabinetServiceSnapshot MakeSnapshot()
+        {
+            fileCabinetServiceSnapshot.FileCabinetRecords = list;
+            return fileCabinetServiceSnapshot;
         }
 
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
