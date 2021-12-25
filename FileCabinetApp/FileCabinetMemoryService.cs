@@ -12,7 +12,7 @@ using System.IO;
 
 namespace FileCabinetApp
 {
-    public class FileCabinetService
+    public class FileCabinetMemoryService : IFileCabinetService
     {
         private readonly FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
         private readonly List<FileCabinetRecord> list = new ();

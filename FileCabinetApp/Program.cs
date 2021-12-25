@@ -16,16 +16,16 @@ namespace FileCabinetApp
     public static class Program
     {
         private const string DeveloperName = "Dmitry Grudinsky";
-        private const string DefaultValidation = "Using default validation rules.";
-        private const string CustomValidation = "Using custom validation rules.";
-        private const string Default = "defaul";
-        private const string Custom = "custom";
+        private const string DefaultValidator = "defaul";
+        private const string CustomValidator = "custom";
+        private const string MemoryService = "memory";
+        private const string FileService = "file";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
         private static bool isRunning = true;
-        private static FileCabinetService cabinetService = new ();
+        private static IFileCabinetService fileCabinetService;
         private static IRecordValidator recordValidator;
         private static FileCabinetRecord cabinetRecord = new ();
         private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
@@ -61,45 +61,13 @@ namespace FileCabinetApp
         {
             Console.Write("Enter the validation option (default or custom): ");
             string validator = Console.ReadLine().ToLower();
-            int checkValidationRules = 0;
-            foreach (var item in validator) // какая валидация выбрана пользователем
-            {
-                if (validator.ToLower().Contains(Default))
-                {
-                    checkValidationRules = 1;
-                    break;
-                }
-                else if (validator.ToLower().Contains(Custom))
-                {
-                    checkValidationRules = -1;
-                    break;
-                }
-            }
+
+            Console.Write("Enter the storage service (memory or file): ");
+            string storage = Console.ReadLine().ToLower();
 
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
-            switch (checkValidationRules) // согласно выбранной вадилидацией пользователем, создание объекта нужного класса
-            {
-                case 0:
-                case 1:
-                    {
-                        Console.WriteLine(DefaultValidation);
-                        recordValidator = new DefaultValidator(); // для default
-                        break;
-                    }
-
-                case -1:
-                    {
-                        Console.WriteLine(CustomValidation);
-                        recordValidator = new CustomValidator(); // для cusmot
-                        break;
-                    }
-
-                default:
-                    {
-                        Console.WriteLine("Не верные данные");
-                        break;
-                    }
-            }
+            PrintValidator(CheckValidatorOrStorage(validator, DefaultValidator, CustomValidator));
+            PrintStorage(CheckValidatorOrStorage(storage, MemoryService, FileService));
 
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
@@ -173,20 +141,20 @@ namespace FileCabinetApp
 
         private static void Start(string parameters) // вывод количества объектов в списке
         {
-            var recordsCount = cabinetService.GetRecordsCount();
+            var recordsCount = fileCabinetService.GetRecordsCount();
             Console.WriteLine($"{recordsCount} record(s).");
         }
 
         private static void Create(string parameters) // добовление нового объекта
         {
-            int id = cabinetService.GetRecordsCount() + 1;
+            int id = fileCabinetService.GetRecordsCount() + 1;
             cabinetRecord = AddParametor(id);
-            cabinetService.CreateRecord(cabinetRecord);
+            fileCabinetService.CreateRecord(cabinetRecord);
         }
 
         private static void List(string parameters) // вывод всех объектов в листе
         {
-            var list = cabinetService.GetRecords();
+            var list = fileCabinetService.GetRecords();
             foreach (var item in list)
             {
                 Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
@@ -198,7 +166,7 @@ namespace FileCabinetApp
             while (CkeckEdit(parameters))
             {
                 int id = int.Parse(parameters);
-                if (id < 1 || id > cabinetService.GetRecordsCount())
+                if (id < 1 || id > fileCabinetService.GetRecordsCount())
                 {
                     Console.WriteLine($"#{id} record is not found.");
                     break;
@@ -206,7 +174,7 @@ namespace FileCabinetApp
                 else
                 {
                     cabinetRecord = AddParametor(id);
-                    cabinetService.EditRecord(id, cabinetRecord);
+                    fileCabinetService.EditRecord(id, cabinetRecord);
                     Console.WriteLine($"Record #{id} is updated.");
                     break;
                 }
@@ -227,14 +195,14 @@ namespace FileCabinetApp
                     case "firstname":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            if (string.IsNullOrEmpty(parameters) || cabinetService.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == parameters.ToLower()) == null)
+                            if (string.IsNullOrEmpty(parameters) || fileCabinetService.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == parameters.ToLower()) == null)
                             {
                                 Console.WriteLine("Specify the search criteria");
                                 break;
                             }
                             else
                             {
-                                var record = cabinetService.FindByFirstName(parameters);
+                                var record = fileCabinetService.FindByFirstName(parameters);
                                 PrintFind(record);
                                 break;
                             }
@@ -243,14 +211,14 @@ namespace FileCabinetApp
                     case "lastname":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            if (string.IsNullOrEmpty(parameters) || cabinetService.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == parameters.ToLower()) == null)
+                            if (string.IsNullOrEmpty(parameters) || fileCabinetService.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == parameters.ToLower()) == null)
                             {
                                 Console.WriteLine("Specify the search criteria");
                                 break;
                             }
                             else
                             {
-                                var record = cabinetService.FindByLastName(parameters);
+                                var record = fileCabinetService.FindByLastName(parameters);
                                 PrintFind(record);
                                 break;
                             }
@@ -259,14 +227,14 @@ namespace FileCabinetApp
                     case "dateofbirth":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            if (string.IsNullOrEmpty(parameters) || (cabinetService.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == parameters.ToLower()) == null))
+                            if (string.IsNullOrEmpty(parameters) || (fileCabinetService.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == parameters.ToLower()) == null))
                             {
                                 Console.WriteLine("You didn't enter the search parameter or you entered it incorrectly. It takes a year (xxxx), a month (the first three letters), a day with two digits if the date is less than 10, then add 0 (xx)");
                                 break;
                             }
                             else
                             {
-                                var record = cabinetService.FindByDateOfBirth(parameters);
+                                var record = fileCabinetService.FindByDateOfBirth(parameters);
                                 PrintFind(record);
                                 break;
                             }
@@ -496,7 +464,7 @@ namespace FileCabinetApp
         private static void GetSaveToCsv()
         {
             streamWriter = new StreamWriter(PathCsv);
-            fileCabinetServiceSnapshot = cabinetService.MakeSnapshot();
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
             fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
             streamWriter.Close();
             Console.WriteLine("All records are exported to file records.csv.");
@@ -505,10 +473,84 @@ namespace FileCabinetApp
         private static void GetSaveToXml()
         {
             streamWriter = new StreamWriter(PathXml);
-            fileCabinetServiceSnapshot = cabinetService.MakeSnapshot();
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
             fileCabinetServiceSnapshot.SaveToXml(streamWriter);
             streamWriter.Close();
             Console.WriteLine("All records are exported to file records.xml.");
+        }
+
+        private static int CheckValidatorOrStorage(string validator, string parametorOne, string parametorTwo)
+        {
+            int checkRules = 0;
+            foreach (var item in validator) // какая валидация выбрана пользователем
+            {
+                if (validator.ToLower().Contains(parametorOne))
+                {
+                    checkRules = 1;
+                    break;
+                }
+                else if (validator.ToLower().Contains(parametorTwo))
+                {
+                    checkRules = -1;
+                    break;
+                }
+            }
+
+            return checkRules;
+        }
+
+        private static void PrintValidator(int checkRules)
+        {
+            switch (checkRules) // согласно выбранной вадилидацией пользователем, создание объекта нужного класса
+            {
+                case 0:
+                case 1:
+                    {
+                        Console.WriteLine("Using default validation rules.");
+                        recordValidator = new DefaultValidator(); // для default
+                        break;
+                    }
+
+                case -1:
+                    {
+                        Console.WriteLine("Using custom validation rules.");
+                        recordValidator = new CustomValidator(); // для cusmot
+                        break;
+                    }
+
+                default:
+                    {
+                        Console.WriteLine("Incorrect input!");
+                        break;
+                    }
+            }
+        }
+
+        private static void PrintStorage(int checkRules)
+        {
+            switch (checkRules) // согласно выбранной вадилидацией пользователем, создание объекта нужного класса
+            {
+                case 0:
+                case 1:
+                    {
+                        Console.WriteLine("Are you using FileCabinetMemoryService");
+                        fileCabinetService = new FileCabinetMemoryService(); // для memory
+                        break;
+                    }
+
+                case -1:
+                    {
+                        Console.WriteLine("Are you using FileCabinetFileService");
+                        fileCabinetService = new FileCabinetFilesystemService(); // для file
+                        break;
+                    }
+
+                default:
+                    {
+                        Console.WriteLine("Incorrect input!");
+                        break;
+                    }
+            }
         }
     }
 }
