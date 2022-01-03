@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -7,9 +8,10 @@ using System.Linq;
 #pragma warning disable CA1305
 #pragma warning disable SA1600
 #pragma warning disable S1450
-#pragma warning disable SA1108
+#pragma warning disable S3241
 #pragma warning disable SA1203
 #pragma warning disable S1075
+#pragma warning disable S3220
 
 namespace FileCabinetApp
 {
@@ -25,13 +27,15 @@ namespace FileCabinetApp
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
         private static bool isRunning = true;
-        private static IFileCabinetService fileCabinetService;
-        private static IRecordValidator recordValidator;
-        private static FileCabinetRecord cabinetRecord = new ();
+        private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService();
+        private static IRecordValidator recordValidator = new DefaultValidator();
+        private static Person person = new ();
         private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
         private static StreamWriter streamWriter;
+        private static FileStream fileStream;
         private const string PathCsv = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
         private const string PathXml = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.xml";
+        private static readonly List<string> ParametersList = new () { "--validation-rules", "-v", "--storage", "-s" };
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -59,15 +63,17 @@ namespace FileCabinetApp
 
         public static void Main(string[] args)
         {
-            Console.Write("Enter the validation option (default or custom): ");
-            string validator = Console.ReadLine().ToLower();
-
-            Console.Write("Enter the storage service (memory or file): ");
-            string storage = Console.ReadLine().ToLower();
-
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
-            PrintValidator(CheckValidatorOrStorage(validator, DefaultValidator, CustomValidator));
-            PrintStorage(CheckValidatorOrStorage(storage, MemoryService, FileService));
+
+            if (args.Length != 0)
+            {
+                CommandLineOptions(args);
+            }
+            else
+            {
+                Console.WriteLine("Using default validation rules.");
+                Console.WriteLine("Using memory service rules.");
+            }
 
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
@@ -147,9 +153,8 @@ namespace FileCabinetApp
 
         private static void Create(string parameters) // добовление нового объекта
         {
-            int id = fileCabinetService.GetRecordsCount() + 1;
-            cabinetRecord = AddParametor(id);
-            fileCabinetService.CreateRecord(cabinetRecord);
+            NewPerson();
+            fileCabinetService.CreateRecord(person);
         }
 
         private static void List(string parameters) // вывод всех объектов в листе
@@ -173,8 +178,8 @@ namespace FileCabinetApp
                 }
                 else
                 {
-                    cabinetRecord = AddParametor(id);
-                    fileCabinetService.EditRecord(id, cabinetRecord);
+                    NewPerson();
+                    fileCabinetService.EditRecord(id, person);
                     Console.WriteLine($"Record #{id} is updated.");
                     break;
                 }
@@ -433,7 +438,7 @@ namespace FileCabinetApp
             return new Tuple<bool, string, char>(true, null, char.Parse(str));
         }
 
-        private static FileCabinetRecord AddParametor(int id)
+        private static Person NewPerson()
         {
             Console.Write($"First name: ");
             string firstName = ReadInput(StringConverter, recordValidator.ValidateFirstName);
@@ -447,9 +452,8 @@ namespace FileCabinetApp
             Console.Write("Any character: ");
             char symbol = ReadInput(CharConverter, recordValidator.ValidateSymbol);
 
-            var record = new FileCabinetRecord
+            person = new Person
             {
-                Id = id,
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = dateOfBirth,
@@ -458,7 +462,7 @@ namespace FileCabinetApp
                 Symbol = symbol,
             };
 
-            return record;
+            return person;
         }
 
         private static void GetSaveToCsv()
@@ -479,77 +483,49 @@ namespace FileCabinetApp
             Console.WriteLine("All records are exported to file records.xml.");
         }
 
-        private static int CheckValidatorOrStorage(string validator, string parametorOne, string parametorTwo)
+        private static void CommandLineOptions(string[] args)
         {
-            int checkRules = 0;
-            foreach (var item in validator) // какая валидация выбрана пользователем
+            string parametorLine = string.Join(' ', args).ToLower();
+            string[] rulesValidetion = parametorLine.Trim(' ').Split(' ', '=');
+            List<string> listCommandLineParameter = rulesValidetion.Where(i => ParametersList.Any(y => y.Equals(i))).ToList();
+            for (int i = 0; i < listCommandLineParameter.Count; i++)
             {
-                if (validator.ToLower().Contains(parametorOne))
+                switch (listCommandLineParameter[i].ToLower())
                 {
-                    checkRules = 1;
-                    break;
-                }
-                else if (validator.ToLower().Contains(parametorTwo))
-                {
-                    checkRules = -1;
-                    break;
-                }
-            }
+                    case "--validation-rules":
+                    case "-v":
+                        if (string.Equals(rulesValidetion[(i * 2) + 1], CustomValidator))
+                        {
+                            recordValidator = new CustomValidator();
+                            Console.WriteLine("Using custom validation rules.");
+                        }
+                        else if (string.Equals(rulesValidetion[(i * 2) + 1], DefaultValidator))
+                        {
+                            Console.WriteLine("Using default validation rules.");
+                        }
 
-            return checkRules;
-        }
+                        break;
 
-        private static void PrintValidator(int checkRules)
-        {
-            switch (checkRules) // согласно выбранной вадилидацией пользователем, создание объекта нужного класса
-            {
-                case 0:
-                case 1:
-                    {
+                    case "--storage":
+                    case "-s":
+                        if (string.Equals(rulesValidetion[(2 * i) + 1], FileService))
+                        {
+                            fileStream = new FileStream("cabinet-records.db", FileMode.OpenOrCreate);
+                            fileCabinetService = new FileCabinetFilesystemService(fileStream);
+                            Console.WriteLine("Using file service rules.");
+                        }
+                        else if (string.Equals(rulesValidetion[(2 * i) + 1], MemoryService))
+                        {
+                            Console.WriteLine("Using memory service rules.");
+                        }
+
+                        break;
+
+                    default:
+                        Console.WriteLine("Using memory service rules.");
                         Console.WriteLine("Using default validation rules.");
-                        recordValidator = new DefaultValidator(); // для default
                         break;
-                    }
-
-                case -1:
-                    {
-                        Console.WriteLine("Using custom validation rules.");
-                        recordValidator = new CustomValidator(); // для cusmot
-                        break;
-                    }
-
-                default:
-                    {
-                        Console.WriteLine("Incorrect input!");
-                        break;
-                    }
-            }
-        }
-
-        private static void PrintStorage(int checkRules)
-        {
-            switch (checkRules) // согласно выбранной вадилидацией пользователем, создание объекта нужного класса
-            {
-                case 0:
-                case 1:
-                    {
-                        Console.WriteLine("Are you using FileCabinetMemoryService");
-                        fileCabinetService = new FileCabinetMemoryService(); // для memory
-                        break;
-                    }
-
-                case -1:
-                    {
-                        Console.WriteLine("Are you using FileCabinetFileService");
-                        fileCabinetService = new FileCabinetFilesystemService(); // для file
-                        break;
-                    }
-
-                default:
-                    {
-                        Console.WriteLine("Incorrect input!");
-                        break;
-                    }
+                }
             }
         }
     }

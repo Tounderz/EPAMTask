@@ -21,8 +21,9 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
         private const string FormatDate = "yyyy-MMM-dd";
 
-        public int CreateRecord(FileCabinetRecord record)
+        public int CreateRecord(Person person)
         {
+            var record = CabinetRecord(person, list.Count + 1);
             this.list.Add(record);
             AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
             AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
@@ -31,13 +32,14 @@ namespace FileCabinetApp
             return record.Id;
         }
 
-        public void EditRecord(int id, FileCabinetRecord record)
+        public void EditRecord(int id, Person person)
         {
             if (id > this.list.Count || id < 1)
             {
                 throw new ArgumentException(null, nameof(id));
             }
 
+            var record = CabinetRecord(person, id);
             RemoveDitionaryItem(id, this.firstNameDictionary);
             AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
             RemoveDitionaryItem(id, this.lastNameDictionary);
@@ -45,6 +47,22 @@ namespace FileCabinetApp
             RemoveDitionaryItem(id, this.dateOfBirthDictionary);
             AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
             this.list[id - 1] = record;
+        }
+
+        private FileCabinetRecord CabinetRecord(Person person, int id)
+        {
+            var record = new FileCabinetRecord
+            {
+                Id = id,
+                FirstName = person.FirstName,
+                LastName = person.LastName,
+                DateOfBirth = person.DateOfBirth,
+                Age = person.Age,
+                Salary = person.Salary,
+                Symbol = person.Symbol,
+            };
+
+            return record;
         }
 
         public FileCabinetServiceSnapshot MakeSnapshot()
@@ -81,7 +99,7 @@ namespace FileCabinetApp
             return dateOfBirthList.AsReadOnly();
         }
 
-        private void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь
+        public void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
             if (!dictionary.ContainsKey(keyStr))
@@ -92,7 +110,7 @@ namespace FileCabinetApp
             dictionary[keyStr].Add(record);
         }
 
-        private void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) // удаление данных из словаря по id
+        public void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) // удаление данных из словаря по id
         {
             foreach (var item in dictionary)
             {

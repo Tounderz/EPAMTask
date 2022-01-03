@@ -10,21 +10,25 @@ using System.Threading.Tasks;
 namespace FileCabinetApp
 {
    public interface IFileCabinetService
-    {
-        public int CreateRecord(FileCabinetRecord record);
+   {
+        int CreateRecord(Person person);
 
-        public void EditRecord(int id, FileCabinetRecord record);
+        void EditRecord(int id, Person person);
 
-        public FileCabinetServiceSnapshot MakeSnapshot();
+        FileCabinetServiceSnapshot MakeSnapshot();
 
-        public ReadOnlyCollection<FileCabinetRecord> GetRecords();
+        ReadOnlyCollection<FileCabinetRecord> GetRecords();
 
-        public int GetRecordsCount();
+        int GetRecordsCount();
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName);
+        ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName);
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName);
+        ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName);
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth);
-    }
+        ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth);
+
+        void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary); // добавление данных в словарь
+
+        void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary); // удаление данных из словаря по id
+   }
 }
