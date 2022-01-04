@@ -7,7 +7,7 @@ using System.Text;
 
 #pragma warning disable SA1600
 #pragma warning disable SA1203
-#pragma warning disable S1450
+#pragma warning disable SA1101
 #pragma warning disable CA1822
 
 namespace FileCabinetApp
@@ -23,6 +23,8 @@ namespace FileCabinetApp
         private const int RecordLength = (MaxLengthString * 2) + (sizeof(int) * 4) + sizeof(char) + sizeof(decimal) + (sizeof(short) * 2) - 1;
         private int recordId = 0;
         private short status = 0;
+        private readonly byte[] StatusInBytes = new byte[sizeof(short)];
+        private readonly byte[] RecordIdInBytes = new byte[sizeof(int)];
 
         public FileCabinetFilesystemService(FileStream fileStream)
         {
@@ -42,13 +44,32 @@ namespace FileCabinetApp
                 int offset = (int)file.Length - RecordLength;
                 file.Seek(offset, SeekOrigin.Begin);
                 file.Read(bytesRecord, 0, bytesRecord.Length);
-                byte[] statusInBytes = new byte[sizeof(short)];
-                this.recordId = BitConverter.ToInt32(bytesRecord, statusInBytes.Length) + 1;
+                this.recordId = BitConverter.ToInt32(bytesRecord, StatusInBytes.Length) + 1;
             }
 
+            var record = GetFileCabinetRecord(person, recordId);
+            GetRecordToBytes(record);
+            return this.recordId;
+        }
+
+        public void EditRecord(int id, Person person)
+        {
+            using (var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                byte[] recordBytes = new byte[file.Length];
+                file.Read(recordBytes, 0, recordBytes.Length);
+                this.list = GetBytesToRecord(recordBytes);
+
+                var record = GetFileCabinetRecord(person, id);
+                GetRecordToBytes(record);
+            }
+        }
+
+        private FileCabinetRecord GetFileCabinetRecord(Person person, int id)
+        {
             var record = new FileCabinetRecord
             {
-                Id = this.recordId,
+                Id = id,
                 FirstName = person.FirstName,
                 LastName = person.LastName,
                 DateOfBirth = person.DateOfBirth,
@@ -57,13 +78,7 @@ namespace FileCabinetApp
                 Symbol = person.Symbol,
             };
 
-            this.GetRecordToBytes(record);
-            return this.recordId;
-        }
-
-        public void EditRecord(int id, Person person)
-        {
-            throw new NotImplementedException();
+            return record;
         }
 
         public FileCabinetServiceSnapshot MakeSnapshot()
@@ -77,7 +92,7 @@ namespace FileCabinetApp
             {
                 byte[] recordBytes = new byte[file.Length];
                 file.Read(recordBytes, 0, recordBytes.Length);
-                this.list = this.GetBytesToRecord(recordBytes);
+                this.list = GetBytesToRecord(recordBytes);
             }
 
             return this.list.AsReadOnly();
@@ -89,7 +104,7 @@ namespace FileCabinetApp
             {
                 byte[] recordBytes = new byte[file.Length];
                 file.Read(recordBytes, 0, recordBytes.Length);
-                this.list = this.GetBytesToRecord(recordBytes);
+                this.list = GetBytesToRecord(recordBytes);
             }
 
             return this.list.Count;
@@ -126,11 +141,27 @@ namespace FileCabinetApp
 
             using MemoryStream memoryStream = new (arrBytes);
             using BinaryWriter binaryWriter = new (memoryStream);
-            byte[] firstName = this.GetNameBytes(record.FirstName);
-            byte[] lastName = this.GetNameBytes(record.LastName);
+            byte[] firstName = GetNameBytes(record.FirstName);
+            byte[] lastName = GetNameBytes(record.LastName);
 
             using BinaryWriter binary = new (this.fileStream, Encoding.ASCII, true);
-            binary.Seek(0, SeekOrigin.End);
+            if (list.Exists(i => i.Id == record.Id))
+            {
+                using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                int offset = (RecordLength * record.Id) - RecordLength;
+                file.Seek(offset, SeekOrigin.Begin);
+                file.Read(StatusInBytes, 0, StatusInBytes.Length);
+                this.status = BitConverter.ToInt16(StatusInBytes, 0);
+                file.Read(RecordIdInBytes, 0, RecordIdInBytes.Length);
+                this.recordId = BitConverter.ToInt32(RecordIdInBytes, 0);
+                binary.Seek(offset, SeekOrigin.Begin);
+            }
+            else
+            {
+                status = 0;
+                binary.Seek(0, SeekOrigin.End);
+            }
+
             binary.Write(this.status);
             binary.Write(this.recordId);
             binary.Write(firstName);
