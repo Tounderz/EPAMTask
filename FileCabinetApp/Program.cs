@@ -31,10 +31,9 @@ namespace FileCabinetApp
         private static IRecordValidator recordValidator = new DefaultValidator();
         private static Person person = new ();
         private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
-        private static StreamWriter streamWriter;
         private static FileStream fileStream;
-        private const string PathCsv = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
-        private const string PathXml = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.xml";
+        //private const string PathCsv = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
+        //private const string PathXml = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.xml";
         private static readonly List<string> ParametersList = new () { "--validation-rules", "-v", "--storage", "-s" };
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
@@ -261,19 +260,21 @@ namespace FileCabinetApp
             else
             {
                 string[] parameterArray = parameters.Split();
-                parameters = parameterArray[1];
-                switch (parameterArray[0].ToLower())
+                string fileType = parameterArray[0];
+                string fileName = parameterArray.Last();
+
+                switch (fileType.ToLower())
                 {
                     case "csv":
-                        if (parameters == "records.csv" || parameters == PathCsv)
+                        try
                         {
-                            if (File.Exists(PathCsv))
+                            if (File.Exists(fileName))
                             {
-                                Console.Write($"File is exist - rewrite {PathCsv}? [Y/n] ");
+                                Console.Write($"File is exist - rewrite {fileName}? [Y/n] ");
                                 string checkToRewrite = Console.ReadLine().ToLower();
                                 if (checkToRewrite == "y")
                                 {
-                                    GetSaveToCsv();
+                                    GetSaveToCsv(fileName);
                                     break;
                                 }
                                 else
@@ -281,28 +282,26 @@ namespace FileCabinetApp
                                     break;
                                 }
                             }
-                            else
-                            {
-                                GetSaveToCsv();
-                                break;
-                            }
+
+                            GetSaveToCsv(fileName);
                         }
-                        else
+                        catch (DirectoryNotFoundException)
                         {
                             Console.WriteLine($"Export failed: can't open file {parameters}");
-                            break;
                         }
 
+                        break;
+
                     case "xml":
-                        if (parameters == "records.xml" || parameters == PathXml)
+                        try
                         {
-                            if (File.Exists(PathXml))
+                            if (File.Exists(fileName))
                             {
-                                Console.Write($"File is exist - rewrite {PathXml}? [Y/n] ");
+                                Console.Write($"File is exist - rewrite {fileName}? [Y/n] ");
                                 string checkToRewrite = Console.ReadLine().ToLower();
                                 if (checkToRewrite == "y")
                                 {
-                                    GetSaveToXml();
+                                    GetSaveToXml(fileName);
                                     break;
                                 }
                                 else
@@ -310,17 +309,15 @@ namespace FileCabinetApp
                                     break;
                                 }
                             }
-                            else
-                            {
-                                GetSaveToXml();
-                                break;
-                            }
+
+                            GetSaveToXml(fileName);
                         }
-                        else
+                        catch (DirectoryNotFoundException)
                         {
                             Console.WriteLine($"Export failed: can't open file {parameters}");
-                            break;
                         }
+
+                        break;
 
                     default:
                         Console.WriteLine("Incorrect input!");
@@ -465,22 +462,26 @@ namespace FileCabinetApp
             return person;
         }
 
-        private static void GetSaveToCsv()
+        private static void GetSaveToCsv(string fileNameCsv)
         {
-            streamWriter = new StreamWriter(PathCsv);
-            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
-            fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
-            streamWriter.Close();
-            Console.WriteLine("All records are exported to file records.csv.");
+            using (StreamWriter streamWriter = new (fileNameCsv))
+            {
+                fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
+                fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
+                streamWriter.Close();
+                Console.WriteLine("All records are exported to file records.csv.");
+            }
         }
 
-        private static void GetSaveToXml()
+        private static void GetSaveToXml(string fileNameXml)
         {
-            streamWriter = new StreamWriter(PathXml);
-            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
-            fileCabinetServiceSnapshot.SaveToXml(streamWriter);
-            streamWriter.Close();
-            Console.WriteLine("All records are exported to file records.xml.");
+            using (StreamWriter streamWriter = new (fileNameXml))
+            {
+                fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
+                fileCabinetServiceSnapshot.SaveToXml(streamWriter);
+                streamWriter.Close();
+                Console.WriteLine("All records are exported to file records.xml.");
+            }
         }
 
         private static void CommandLineOptions(string[] args)

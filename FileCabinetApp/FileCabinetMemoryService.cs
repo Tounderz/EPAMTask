@@ -9,6 +9,7 @@ using System.IO;
 #pragma warning disable CA1305
 #pragma warning disable SA1203
 #pragma warning disable SA1101
+#pragma warning disable SA1202
 
 namespace FileCabinetApp
 {
