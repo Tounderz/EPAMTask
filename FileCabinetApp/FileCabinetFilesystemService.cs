@@ -85,7 +85,14 @@ namespace FileCabinetApp
 
         public int GetRecordsCount()
         {
-            throw new NotImplementedException();
+            using (FileStream file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                byte[] recordBytes = new byte[file.Length];
+                file.Read(recordBytes, 0, recordBytes.Length);
+                this.list = this.GetBytesToRecord(recordBytes);
+            }
+
+            return this.list.Count;
         }
 
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
