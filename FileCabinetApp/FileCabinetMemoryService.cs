@@ -24,7 +24,7 @@ namespace FileCabinetApp
 
         public int CreateRecord(Person person)
         {
-            var record = CabinetRecord(person, list.Count + 1);
+            var record = GetFileCabinetRecord(person, list.Count + 1);
             this.list.Add(record);
             AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
             AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
@@ -40,7 +40,7 @@ namespace FileCabinetApp
                 throw new ArgumentException(null, nameof(id));
             }
 
-            var record = CabinetRecord(person, id);
+            var record = GetFileCabinetRecord(person, id);
             RemoveDitionaryItem(id, this.firstNameDictionary);
             AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
             RemoveDitionaryItem(id, this.lastNameDictionary);
@@ -50,7 +50,7 @@ namespace FileCabinetApp
             this.list[id - 1] = record;
         }
 
-        private FileCabinetRecord CabinetRecord(Person person, int id)
+        private FileCabinetRecord GetFileCabinetRecord(Person person, int id)
         {
             var record = new FileCabinetRecord
             {
