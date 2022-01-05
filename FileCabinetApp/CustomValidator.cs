@@ -10,9 +10,18 @@ namespace FileCabinetApp
 {
     public class CustomValidator : IRecordValidator
     {
+        private readonly DateTime minDate = new (1950, 01, 01);
+        private readonly DateTime maxDate = new (2015, 12, 31);
+        private readonly int minString = 2;
+        private readonly int maxFirstName = 15;
+        private readonly int maxLastName = 30;
+        private readonly decimal minSalary = 500;
+        private readonly decimal maxSalary = 1000000;
+        private readonly int syzeSymbol = 1;
+
         public Tuple<bool, string> ValidateFirstName(string firstName)
         {
-            if (firstName.Length < 2 || firstName.Length > 15 || !firstName.All(char.IsLetter))
+            if (firstName.Length < this.minString || firstName.Length > this.maxFirstName || !firstName.All(char.IsLetter))
             {
                 return new Tuple<bool, string>(false, $"The {nameof(firstName)} size is from 2 to 15 characters and there should be no spaces");
             }
@@ -22,7 +31,7 @@ namespace FileCabinetApp
 
         public Tuple<bool, string> ValidateLastName(string lastName)
         {
-            if (lastName.Length < 2 || lastName.Length > 30)
+            if (lastName.Length < this.minString || lastName.Length > this.maxLastName)
             {
                 return new Tuple<bool, string>(false, $"The {nameof(lastName)} size is from 2 to 30 characters and there should be no spaces");
             }
@@ -32,7 +41,7 @@ namespace FileCabinetApp
 
         public Tuple<bool, string> ValidateDateOfBirth(DateTime dateOfBirth)
         {
-            if (dateOfBirth > new DateTime(2015, 12, 31) || dateOfBirth < new DateTime(1950, 01, 01))
+            if (dateOfBirth > this.maxDate || dateOfBirth < this.minDate)
             {
                 return new Tuple<bool, string>(false, $"{nameof(dateOfBirth)} - Minimum date is 01/01/1950, and the maximum is 12.31.2015.");
             }
@@ -42,7 +51,7 @@ namespace FileCabinetApp
 
         public Tuple<bool, string> ValidateSalary(decimal salary)
         {
-            if (salary < 500 || salary > 1000000)
+            if (salary < this.minSalary || salary > this.maxSalary)
             {
                 return new Tuple<bool, string>(false, $"The salary should not be less than 500 or more than a million");
             }
@@ -52,7 +61,7 @@ namespace FileCabinetApp
 
         public Tuple<bool, string> ValidateSymbol(char symbol)
         {
-            if (symbol.ToString().Length != 1 || char.IsLetter(symbol))
+            if (symbol.ToString().Length != this.syzeSymbol || char.IsLetter(symbol))
             {
                 return new Tuple<bool, string>(false, $"The {nameof(symbol)} field must contain one character and must not be a letter.");
             }

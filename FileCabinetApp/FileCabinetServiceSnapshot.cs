@@ -30,7 +30,7 @@ namespace FileCabinetApp
 
         public void SaveToXml(StreamWriter streamWriter)
         {
-            XmlWriter xmlWriter = XmlWriter.Create(streamWriter, new XmlWriterSettings() { Indent = true });
+            XmlWriter xmlWriter = XmlWriter.Create(streamWriter);
             this.fileCabinetRecordXmlWriter = new FileCabinetRecordXmlWriter(xmlWriter);
             xmlWriter.WriteStartDocument();
             xmlWriter.WriteStartElement("records");

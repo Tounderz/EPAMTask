@@ -1,37 +1,38 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 #pragma warning disable CA1304
 #pragma warning disable CA1305
 #pragma warning disable SA1600
 #pragma warning disable S1450
-#pragma warning disable SA1108
-#pragma warning disable SA1203
-#pragma warning disable S1075
+#pragma warning disable S3241
+#pragma warning disable SA1214
+#pragma warning disable S3220
 
 namespace FileCabinetApp
 {
     public static class Program
     {
         private const string DeveloperName = "Dmitry Grudinsky";
-        private const string DefaultValidation = "Using default validation rules.";
-        private const string CustomValidation = "Using custom validation rules.";
-        private const string Default = "defaul";
-        private const string Custom = "custom";
+        private const string DefaultValidator = "defaul";
+        private const string CustomValidator = "custom";
+        private const string MemoryService = "memory";
+        private const string FileService = "file";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
         private const int CommandHelpIndex = 0;
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
         private static bool isRunning = true;
-        private static FileCabinetService cabinetService = new ();
-        private static IRecordValidator recordValidator;
-        private static FileCabinetRecord cabinetRecord = new ();
+        private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService();
+        private static IRecordValidator recordValidator = new DefaultValidator();
+        private static Person person = new ();
         private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
-        private static StreamWriter streamWriter;
-        private const string PathCsv = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
-        private const string PathXml = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.xml";
+        private static FileStream fileStream;
+        private static readonly List<string> ParametersList = new () { "--validation-rules", "-v", "--storage", "-s" };
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -59,46 +60,16 @@ namespace FileCabinetApp
 
         public static void Main(string[] args)
         {
-            Console.Write("Enter the validation option (default or custom): ");
-            string validator = Console.ReadLine().ToLower();
-            int checkValidationRules = 0;
-            foreach (var item in validator) // какая валидация выбрана пользователем
-            {
-                if (validator.ToLower().Contains(Default))
-                {
-                    checkValidationRules = 1;
-                    break;
-                }
-                else if (validator.ToLower().Contains(Custom))
-                {
-                    checkValidationRules = -1;
-                    break;
-                }
-            }
-
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
-            switch (checkValidationRules) // согласно выбранной вадилидацией пользователем, создание объекта нужного класса
+
+            if (args.Length != 0)
             {
-                case 0:
-                case 1:
-                    {
-                        Console.WriteLine(DefaultValidation);
-                        recordValidator = new DefaultValidator(); // для default
-                        break;
-                    }
-
-                case -1:
-                    {
-                        Console.WriteLine(CustomValidation);
-                        recordValidator = new CustomValidator(); // для cusmot
-                        break;
-                    }
-
-                default:
-                    {
-                        Console.WriteLine("Не верные данные");
-                        break;
-                    }
+                CommandLineOptions(args);
+            }
+            else
+            {
+                Console.WriteLine("Using default validation rules.");
+                Console.WriteLine("Using memory service rules.");
             }
 
             Console.WriteLine(Program.HintMessage);
@@ -173,23 +144,22 @@ namespace FileCabinetApp
 
         private static void Start(string parameters) // вывод количества объектов в списке
         {
-            var recordsCount = cabinetService.GetRecordsCount();
+            var recordsCount = fileCabinetService.GetRecordsCount();
             Console.WriteLine($"{recordsCount} record(s).");
         }
 
         private static void Create(string parameters) // добовление нового объекта
         {
-            int id = cabinetService.GetRecordsCount() + 1;
-            cabinetRecord = AddParametor(id);
-            cabinetService.CreateRecord(cabinetRecord);
+            NewPerson();
+            fileCabinetService.CreateRecord(person);
         }
 
         private static void List(string parameters) // вывод всех объектов в листе
         {
-            var list = cabinetService.GetRecords();
+            var list = fileCabinetService.GetRecords();
             foreach (var item in list)
             {
-                Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
+                Console.WriteLine($"# {item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
             }
         }
 
@@ -198,15 +168,15 @@ namespace FileCabinetApp
             while (CkeckEdit(parameters))
             {
                 int id = int.Parse(parameters);
-                if (id < 1 || id > cabinetService.GetRecordsCount())
+                if (id < 1 || id > fileCabinetService.GetRecordsCount())
                 {
                     Console.WriteLine($"#{id} record is not found.");
                     break;
                 }
                 else
                 {
-                    cabinetRecord = AddParametor(id);
-                    cabinetService.EditRecord(id, cabinetRecord);
+                    NewPerson();
+                    fileCabinetService.EditRecord(id, person);
                     Console.WriteLine($"Record #{id} is updated.");
                     break;
                 }
@@ -227,14 +197,14 @@ namespace FileCabinetApp
                     case "firstname":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            if (string.IsNullOrEmpty(parameters) || cabinetService.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == parameters.ToLower()) == null)
+                            if (string.IsNullOrEmpty(parameters) || fileCabinetService.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == parameters.ToLower()) == null)
                             {
                                 Console.WriteLine("Specify the search criteria");
                                 break;
                             }
                             else
                             {
-                                var record = cabinetService.FindByFirstName(parameters);
+                                var record = fileCabinetService.FindByFirstName(parameters);
                                 PrintFind(record);
                                 break;
                             }
@@ -243,14 +213,14 @@ namespace FileCabinetApp
                     case "lastname":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            if (string.IsNullOrEmpty(parameters) || cabinetService.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == parameters.ToLower()) == null)
+                            if (string.IsNullOrEmpty(parameters) || fileCabinetService.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == parameters.ToLower()) == null)
                             {
                                 Console.WriteLine("Specify the search criteria");
                                 break;
                             }
                             else
                             {
-                                var record = cabinetService.FindByLastName(parameters);
+                                var record = fileCabinetService.FindByLastName(parameters);
                                 PrintFind(record);
                                 break;
                             }
@@ -259,14 +229,14 @@ namespace FileCabinetApp
                     case "dateofbirth":
                         {
                             parameters = str[1].Trim('"').ToUpper();
-                            if (string.IsNullOrEmpty(parameters) || (cabinetService.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == parameters.ToLower()) == null))
+                            if (string.IsNullOrEmpty(parameters) || (fileCabinetService.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == parameters.ToLower()) == null))
                             {
                                 Console.WriteLine("You didn't enter the search parameter or you entered it incorrectly. It takes a year (xxxx), a month (the first three letters), a day with two digits if the date is less than 10, then add 0 (xx)");
                                 break;
                             }
                             else
                             {
-                                var record = cabinetService.FindByDateOfBirth(parameters);
+                                var record = fileCabinetService.FindByDateOfBirth(parameters);
                                 PrintFind(record);
                                 break;
                             }
@@ -288,19 +258,21 @@ namespace FileCabinetApp
             else
             {
                 string[] parameterArray = parameters.Split();
-                parameters = parameterArray[1];
-                switch (parameterArray[0].ToLower())
+                string fileType = parameterArray[0];
+                string fileName = parameterArray.Last();
+
+                switch (fileType.ToLower())
                 {
                     case "csv":
-                        if (parameters == "records.csv" || parameters == PathCsv)
+                        try
                         {
-                            if (File.Exists(PathCsv))
+                            if (File.Exists(fileName))
                             {
-                                Console.Write($"File is exist - rewrite {PathCsv}? [Y/n] ");
+                                Console.Write($"File is exist - rewrite {fileName}? [Y/n] ");
                                 string checkToRewrite = Console.ReadLine().ToLower();
                                 if (checkToRewrite == "y")
                                 {
-                                    GetSaveToCsv();
+                                    GetSaveToCsv(fileName);
                                     break;
                                 }
                                 else
@@ -308,28 +280,26 @@ namespace FileCabinetApp
                                     break;
                                 }
                             }
-                            else
-                            {
-                                GetSaveToCsv();
-                                break;
-                            }
+
+                            GetSaveToCsv(fileName);
                         }
-                        else
+                        catch (DirectoryNotFoundException)
                         {
                             Console.WriteLine($"Export failed: can't open file {parameters}");
-                            break;
                         }
 
+                        break;
+
                     case "xml":
-                        if (parameters == "records.xml" || parameters == PathXml)
+                        try
                         {
-                            if (File.Exists(PathXml))
+                            if (File.Exists(fileName))
                             {
-                                Console.Write($"File is exist - rewrite {PathXml}? [Y/n] ");
+                                Console.Write($"File is exist - rewrite {fileName}? [Y/n] ");
                                 string checkToRewrite = Console.ReadLine().ToLower();
                                 if (checkToRewrite == "y")
                                 {
-                                    GetSaveToXml();
+                                    GetSaveToXml(fileName);
                                     break;
                                 }
                                 else
@@ -337,17 +307,15 @@ namespace FileCabinetApp
                                     break;
                                 }
                             }
-                            else
-                            {
-                                GetSaveToXml();
-                                break;
-                            }
+
+                            GetSaveToXml(fileName);
                         }
-                        else
+                        catch (DirectoryNotFoundException)
                         {
                             Console.WriteLine($"Export failed: can't open file {parameters}");
-                            break;
                         }
+
+                        break;
 
                     default:
                         Console.WriteLine("Incorrect input!");
@@ -465,7 +433,7 @@ namespace FileCabinetApp
             return new Tuple<bool, string, char>(true, null, char.Parse(str));
         }
 
-        private static FileCabinetRecord AddParametor(int id)
+        private static Person NewPerson()
         {
             Console.Write($"First name: ");
             string firstName = ReadInput(StringConverter, recordValidator.ValidateFirstName);
@@ -479,9 +447,8 @@ namespace FileCabinetApp
             Console.Write("Any character: ");
             char symbol = ReadInput(CharConverter, recordValidator.ValidateSymbol);
 
-            var record = new FileCabinetRecord
+            person = new Person
             {
-                Id = id,
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = dateOfBirth,
@@ -490,25 +457,71 @@ namespace FileCabinetApp
                 Symbol = symbol,
             };
 
-            return record;
+            return person;
         }
 
-        private static void GetSaveToCsv()
+        private static void GetSaveToCsv(string fileNameCsv)
         {
-            streamWriter = new StreamWriter(PathCsv);
-            fileCabinetServiceSnapshot = cabinetService.MakeSnapshot();
+            using StreamWriter streamWriter = new (fileNameCsv);
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
             fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
             streamWriter.Close();
             Console.WriteLine("All records are exported to file records.csv.");
         }
 
-        private static void GetSaveToXml()
+        private static void GetSaveToXml(string fileNameXml)
         {
-            streamWriter = new StreamWriter(PathXml);
-            fileCabinetServiceSnapshot = cabinetService.MakeSnapshot();
+            using StreamWriter streamWriter = new (fileNameXml);
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
             fileCabinetServiceSnapshot.SaveToXml(streamWriter);
             streamWriter.Close();
             Console.WriteLine("All records are exported to file records.xml.");
+        }
+
+        private static void CommandLineOptions(string[] args)
+        {
+            string parametorLine = string.Join(' ', args).ToLower();
+            string[] rulesValidetion = parametorLine.Trim(' ').Split(' ', '=');
+            List<string> listCommandLineParameter = rulesValidetion.Where(i => ParametersList.Any(y => y.Equals(i))).ToList();
+            for (int i = 0; i < listCommandLineParameter.Count; i++)
+            {
+                switch (listCommandLineParameter[i].ToLower())
+                {
+                    case "--validation-rules":
+                    case "-v":
+                        if (string.Equals(rulesValidetion[(i * 2) + 1], CustomValidator))
+                        {
+                            recordValidator = new CustomValidator();
+                            Console.WriteLine("Using custom validation rules.");
+                        }
+                        else if (string.Equals(rulesValidetion[(i * 2) + 1], DefaultValidator))
+                        {
+                            Console.WriteLine("Using default validation rules.");
+                        }
+
+                        break;
+
+                    case "--storage":
+                    case "-s":
+                        if (string.Equals(rulesValidetion[(2 * i) + 1], FileService))
+                        {
+                            fileStream = new FileStream("cabinet-records.db", FileMode.OpenOrCreate);
+                            fileCabinetService = new FileCabinetFilesystemService(fileStream);
+                            Console.WriteLine("Using file service rules.");
+                        }
+                        else if (string.Equals(rulesValidetion[(2 * i) + 1], MemoryService))
+                        {
+                            Console.WriteLine("Using memory service rules.");
+                        }
+
+                        break;
+
+                    default:
+                        Console.WriteLine("Using memory service rules.");
+                        Console.WriteLine("Using default validation rules.");
+                        break;
+                }
+            }
         }
     }
 }
