@@ -10,8 +10,7 @@ using System.Text;
 #pragma warning disable SA1600
 #pragma warning disable S1450
 #pragma warning disable S3241
-#pragma warning disable SA1203
-#pragma warning disable S1075
+#pragma warning disable SA1214
 #pragma warning disable S3220
 
 namespace FileCabinetApp
@@ -33,8 +32,6 @@ namespace FileCabinetApp
         private static Person person = new ();
         private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
         private static FileStream fileStream;
-        //private const string PathCsv = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.csv";
-        //private const string PathXml = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\bin\Debug\records.xml";
         private static readonly List<string> ParametersList = new () { "--validation-rules", "-v", "--storage", "-s" };
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
@@ -465,24 +462,20 @@ namespace FileCabinetApp
 
         private static void GetSaveToCsv(string fileNameCsv)
         {
-            using (StreamWriter streamWriter = new (fileNameCsv))
-            {
-                fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
-                fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
-                streamWriter.Close();
-                Console.WriteLine("All records are exported to file records.csv.");
-            }
+            using StreamWriter streamWriter = new (fileNameCsv);
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
+            fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
+            streamWriter.Close();
+            Console.WriteLine("All records are exported to file records.csv.");
         }
 
         private static void GetSaveToXml(string fileNameXml)
         {
-            using (StreamWriter streamWriter = new (fileNameXml))
-            {
-                fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
-                fileCabinetServiceSnapshot.SaveToXml(streamWriter);
-                streamWriter.Close();
-                Console.WriteLine("All records are exported to file records.xml.");
-            }
+            using StreamWriter streamWriter = new (fileNameXml);
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
+            fileCabinetServiceSnapshot.SaveToXml(streamWriter);
+            streamWriter.Close();
+            Console.WriteLine("All records are exported to file records.xml.");
         }
 
         private static void CommandLineOptions(string[] args)
