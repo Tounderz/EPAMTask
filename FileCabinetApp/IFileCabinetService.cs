@@ -17,6 +17,8 @@ namespace FileCabinetApp
 
         FileCabinetServiceSnapshot MakeSnapshot();
 
+        void Restore(FileCabinetServiceSnapshot snapshot);
+
         ReadOnlyCollection<FileCabinetRecord> GetRecords();
 
         int GetRecordsCount();

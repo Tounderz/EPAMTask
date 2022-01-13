@@ -61,7 +61,7 @@ namespace FileCabinetApp
 
         public Tuple<bool, string> ValidateSymbol(char symbol)
         {
-            if (symbol.ToString().Length != this.syzeSymbol)
+            if (symbol.ToString().Length != this.syzeSymbol || char.IsDigit(symbol) || char.IsLetter(symbol))
             {
                 return new Tuple<bool, string>(false, $"The {nameof(symbol)} size of the string character is equal to one element");
             }

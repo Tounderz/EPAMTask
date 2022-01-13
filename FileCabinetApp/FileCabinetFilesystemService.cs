@@ -10,6 +10,7 @@ using System.Text;
 #pragma warning disable SA1203
 #pragma warning disable CA1822
 #pragma warning disable SA1214
+#pragma warning disable SA1202
 
 namespace FileCabinetApp
 {
@@ -51,9 +52,6 @@ namespace FileCabinetApp
 
             var record = this.GetFileCabinetRecord(person, this.recordId);
             this.ConvertRecordToBytes(record);
-            this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
-            this.AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
-            this.AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
             return this.recordId;
         }
 
@@ -63,7 +61,6 @@ namespace FileCabinetApp
             byte[] recordBytes = new byte[file.Length];
             file.Read(recordBytes, 0, recordBytes.Length);
             this.list = this.ConvertBytesToRecord(recordBytes);
-
             var record = this.GetFileCabinetRecord(person, id);
             this.ConvertRecordToBytes(record);
         }
@@ -86,7 +83,44 @@ namespace FileCabinetApp
 
         public FileCabinetServiceSnapshot MakeSnapshot()
         {
-            throw new NotImplementedException();
+            using FileStream file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            byte[] recordBuffer = new byte[file.Length];
+            file.Read(recordBuffer, 0, recordBuffer.Length);
+            this.list = this.ConvertBytesToRecord(recordBuffer);
+            return new FileCabinetServiceSnapshot(this.list.ToArray());
+        }
+
+        public void Restore(FileCabinetServiceSnapshot snapshot)
+        {
+            ReadOnlyCollection<FileCabinetRecord> record = snapshot.Records;
+            IList<FileCabinetRecord> recordFromFile = snapshot.RecordsFromFile;
+            bool checkId = false;
+
+            for (int i = 0; i < recordFromFile.Count; i++)
+            {
+                if (record.Count == 0)
+                {
+                    this.list.Add(recordFromFile[i]);
+                }
+                else
+                {
+                    for (int j = 0; j < record.Count; j++)
+                    {
+                        if (record[j].Id == recordFromFile[i].Id)
+                        {
+                            this.list[j] = recordFromFile[i];
+                            checkId = true;
+                        }
+                        else if (!checkId)
+                        {
+                            recordFromFile[i].Id = this.list.Count + 1;
+                            this.list.Add(recordFromFile[i]);
+                        }
+                    }
+                }
+
+                checkId = false;
+            }
         }
 
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
@@ -193,8 +227,8 @@ namespace FileCabinetApp
 
             using MemoryStream memoryStream = new (arrBytes);
             using BinaryWriter binaryWriter = new (memoryStream);
-            byte[] firstName = this.ConvertNameBytes(record.FirstName);
-            byte[] lastName = this.ConvertNameBytes(record.LastName);
+            byte[] firstName = this.ConvertNameToBytes(record.FirstName);
+            byte[] lastName = this.ConvertNameToBytes(record.LastName);
 
             using BinaryWriter binary = new (this.fileStream, Encoding.ASCII, true);
             if (this.list.Exists(i => i.Id == record.Id))
@@ -227,7 +261,7 @@ namespace FileCabinetApp
             binary.Flush();
         }
 
-        private byte[] ConvertNameBytes(string name) // convert FirstName and LastName to bytes
+        private byte[] ConvertNameToBytes(string name) // convert FirstName and LastName to bytes
         {
             byte[] nameToBytes = Encoding.ASCII.GetBytes(name);
             byte[] names = new byte[MaxLengthString];

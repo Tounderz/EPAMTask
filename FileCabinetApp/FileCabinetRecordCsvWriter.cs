@@ -21,7 +21,7 @@ namespace FileCabinetApp
 
         public void Write(FileCabinetRecord record)
         {
-            var line = $"{record.Id},{record.FirstName},{record.LastName},{record.DateOfBirth},{record.Age},{record.Salary},{record.Symbol}";
+            var line = $"{record.Id},{record.FirstName},{record.LastName},{record.DateOfBirth:dd/MM/yyyy},{record.Age},{record.Salary},{record.Symbol}";
             this.textWriter.WriteLine(line);
             this.textWriter.Flush();
         }

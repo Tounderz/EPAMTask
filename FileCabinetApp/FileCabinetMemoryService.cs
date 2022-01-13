@@ -8,14 +8,12 @@ using System.IO;
 #pragma warning disable SA1600
 #pragma warning disable CA1305
 #pragma warning disable SA1203
-#pragma warning disable SA1101
 #pragma warning disable SA1202
 
 namespace FileCabinetApp
 {
     public class FileCabinetMemoryService : IFileCabinetService
     {
-        private readonly FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
         private readonly List<FileCabinetRecord> list = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
@@ -24,11 +22,11 @@ namespace FileCabinetApp
 
         public int CreateRecord(Person person)
         {
-            var record = GetFileCabinetRecord(person, list.Count + 1);
+            var record = this.GetFileCabinetRecord(person, this.list.Count + 1);
             this.list.Add(record);
-            AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
-            AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
-            AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
+            this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
+            this.AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
+            this.AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
 
             return record.Id;
         }
@@ -40,13 +38,13 @@ namespace FileCabinetApp
                 throw new ArgumentException(null, nameof(id));
             }
 
-            var record = GetFileCabinetRecord(person, id);
-            RemoveDitionaryItem(id, this.firstNameDictionary);
-            AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
-            RemoveDitionaryItem(id, this.lastNameDictionary);
-            AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
-            RemoveDitionaryItem(id, this.dateOfBirthDictionary);
-            AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
+            var record = this.GetFileCabinetRecord(person, id);
+            this.RemoveDitionaryItem(id, this.firstNameDictionary);
+            this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
+            this.RemoveDitionaryItem(id, this.lastNameDictionary);
+            this.AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
+            this.RemoveDitionaryItem(id, this.dateOfBirthDictionary);
+            this.AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
             this.list[id - 1] = record;
         }
 
@@ -68,8 +66,40 @@ namespace FileCabinetApp
 
         public FileCabinetServiceSnapshot MakeSnapshot()
         {
-            fileCabinetServiceSnapshot.FileCabinetRecords = list;
-            return fileCabinetServiceSnapshot;
+            return new FileCabinetServiceSnapshot(this.list.ToArray());
+        }
+
+        public void Restore(FileCabinetServiceSnapshot snapshot)
+        {
+            ReadOnlyCollection<FileCabinetRecord> record = snapshot.Records;
+            IList<FileCabinetRecord> recordFromFile = snapshot.RecordsFromFile;
+            bool checkId = false;
+
+            for (int i = 0; i < recordFromFile.Count; i++)
+            {
+                if (record.Count == 0)
+                {
+                    this.list.Add(recordFromFile[i]);
+                }
+                else
+                {
+                    for (int j = 0; j < record.Count; j++)
+                    {
+                        if (record[j].Id == recordFromFile[i].Id)
+                        {
+                            this.list[j] = recordFromFile[i];
+                            checkId = true;
+                        }
+                        else if (!checkId)
+                        {
+                            recordFromFile[i].Id = this.list.Count + 1;
+                            this.list.Add(recordFromFile[i]);
+                        }
+                    }
+                }
+
+                checkId = false;
+            }
         }
 
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()

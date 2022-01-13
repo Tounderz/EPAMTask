@@ -12,6 +12,7 @@ using System.Text;
 #pragma warning disable S3241
 #pragma warning disable SA1214
 #pragma warning disable S3220
+#pragma warning disable S1117
 
 namespace FileCabinetApp
 {
@@ -30,7 +31,7 @@ namespace FileCabinetApp
         private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService();
         private static IRecordValidator recordValidator = new DefaultValidator();
         private static Person person = new ();
-        private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot = new ();
+        private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot;
         private static FileStream fileStream;
         private static readonly List<string> ParametersList = new () { "--validation-rules", "-v", "--storage", "-s" };
 
@@ -44,6 +45,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("export", Export),
+            new Tuple<string, Action<string>>("import", Import),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -56,6 +58,7 @@ namespace FileCabinetApp
             new string[] { "edit", "editor", "The 'edit' command allows you to edit data by id." },
             new string[] { "find", "search model: find search parameter \"search criteria\"", "Search by parameters 'firstname or lastname or dateofbirth', search model: find search parameter \"search criteria\"." },
             new string[] { "export", "writing to a 'csv or xml' file", "The 'export' command writes a file in csv or xml format" },
+            new string[] { "import", "importing records from a format file 'csv' or 'xml'", "The import command imports data from files in 'csv' or 'xml' format" },
         };
 
         public static void Main(string[] args)
@@ -318,7 +321,67 @@ namespace FileCabinetApp
                         break;
 
                     default:
-                        Console.WriteLine("Incorrect input!");
+                        Console.WriteLine("Incorrect input! 1. export csv (or xml) filename.csv ; 2. export csv (or xml) full address to the file'\'filename.csv");
+                        break;
+                }
+            }
+        }
+
+        private static void Import(string parameters)
+        {
+            if (string.IsNullOrEmpty(parameters))
+            {
+                Console.WriteLine("Specify the search criteria");
+            }
+            else
+            {
+                string[] parameterArray = parameters.Split();
+                string fileType = parameterArray[0];
+                string pathName = parameterArray.Last();
+                string fileName = Path.GetFileName(pathName);
+
+                switch (fileType)
+                {
+                    case "csv":
+                        try
+                        {
+                            if (File.Exists(fileName))
+                            {
+                                GetLoadFromCsv(fileName, pathName);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Import error: file {pathName} is not exist.");
+                            }
+                        }
+                        catch (DirectoryNotFoundException)
+                        {
+                            Console.WriteLine("Incorrect input! 1. import csv filename.csv ; 2. import csv full address to the file'\'filename.csv");
+                        }
+
+                        break;
+
+                    case "xml":
+                        try
+                        {
+                            if (File.Exists(fileName))
+                            {
+                                GetLoadFromXml(fileName, pathName);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Import error: file {pathName} is not exist.");
+                            }
+                        }
+                        catch (DirectoryNotFoundException)
+                        {
+                            Console.WriteLine("Incorrect input! 1. import xml filename.csv ; 2. import xml full address to the file'\'filename.csv");
+                        }
+
+                        break;
+
+                    default:
+                        Console.WriteLine("Incorrect input! 1. import csv (or xml) filename.csv ; 2. import csv (or xml) full address to the file'\'filename.csv");
                         break;
                 }
             }
@@ -425,7 +488,7 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string, char> CharConverter(string str)
         {
-            if (str.Length != 1)
+            if (str.Length != 1 || string.IsNullOrWhiteSpace(str))
             {
                 return new Tuple<bool, string, char>(false, "It cannot be empty and more than one character.", ' ');
             }
@@ -466,7 +529,7 @@ namespace FileCabinetApp
             fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
             fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
             streamWriter.Close();
-            Console.WriteLine("All records are exported to file records.csv.");
+            Console.WriteLine($"All records are exported to file {fileNameCsv}.");
         }
 
         private static void GetSaveToXml(string fileNameXml)
@@ -475,7 +538,27 @@ namespace FileCabinetApp
             fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
             fileCabinetServiceSnapshot.SaveToXml(streamWriter);
             streamWriter.Close();
-            Console.WriteLine("All records are exported to file records.xml.");
+            Console.WriteLine($"All records are exported to file {fileNameXml}.");
+        }
+
+        private static void GetLoadFromCsv(string fileNameCsv, string pathName)
+        {
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
+            using FileStream fileStream = File.Open(fileNameCsv, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using StreamReader streamReader = new (fileStream.Name, Encoding.ASCII);
+            fileCabinetServiceSnapshot.LoadFromCsv(streamReader);
+            Console.WriteLine($"{fileCabinetServiceSnapshot.RecordsFromFile.Count} records were imported from {pathName}");
+            fileCabinetService.Restore(fileCabinetServiceSnapshot);
+        }
+
+        private static void GetLoadFromXml(string fileNameXml, string pathName)
+        {
+            fileCabinetServiceSnapshot = fileCabinetService.MakeSnapshot();
+            using FileStream fileStream = File.Open(fileNameXml, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using StreamReader streamReader = new (fileStream.Name, Encoding.ASCII);
+            fileCabinetServiceSnapshot.LoadFromXml(streamReader);
+            Console.WriteLine($"{fileCabinetServiceSnapshot.RecordsFromFile.Count} records were imported from {pathName}");
+            fileCabinetService.Restore(fileCabinetServiceSnapshot);
         }
 
         private static void CommandLineOptions(string[] args)
