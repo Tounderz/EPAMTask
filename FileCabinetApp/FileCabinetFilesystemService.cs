@@ -65,6 +65,11 @@ namespace FileCabinetApp
             this.ConvertRecordToBytes(record);
         }
 
+        public void RemoveRecord(int id)
+        {
+            throw new NotSupportedException();
+        }
+
         private FileCabinetRecord GetFileCabinetRecord(Person person, int id) // создание объекта FileCabinetRecord
         {
             var record = new FileCabinetRecord

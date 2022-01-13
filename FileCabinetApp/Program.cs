@@ -34,6 +34,7 @@ namespace FileCabinetApp
         private static FileCabinetServiceSnapshot fileCabinetServiceSnapshot;
         private static FileStream fileStream;
         private static readonly List<string> ParametersList = new () { "--validation-rules", "-v", "--storage", "-s" };
+        private static ReadOnlyCollection<FileCabinetRecord> listRecords;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -46,6 +47,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("export", Export),
             new Tuple<string, Action<string>>("import", Import),
+            new Tuple<string, Action<string>>("remove", Remove),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -59,6 +61,7 @@ namespace FileCabinetApp
             new string[] { "find", "search model: find search parameter \"search criteria\"", "Search by parameters 'firstname or lastname or dateofbirth', search model: find search parameter \"search criteria\"." },
             new string[] { "export", "writing to a 'csv or xml' file", "The 'export' command writes a file in csv or xml format" },
             new string[] { "import", "importing records from a format file 'csv' or 'xml'", "The import command imports data from files in 'csv' or 'xml' format" },
+            new string[] { "remove", "remove record by id.", "The 'remove' command record by id." },
         };
 
         public static void Main(string[] args)
@@ -384,6 +387,40 @@ namespace FileCabinetApp
                         Console.WriteLine("Incorrect input! 1. import csv (or xml) filename.csv ; 2. import csv (or xml) full address to the file'\'filename.csv");
                         break;
                 }
+            }
+        }
+
+        private static void Remove(string parameters)
+        {
+            try
+            {
+                int id;
+                bool checkId = int.TryParse(parameters, out id);
+                if (!checkId)
+                {
+                    Console.WriteLine("Incorrect format, enter a numeric value after remove");
+                }
+
+                listRecords = fileCabinetService.GetRecords();
+                for (int i = 0; i < listRecords.Count; i++)
+                {
+                    if (id == listRecords[i].Id)
+                    {
+                        fileCabinetService.RemoveRecord(id);
+                        Console.WriteLine($"Record #{id} is removed");
+                        checkId = true;
+                        break;
+                    }
+                }
+
+                if (!checkId)
+                {
+                    throw new ArgumentException($"Record #{id} doesn't exists.");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 

@@ -48,6 +48,15 @@ namespace FileCabinetApp
             this.list[id - 1] = record;
         }
 
+        public void RemoveRecord(int id)
+        {
+            FileCabinetRecord record = this.list.Find(i => i.Id == id);
+            this.list.Remove(record);
+            this.RemoveDitionaryItem(id, this.firstNameDictionary);
+            this.RemoveDitionaryItem(id, this.lastNameDictionary);
+            this.RemoveDitionaryItem(id, this.dateOfBirthDictionary);
+        }
+
         private FileCabinetRecord GetFileCabinetRecord(Person person, int id)
         {
             var record = new FileCabinetRecord

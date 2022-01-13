@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FileCabinetApp;
 
 #pragma warning disable SA1600
+#pragma warning disable CA1062
 
 namespace FileCabinetGenerator
 {

@@ -15,6 +15,8 @@ namespace FileCabinetApp
 
         void EditRecord(int id, Person person);
 
+        void RemoveRecord(int id);
+
         FileCabinetServiceSnapshot MakeSnapshot();
 
         void Restore(FileCabinetServiceSnapshot snapshot);
