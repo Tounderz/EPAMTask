@@ -121,6 +121,11 @@ namespace FileCabinetApp
             return this.list.Count;
         }
 
+        public Tuple<int, int> PurgeRecord()
+        {
+            throw new NotImplementedException();
+        }
+
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             List<FileCabinetRecord> firstNameList = this.firstNameDictionary[firstName];

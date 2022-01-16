@@ -48,6 +48,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("export", Export),
             new Tuple<string, Action<string>>("import", Import),
             new Tuple<string, Action<string>>("remove", Remove),
+            new Tuple<string, Action<string>>("purge", Purge),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -421,6 +422,18 @@ namespace FileCabinetApp
             catch (ArgumentException ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static void Purge(string parameters)
+        {
+            try
+            {
+                var tuple = fileCabinetService.PurgeRecord();
+                Console.WriteLine($"Data file processing is completed: {tuple.Item1} of {tuple.Item2} records were purged.");
+            }
+            catch (NotImplementedException)
+            {
             }
         }
 

@@ -19,7 +19,7 @@ namespace FileCabinetApp
     {
         private readonly FileStream fileStream;
         private List<FileCabinetRecord> list = new ();
-        private List<FileCabinetRecord> isDeleteRecords = new ();
+        private readonly List<FileCabinetRecord> isDeleteRecords = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
@@ -177,6 +177,42 @@ namespace FileCabinetApp
             return this.list.Count;
         }
 
+        public Tuple<int, int> PurgeRecord()
+        {
+            using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            byte[] recordBytes = new byte[file.Length];
+            file.Read(recordBytes, 0, recordBytes.Length);
+            this.list = this.ConvertBytesToRecord(recordBytes);
+
+            this.fileStream.SetLength(0);
+
+            using BinaryWriter binaryWriter = new (this.fileStream, Encoding.ASCII, true);
+            for (int i = 0; i < this.list.Count; i++)
+            {
+                this.status = 0;
+                byte[] firstName = this.ConvertNameToBytes(this.list[i].FirstName);
+                byte[] lastName = this.ConvertNameToBytes(this.list[i].LastName);
+                var record = this.list[i];
+                this.GetBinaryWriter(binaryWriter, this.status, record.Id, firstName, lastName, record);
+                // binaryWriter.Write(this.status);
+                // binaryWriter.Write(record.Id);
+                // binaryWriter.Write(firstName);
+                // binaryWriter.Write(lastName);
+                // binaryWriter.Write(record.DateOfBirth.Year);
+                // binaryWriter.Write(record.DateOfBirth.Month);
+                // binaryWriter.Write(record.DateOfBirth.Day);
+                // binaryWriter.Write(record.Age);
+                // binaryWriter.Write(record.Salary);
+                // binaryWriter.Write(record.Symbol);
+                binaryWriter.Flush();
+            }
+
+            int count = this.isDeleteRecords.Count;
+            this.isDeleteRecords.Clear();
+
+            return Tuple.Create(count, this.list.Count + count);
+        }
+
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -278,17 +314,32 @@ namespace FileCabinetApp
                 binary.Seek(0, SeekOrigin.End);
             }
 
-            binary.Write(this.status);
-            binary.Write(this.recordId);
-            binary.Write(firstName);
-            binary.Write(lastName);
-            binary.Write(record.DateOfBirth.Year);
-            binary.Write(record.DateOfBirth.Month);
-            binary.Write(record.DateOfBirth.Day);
-            binary.Write(record.Age);
-            binary.Write(record.Salary);
-            binary.Write(record.Symbol);
+            this.GetBinaryWriter(binary, this.status, this.recordId, firstName, lastName, record);
+            // binary.Write(this.status);
+            // binary.Write(this.recordId);
+            // binary.Write(firstName);
+            // binary.Write(lastName);
+            // binary.Write(record.DateOfBirth.Year);
+            // binary.Write(record.DateOfBirth.Month);
+            // binary.Write(record.DateOfBirth.Day);
+            // binary.Write(record.Age);
+            // binary.Write(record.Salary);
+            // binary.Write(record.Symbol);
             binary.Flush();
+        }
+
+        private void GetBinaryWriter(BinaryWriter binaryWriter, short status, int id, byte[] firstName, byte[] lastName, FileCabinetRecord record)
+        {
+            binaryWriter.Write(status);
+            binaryWriter.Write(id);
+            binaryWriter.Write(firstName);
+            binaryWriter.Write(lastName);
+            binaryWriter.Write(record.DateOfBirth.Year);
+            binaryWriter.Write(record.DateOfBirth.Month);
+            binaryWriter.Write(record.DateOfBirth.Day);
+            binaryWriter.Write(record.Age);
+            binaryWriter.Write(record.Salary);
+            binaryWriter.Write(record.Symbol);
         }
 
         private byte[] ConvertNameToBytes(string value) // convert FirstName and LastName to bytes

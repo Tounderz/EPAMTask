@@ -25,6 +25,8 @@ namespace FileCabinetApp
 
         int GetRecordsCount();
 
+        Tuple<int, int> PurgeRecord();
+
         ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName);
 
         ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName);
