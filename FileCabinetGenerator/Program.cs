@@ -50,7 +50,7 @@ namespace FileCabinetGenerator
         {
             string parametorLine = string.Join(' ', args).ToLower();
             string[] rulesValidetion = parametorLine.Trim(' ').Split(' ', '=');
-            List<string> listCommandLineParameter = rulesValidetion.Where(i => ParametersList.Any(y => y.Equals(i))).ToList();
+            List<string> listCommandLineParameter = rulesValidetion.Where(i => ParametersList.Any(y => y.Equals(i, StringComparison.Ordinal))).ToList();
 
             for (int i = 0; i < listCommandLineParameter.Count; i++)
             {
