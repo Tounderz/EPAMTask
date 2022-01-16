@@ -116,9 +116,9 @@ namespace FileCabinetApp
             return this.list.AsReadOnly();
         }
 
-        public int GetRecordsCount()
+        public Tuple<int, int> GetRecordsCount()
         {
-            return this.list.Count;
+            return Tuple.Create(this.list.Count, 0);
         }
 
         public Tuple<int, int> PurgeRecord()

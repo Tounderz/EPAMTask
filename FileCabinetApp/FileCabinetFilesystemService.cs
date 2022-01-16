@@ -63,9 +63,11 @@ namespace FileCabinetApp
         {
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[file.Length];
-            var record = this.GetFileCabinetRecord(person, id);
+            //var record = this.GetFileCabinetRecord(person, id);
             file.Read(recordBytes, 0, recordBytes.Length);
             this.list = this.ConvertBytesToRecord(recordBytes);
+            FileCabinetRecord record = this.list.Find(i => i.Id == id);
+            record = this.GetFileCabinetRecord(person, record.Id);
             this.ConvertRecordToBytes(record);
         }
 
@@ -165,7 +167,7 @@ namespace FileCabinetApp
             return this.list.AsReadOnly();
         }
 
-        public int GetRecordsCount()
+        public Tuple<int, int> GetRecordsCount()
         {
             using (FileStream file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -174,7 +176,7 @@ namespace FileCabinetApp
                 this.list = this.ConvertBytesToRecord(recordBytes);
             }
 
-            return this.list.Count;
+            return Tuple.Create(this.list.Count, this.isDeleteRecords.Count);
         }
 
         public Tuple<int, int> PurgeRecord()
@@ -289,6 +291,11 @@ namespace FileCabinetApp
 
         private void ConvertRecordToBytes(FileCabinetRecord record) // convert record to bytes
         {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
             byte[] arrBytes = new byte[RecordLength];
 
             using MemoryStream memoryStream = new (arrBytes);

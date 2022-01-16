@@ -13,6 +13,7 @@ using System.Text;
 #pragma warning disable SA1214
 #pragma warning disable S3220
 #pragma warning disable S1117
+#pragma warning disable CS0162
 
 namespace FileCabinetApp
 {
@@ -152,7 +153,7 @@ namespace FileCabinetApp
         private static void Start(string parameters) // вывод количества объектов в списке
         {
             var recordsCount = fileCabinetService.GetRecordsCount();
-            Console.WriteLine($"{recordsCount} record(s).");
+            Console.WriteLine($"{recordsCount.Item1} record(s).\n{recordsCount.Item2} delete record(s)");
         }
 
         private static void Create(string parameters) // добовление нового объекта
@@ -172,21 +173,32 @@ namespace FileCabinetApp
 
         private static void Edit(string parameters) // изменение данных по id
         {
-            while (CkeckEdit(parameters))
+            try
             {
                 int id = int.Parse(parameters);
-                if (id < 1 || id > fileCabinetService.GetRecordsCount())
+                listRecords = fileCabinetService.GetRecords();
+                for (int i = 0; i < listRecords.Count; i++)
                 {
-                    Console.WriteLine($"#{id} record is not found.");
-                    break;
+                    if (!listRecords.All(i => i.Id == id))
+                    {
+                        throw new ArgumentException($"#{id} record in not found. ");
+                    }
+                    else
+                    {
+                        NewPerson();
+                        fileCabinetService.EditRecord(id, person);
+                        Console.WriteLine($"Record #{id} is updated.");
+                        break;
+                    }
                 }
-                else
-                {
-                    NewPerson();
-                    fileCabinetService.EditRecord(id, person);
-                    Console.WriteLine($"Record #{id} is updated.");
-                    break;
-                }
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("Enter the 'edit' 'number' to change separated by a space.");
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine("The parameter must be numeric.");
             }
         }
 
@@ -433,8 +445,7 @@ namespace FileCabinetApp
                 Console.WriteLine($"Data file processing is completed: {tuple.Item1} of {tuple.Item2} records were purged.");
             }
             catch (NotImplementedException)
-            {
-            }
+            {}
         }
 
         private static void PrintFind(ReadOnlyCollection<FileCabinetRecord> record) // метод для вывода в консоль данных по запросу из метода Find
@@ -443,32 +454,6 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
             }
-        }
-
-        private static bool CkeckEdit(string parameters) // проверка параметра на отстутствие не числовых данных, для метода Edit
-        {
-            bool ckeck = true;
-            if (parameters.Length == 0)
-            {
-                Console.WriteLine("Enter the 'edit' 'number' to change separated by a space.");
-                return false;
-            }
-
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                if (!char.IsDigit(parameters[i]))
-                {
-                    Console.WriteLine("The parameter must be numeric.");
-                    ckeck = false;
-                    break;
-                }
-                else
-                {
-                    ckeck = true;
-                }
-            }
-
-            return ckeck;
         }
 
         private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)

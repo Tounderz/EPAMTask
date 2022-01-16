@@ -23,7 +23,7 @@ namespace FileCabinetApp
 
         ReadOnlyCollection<FileCabinetRecord> GetRecords();
 
-        int GetRecordsCount();
+        Tuple<int, int> GetRecordsCount();
 
         Tuple<int, int> PurgeRecord();
 
