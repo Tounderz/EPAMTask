@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FileCabinetApp;
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetGenerator
 {
-    public class FileCabinetRecordCsvWriter
+    public class GeneratorRecordCsvWriter
     {
         private readonly TextWriter textWriter;
 
-        public FileCabinetRecordCsvWriter(TextWriter textWriter)
+        public GeneratorRecordCsvWriter(TextWriter textWriter)
         {
             this.textWriter = textWriter;
         }

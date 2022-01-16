@@ -61,7 +61,7 @@ namespace FileCabinetApp
 
         public Tuple<bool, string> ValidateSymbol(char symbol)
         {
-            if (symbol.ToString().Length != this.syzeSymbol || char.IsLetter(symbol))
+            if (symbol.ToString().Length != this.syzeSymbol || char.IsLetter(symbol) || char.IsDigit(symbol))
             {
                 return new Tuple<bool, string>(false, $"The {nameof(symbol)} field must contain one character and must not be a letter.");
             }

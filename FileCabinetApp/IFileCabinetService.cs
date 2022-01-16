@@ -15,11 +15,17 @@ namespace FileCabinetApp
 
         void EditRecord(int id, Person person);
 
+        void RemoveRecord(int id);
+
         FileCabinetServiceSnapshot MakeSnapshot();
+
+        void Restore(FileCabinetServiceSnapshot snapshot);
 
         ReadOnlyCollection<FileCabinetRecord> GetRecords();
 
-        int GetRecordsCount();
+        Tuple<int, int> GetRecordsCount();
+
+        Tuple<int, int> PurgeRecord();
 
         ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName);
 
