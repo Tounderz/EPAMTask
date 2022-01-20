@@ -5,13 +5,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using FileCabinetApp.Validators;
 
 #pragma warning disable SA1600
-#pragma warning disable SA1203
 #pragma warning disable CA1822
 #pragma warning disable SA1214
 #pragma warning disable SA1202
 #pragma warning disable SA1305
+#pragma warning disable SA1515
+#pragma warning disable S125
 
 namespace FileCabinetApp
 {
@@ -23,15 +25,10 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
-        private const int MaxLengthString = 120;
-        private const int RecordLength = (MaxLengthString * 2) + (sizeof(int) * 4) + sizeof(char) + sizeof(decimal) + (sizeof(short) * 2) - 1;
         private int recordId = 0;
         private short status = 0;
         private readonly byte[] statusInBytes = new byte[sizeof(short)];
         private readonly byte[] recordIdInBytes = new byte[sizeof(int)];
-        private const string FormatDate = "yyyy-MMM-dd";
-        private const int IsDelete = 1;
-        private const int NotDelete = 0;
 
         public FileCabinetFilesystemService(FileStream fileStream)
         {
@@ -47,8 +44,8 @@ namespace FileCabinetApp
             }
             else
             {
-                byte[] recordBytes = new byte[RecordLength];
-                int offset = (int)file.Length - RecordLength;
+                byte[] recordBytes = new byte[ConstParameters.RecordLength];
+                int offset = (int)file.Length - ConstParameters.RecordLength;
                 file.Seek(offset, SeekOrigin.Begin);
                 file.Read(recordBytes, 0, recordBytes.Length);
                 this.recordId = BitConverter.ToInt32(recordBytes, this.statusInBytes.Length) + 1;
@@ -63,7 +60,6 @@ namespace FileCabinetApp
         {
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[file.Length];
-            //var record = this.GetFileCabinetRecord(person, id);
             file.Read(recordBytes, 0, recordBytes.Length);
             this.list = this.ConvertBytesToRecord(recordBytes);
             FileCabinetRecord record = this.list.Find(i => i.Id == id);
@@ -74,16 +70,16 @@ namespace FileCabinetApp
         public void RemoveRecord(int id)
         {
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            byte[] recordBytes = new byte[RecordLength];
-            this.status = IsDelete;
+            byte[] recordBytes = new byte[ConstParameters.RecordLength];
+            this.status = ConstParameters.IsDelete;
             int idRecord = 0;
             int offset = 0;
             do
             {
                 file.Seek(offset, SeekOrigin.Begin);
-                recordBytes = new byte[RecordLength];
+                recordBytes = new byte[ConstParameters.RecordLength];
                 file.Read(recordBytes, 0, recordBytes.Length);
-                offset += RecordLength;
+                offset += ConstParameters.RecordLength;
                 idRecord = BitConverter.ToInt32(recordBytes, this.statusInBytes.Length);
             }
             while (idRecord != id);
@@ -91,7 +87,7 @@ namespace FileCabinetApp
             byte[] arrBytes = BitConverter.GetBytes(this.status);
             Array.Copy(arrBytes, 0, recordBytes, 0, 2);
 
-            offset -= RecordLength;
+            offset -= ConstParameters.RecordLength;
             using BinaryWriter binaryWriter = new (this.fileStream, Encoding.ASCII, true);
             binaryWriter.Seek(offset, SeekOrigin.Begin);
             binaryWriter.Write(recordBytes);
@@ -256,7 +252,7 @@ namespace FileCabinetApp
             this.list = this.ConvertBytesToRecord(recordBytes);
             foreach (var item in this.list)
             {
-                this.AddDitionaryItem(item.DateOfBirth.ToString(FormatDate), item, this.dateOfBirthDictionary);
+                this.AddDitionaryItem(item.DateOfBirth.ToString(ConstParameters.FormatDate), item, this.dateOfBirthDictionary);
             }
 
             List<FileCabinetRecord> firstNameList = this.dateOfBirthDictionary[dateOfBirth];
@@ -296,7 +292,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(record));
             }
 
-            byte[] arrBytes = new byte[RecordLength];
+            byte[] arrBytes = new byte[ConstParameters.RecordLength];
 
             using MemoryStream memoryStream = new (arrBytes);
             using BinaryWriter binaryWriter = new (memoryStream);
@@ -307,7 +303,7 @@ namespace FileCabinetApp
             if (this.list.Exists(i => i.Id == record.Id))
             {
                 using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                int offset = (RecordLength * record.Id) - RecordLength;
+                int offset = (ConstParameters.RecordLength * record.Id) - ConstParameters.RecordLength;
                 file.Seek(offset, SeekOrigin.Begin);
                 file.Read(this.statusInBytes, 0, this.statusInBytes.Length);
                 this.status = BitConverter.ToInt16(this.statusInBytes, 0);
@@ -317,7 +313,7 @@ namespace FileCabinetApp
             }
             else
             {
-                this.status = NotDelete;
+                this.status = ConstParameters.NotDelete;
                 binary.Seek(0, SeekOrigin.End);
             }
 
@@ -352,11 +348,11 @@ namespace FileCabinetApp
         private byte[] ConvertNameToBytes(string value) // convert FirstName and LastName to bytes
         {
             byte[] nameToBytes = Encoding.ASCII.GetBytes(value);
-            byte[] name = new byte[MaxLengthString];
+            byte[] name = new byte[ConstParameters.MaxLengthString];
             int nameLengh = nameToBytes.Length;
-            if (nameLengh > MaxLengthString)
+            if (nameLengh > ConstParameters.MaxLengthString)
             {
-                nameLengh = MaxLengthString;
+                nameLengh = ConstParameters.MaxLengthString;
             }
 
             Array.Copy(nameToBytes, 0, name, 0, nameLengh);
@@ -381,10 +377,10 @@ namespace FileCabinetApp
                 var record = new FileCabinetRecord();
                 this.status = reader.ReadInt16();
                 record.Id = reader.ReadInt32();
-                byte[] firstNameBytes = reader.ReadBytes(MaxLengthString);
+                byte[] firstNameBytes = reader.ReadBytes(ConstParameters.MaxLengthString);
                 string bytesToFirstName = Encoding.ASCII.GetString(firstNameBytes, 0, firstNameBytes.Length);
                 record.FirstName = bytesToFirstName.Replace("\0", string.Empty);
-                byte[] lastNameBytes = reader.ReadBytes(MaxLengthString);
+                byte[] lastNameBytes = reader.ReadBytes(ConstParameters.MaxLengthString);
                 string bytesToLastName = Encoding.ASCII.GetString(lastNameBytes, 0, lastNameBytes.Length);
                 record.LastName = bytesToLastName.Replace("\0", string.Empty);
                 int dateOfYear = reader.ReadInt32();
