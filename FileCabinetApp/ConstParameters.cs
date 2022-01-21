@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 #pragma warning disable SA1600
 #pragma warning disable S1075
 
+
 namespace FileCabinetApp
 {
     public static class ConstParameters
@@ -40,6 +41,15 @@ namespace FileCabinetApp
         public const string ImportName = "import";
         public const string RemoveName = "remove";
         public const string PurgeName = "purge";
+
+        public const int MinStringLength = 2;
+        public const int MaxStringDefaultLength = 60;
+        public const int MaxStringCustomLength = 30;
+        public const int MinSalaryCustom = 500;
+        public const int MaxSalaryCustom = 1000000;
+        public const int MinSalaryDefault = 0;
+        public const int MaxSalaryDefault = int.MaxValue;
+        public const int SymbolLength = 1;
 
         public const string FormatDate = "yyyy-MMM-dd";
         public const int IsDelete = 1;

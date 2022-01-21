@@ -99,6 +99,7 @@ namespace FileCabinetApp
 
         private FileCabinetRecord CreateRecord(Person person, int id) // создание объекта FileCabinetRecord
         {
+            this.recordValidator.ValidateParameters(person);
             var record = new FileCabinetRecord
             {
                 Id = id,
