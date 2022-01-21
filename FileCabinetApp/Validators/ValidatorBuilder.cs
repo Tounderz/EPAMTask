@@ -30,7 +30,7 @@ namespace FileCabinetApp.Validators
             return this;
         }
 
-        public ValidatorBuilder ValidateSalary(decimal minSalary, decimal maxSalary)
+        public ValidatorBuilder ValidateSalary(int minSalary, int maxSalary)
         {
             this.recordValidators.Add(new SalaryValidator(minSalary, maxSalary));
             return this;

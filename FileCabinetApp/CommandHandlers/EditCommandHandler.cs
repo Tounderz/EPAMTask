@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FileCabinetApp.Validators;
 
 #pragma warning disable SA1600
 #pragma warning disable S1450
@@ -16,12 +15,12 @@ namespace FileCabinetApp.CommandHandlers
     public class EditCommandHandler : ServiceCommandHandlerBase
     {
         private ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords;
-        private readonly IRecordValidator recordValidator;
+        private readonly string nameValidator;
 
-        public EditCommandHandler(IFileCabinetService service, IRecordValidator recordValidator)
+        public EditCommandHandler(IFileCabinetService service, string nameValidator)
             : base(service)
         {
-            this.recordValidator = recordValidator;
+            this.nameValidator = nameValidator;
         }
 
         private void Edit(string parameters) // изменение данных по id
@@ -36,16 +35,9 @@ namespace FileCabinetApp.CommandHandlers
                 }
                 else
                 {
-                    var person = CreatingPerson.NewPerson();
-                    if (!this.recordValidator.ValidateParameters(person).Item1)
-                    {
-                        Console.WriteLine(this.recordValidator.ValidateParameters(person).Item2);
-                    }
-                    else
-                    {
-                        this.service.EditRecord(id, person);
-                        Console.WriteLine($"Record #{id} is updated.");
-                    }
+                    var person = CreatingPerson.NewPerson(this.nameValidator);
+                    this.service.EditRecord(id, person);
+                    Console.WriteLine($"Record #{id} is updated.");
                 }
             }
             catch (FormatException)

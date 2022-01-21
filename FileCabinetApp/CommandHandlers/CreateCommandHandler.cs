@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FileCabinetApp.Validators;
 
 #pragma warning disable SA1600
 #pragma warning disable SA1202
@@ -12,12 +11,12 @@ namespace FileCabinetApp.CommandHandlers
 {
     public class CreateCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly IRecordValidator recordValidator;
+        private readonly string nameValidator;
 
-        public CreateCommandHandler(IFileCabinetService service, IRecordValidator recordValidator)
+        public CreateCommandHandler(IFileCabinetService service, string nameValidator)
             : base(service)
         {
-            this.recordValidator = recordValidator;
+            this.nameValidator = nameValidator;
         }
 
         private void Create(string parameters)
@@ -27,15 +26,8 @@ namespace FileCabinetApp.CommandHandlers
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            var person = CreatingPerson.NewPerson();
-            if (!this.recordValidator.ValidateParameters(person).Item1)
-            {
-                Console.WriteLine(this.recordValidator.ValidateParameters(person).Item2);
-            }
-            else
-            {
-                Console.WriteLine($"Record # {this.service.CreateRecord(person)} is created.");
-            }
+            var person = CreatingPerson.NewPerson(this.nameValidator);
+            Console.WriteLine($"Record # {this.service.CreateRecord(person)} is created.");
         }
 
         public override AppCommandRequest Handle(AppCommandRequest request)

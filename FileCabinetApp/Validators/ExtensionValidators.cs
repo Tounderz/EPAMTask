@@ -10,29 +10,25 @@ namespace FileCabinetApp.Validators
 {
     public static class ExtensionValidators
     {
-        private static readonly DateTime MinDate = new (1950, 01, 01);
-        private static readonly DateTime MaxDateDafault = DateTime.Now;
-        private static readonly DateTime MaxDateCustom = new (2015, 12, 31);
-
         public static IRecordValidator CreateDefault(this ValidatorBuilder builder)
         {
             return new ValidatorBuilder()
-                .ValidateFirstName(ConstParameters.MinString, ConstParameters.MaxStringDefault)
-                .ValidateLastName(ConstParameters.MinString, ConstParameters.MaxStringDefault)
-                .ValidateDateOfBirth(MinDate, MaxDateDafault)
+                .ValidateFirstName(ConstParameters.MinStringLength, ConstParameters.MaxStringDefaultLength)
+                .ValidateLastName(ConstParameters.MinStringLength, ConstParameters.MaxStringDefaultLength)
+                .ValidateDateOfBirth(ConstParameters.MinDateDafault, ConstParameters.MaxDateDafault)
                 .ValidateSalary(ConstParameters.MinSalaryDefault, ConstParameters.MaxSalaryDefault)
-                .ValidateSymbol(ConstParameters.SyzeSymbol)
+                .ValidateSymbol(ConstParameters.SymbolLength)
                 .Create();
         }
 
         public static IRecordValidator CreateCustom(this ValidatorBuilder builder)
         {
             return new ValidatorBuilder()
-                .ValidateFirstName(ConstParameters.MinString, ConstParameters.MaxFirstNameCustom)
-                .ValidateLastName(ConstParameters.MinString, ConstParameters.MaxLastNameCustom)
-                .ValidateDateOfBirth(MinDate, MaxDateCustom)
+                .ValidateFirstName(ConstParameters.MinStringLength, ConstParameters.MaxStringCustomLength)
+                .ValidateLastName(ConstParameters.MinStringLength, ConstParameters.MaxStringCustomLength)
+                .ValidateDateOfBirth(ConstParameters.MinDateCustom, ConstParameters.MaxDateCustom)
                 .ValidateSalary(ConstParameters.MinSalaryCustom, ConstParameters.MaxSalaryCustom)
-                .ValidateSymbol(ConstParameters.SyzeSymbol)
+                .ValidateSymbol(ConstParameters.SymbolLength)
                 .Create();
         }
     }

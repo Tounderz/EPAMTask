@@ -12,6 +12,12 @@ namespace FileCabinetApp
 {
     public static class CreatingPerson
     {
+        private static int maxStringLength;
+        private static int minSalary;
+        private static int maxSalary;
+        private static DateTime minDate;
+        private static DateTime maxDate;
+
         private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
         {
             do
@@ -48,9 +54,9 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> FirstNameValidator(string firstName)
         {
-            if (string.IsNullOrEmpty(firstName))
+            if (firstName.Length < ConstParameters.MinStringLength || firstName.Length > maxStringLength)
             {
-                return new Tuple<bool, string>(false, $"The 'First Name' field should not be empty.");
+                return new Tuple<bool, string>(false, $"The 'First Name' field size is from {ConstParameters.MinStringLength} to {maxStringLength} characters.");
             }
             else if (!firstName.All(char.IsLetter))
             {
@@ -64,9 +70,9 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> LastNameValidator(string lastName)
         {
-            if (string.IsNullOrEmpty(lastName))
+            if (lastName.Length < ConstParameters.MinStringLength || lastName.Length > maxStringLength)
             {
-                return new Tuple<bool, string>(false, $"The 'Last Name' field should not be empty.");
+                return new Tuple<bool, string>(false, $"The 'Last Name' field size is from {ConstParameters.MinStringLength} to {maxStringLength} characters.");
             }
             else if (!lastName.All(char.IsLetter))
             {
@@ -93,9 +99,9 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> DateOfBirthValidator(DateTime dateOfBirth)
         {
-            if (dateOfBirth == DateTime.MinValue)
+            if (dateOfBirth < minDate || dateOfBirth > maxDate)
             {
-                return new Tuple<bool, string>(false, $"Incorrect field 'Date of birth' data.");
+                return new Tuple<bool, string>(false, $"The 'Date Of Birth' field - Minimum date of birth {minDate:dd/MM/yyyy}, and maximum - {maxDate:dd/MM/yyyy}.");
             }
 
             return new Tuple<bool, string>(true, string.Empty);
@@ -116,14 +122,12 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> SalaryValidator(decimal salary)
         {
-            if (salary < 0)
+            if (salary < minSalary || salary > maxSalary)
             {
-                return new Tuple<bool, string>(false, "The 'Salary' field cannot be less than 0.");
+                return new Tuple<bool, string>(false, $"The 'Salary' field should not be less than {minSalary} or more than a {maxSalary}.");
             }
-            else
-            {
-                return new Tuple<bool, string>(true, string.Empty);
-            }
+
+            return new Tuple<bool, string>(true, string.Empty);
         }
 
         private static Tuple<bool, string, char> CharConverter(string symbol)
@@ -138,16 +142,23 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> SymbolValidator(char symbol)
         {
-            if (symbol.ToString().Length != ConstParameters.SyzeSymbol)
+            if (symbol.ToString().Length != ConstParameters.SymbolLength)
             {
                 return new Tuple<bool, string>(false, $"The {nameof(symbol)} size of the string character is equal to one element.");
             }
-
-            return new Tuple<bool, string>(true, null);
+            else if (char.IsDigit(symbol) || char.IsLetter(symbol))
+            {
+                return new Tuple<bool, string>(false, $"The 'Symbol' field should not contain letters or numbers.");
+            }
+            else
+            {
+                return new Tuple<bool, string>(true, null);
+            }
         }
 
-        public static Person NewPerson()
+        public static Person NewPerson(string nameValidator)
         {
+            ValidatorParameters(nameValidator);
             Console.Write($"First name: ");
             string firstName = ReadInput(StringConverter, FirstNameValidator);
             Console.Write($"Last name: ");
@@ -171,6 +182,26 @@ namespace FileCabinetApp
             };
 
             return person;
+        }
+
+        private static void ValidatorParameters(string nameValidator)
+        {
+            if (nameValidator == "default")
+            {
+                maxStringLength = ConstParameters.MaxStringDefaultLength;
+                minSalary = ConstParameters.MinSalaryDefault;
+                maxSalary = ConstParameters.MaxSalaryDefault;
+                minDate = ConstParameters.MinDateDafault;
+                maxDate = ConstParameters.MaxDateDafault;
+            }
+            else if (nameValidator == "custom")
+            {
+                maxStringLength = ConstParameters.MaxStringCustomLength;
+                minSalary = ConstParameters.MinSalaryCustom;
+                maxSalary = ConstParameters.MaxSalaryCustom;
+                minDate = ConstParameters.MinDateCustom;
+                maxDate = ConstParameters.MaxDateCustom;
+            }
         }
     }
 }
