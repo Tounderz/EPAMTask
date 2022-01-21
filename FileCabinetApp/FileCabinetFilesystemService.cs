@@ -39,6 +39,7 @@ namespace FileCabinetApp
 
         public int CreateRecord(Person person)
         {
+            this.recordValidator.ValidateParameters(person);
             using FileStream file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             if (file.Length <= 0)
             {
@@ -60,6 +61,7 @@ namespace FileCabinetApp
 
         public void EditRecord(int id, Person person)
         {
+            this.recordValidator.ValidateParameters(person);
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[file.Length];
             file.Read(recordBytes, 0, recordBytes.Length);

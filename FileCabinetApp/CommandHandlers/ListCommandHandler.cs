@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 #pragma warning disable SA1214
 #pragma warning disable SA1202
 #pragma warning disable S1172
-#pragma warning disable IDE0060
 
 namespace FileCabinetApp.CommandHandlers
 {

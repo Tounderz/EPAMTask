@@ -12,23 +12,31 @@ namespace FileCabinetApp.Validators
     {
         public static IRecordValidator CreateDefault(this ValidatorBuilder builder)
         {
-            return new ValidatorBuilder()
-                .ValidateFirstName(ConstParameters.MinStringLength, ConstParameters.MaxStringDefaultLength)
-                .ValidateLastName(ConstParameters.MinStringLength, ConstParameters.MaxStringDefaultLength)
-                .ValidateDateOfBirth(ConstParameters.MinDateDafault, ConstParameters.MaxDateDafault)
-                .ValidateSalary(ConstParameters.MinSalaryDefault, ConstParameters.MaxSalaryDefault)
-                .ValidateSymbol(ConstParameters.SymbolLength)
-                .Create();
+
+            return CreateValidator(ConstParameters.DefaultValidatorName);
         }
 
         public static IRecordValidator CreateCustom(this ValidatorBuilder builder)
         {
+
+            return CreateValidator(ConstParameters.CustomValidatorName);
+        }
+
+        private static IRecordValidator CreateValidator(string nameValidator)
+        {
+            ConfigurationReaderJson configurationReaderJson = new (nameValidator);
+            (int firstNameMinLength, int firstNameMaxLength) = configurationReaderJson.FirstNameCreterios();
+            (int lastNameMinLength, int lastNameMaxLength) = configurationReaderJson.LastNameCreterios();
+            (DateTime from, DateTime of) = configurationReaderJson.DateOfBirthCriterions();
+            (int salaryMin, int salaryMax) = configurationReaderJson.SalaryCreterios();
+            int symbolLength = configurationReaderJson.SymbolCreterios();
+
             return new ValidatorBuilder()
-                .ValidateFirstName(ConstParameters.MinStringLength, ConstParameters.MaxStringCustomLength)
-                .ValidateLastName(ConstParameters.MinStringLength, ConstParameters.MaxStringCustomLength)
-                .ValidateDateOfBirth(ConstParameters.MinDateCustom, ConstParameters.MaxDateCustom)
-                .ValidateSalary(ConstParameters.MinSalaryCustom, ConstParameters.MaxSalaryCustom)
-                .ValidateSymbol(ConstParameters.SymbolLength)
+                .ValidateFirstName(firstNameMinLength, firstNameMaxLength)
+                .ValidateLastName(lastNameMinLength, lastNameMaxLength)
+                .ValidateDateOfBirth(from, of)
+                .ValidateSalary(salaryMin, salaryMax)
+                .ValidateSymbol(symbolLength)
                 .Create();
         }
     }

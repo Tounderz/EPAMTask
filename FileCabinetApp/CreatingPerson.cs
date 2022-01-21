@@ -12,11 +12,15 @@ namespace FileCabinetApp
 {
     public static class CreatingPerson
     {
-        private static int maxStringLength;
+        private static int minFirstNameLength;
+        private static int maxFirstNameLength;
+        private static int minLastNameLength;
+        private static int maxLastNameLength;
         private static int minSalary;
         private static int maxSalary;
         private static DateTime minDate;
         private static DateTime maxDate;
+        private static int symbolLength;
 
         private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
         {
@@ -54,9 +58,9 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> FirstNameValidator(string firstName)
         {
-            if (firstName.Length < ConstParameters.MinStringLength || firstName.Length > maxStringLength)
+            if (firstName.Length < minFirstNameLength || firstName.Length > maxFirstNameLength)
             {
-                return new Tuple<bool, string>(false, $"The 'First Name' field size is from {ConstParameters.MinStringLength} to {maxStringLength} characters.");
+                return new Tuple<bool, string>(false, $"The 'First Name' field size is from {minFirstNameLength} to {maxFirstNameLength} characters.");
             }
             else if (!firstName.All(char.IsLetter))
             {
@@ -70,9 +74,9 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> LastNameValidator(string lastName)
         {
-            if (lastName.Length < ConstParameters.MinStringLength || lastName.Length > maxStringLength)
+            if (lastName.Length < minLastNameLength || lastName.Length > maxLastNameLength)
             {
-                return new Tuple<bool, string>(false, $"The 'Last Name' field size is from {ConstParameters.MinStringLength} to {maxStringLength} characters.");
+                return new Tuple<bool, string>(false, $"The 'Last Name' field size is from {minLastNameLength} to {maxLastNameLength} characters.");
             }
             else if (!lastName.All(char.IsLetter))
             {
@@ -132,7 +136,7 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string, char> CharConverter(string symbol)
         {
-            if (symbol.Length != 1 || string.IsNullOrWhiteSpace(symbol))
+            if (symbol.Length != symbolLength || string.IsNullOrWhiteSpace(symbol))
             {
                 return new Tuple<bool, string, char>(false, "It cannot be empty and more than one character.", ' ');
             }
@@ -142,9 +146,9 @@ namespace FileCabinetApp
 
         private static Tuple<bool, string> SymbolValidator(char symbol)
         {
-            if (symbol.ToString().Length != ConstParameters.SymbolLength)
+            if (symbol.ToString().Length != symbolLength)
             {
-                return new Tuple<bool, string>(false, $"The {nameof(symbol)} size of the string character is equal to one element.");
+                return new Tuple<bool, string>(false, $"The 'Symbol' field size of the string character is equal to one element.");
             }
             else if (char.IsDigit(symbol) || char.IsLetter(symbol))
             {
@@ -186,22 +190,12 @@ namespace FileCabinetApp
 
         private static void ValidatorParameters(string nameValidator)
         {
-            if (nameValidator == "default")
-            {
-                maxStringLength = ConstParameters.MaxStringDefaultLength;
-                minSalary = ConstParameters.MinSalaryDefault;
-                maxSalary = ConstParameters.MaxSalaryDefault;
-                minDate = ConstParameters.MinDateDafault;
-                maxDate = ConstParameters.MaxDateDafault;
-            }
-            else if (nameValidator == "custom")
-            {
-                maxStringLength = ConstParameters.MaxStringCustomLength;
-                minSalary = ConstParameters.MinSalaryCustom;
-                maxSalary = ConstParameters.MaxSalaryCustom;
-                minDate = ConstParameters.MinDateCustom;
-                maxDate = ConstParameters.MaxDateCustom;
-            }
+            ConfigurationReaderJson configurationReaderJson = new (nameValidator);
+            (minFirstNameLength, maxFirstNameLength) = configurationReaderJson.FirstNameCreterios();
+            (minLastNameLength, maxLastNameLength) = configurationReaderJson.LastNameCreterios();
+            (minSalary, maxSalary) = configurationReaderJson.SalaryCreterios();
+            (minDate, maxDate) = configurationReaderJson.DateOfBirthCriterions();
+            symbolLength = configurationReaderJson.SymbolCreterios();
         }
     }
 }
