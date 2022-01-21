@@ -10,6 +10,6 @@ namespace FileCabinetApp.Validators
 {
     public interface IRecordValidator
     {
-        Tuple<bool, string> ValidateParameters(Person person);
+        void ValidateParameters(Person person);
     }
 }

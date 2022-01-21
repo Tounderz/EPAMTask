@@ -17,14 +17,12 @@ namespace FileCabinetApp.Validators
             this.syzeSymbol = syzeSymbol;
         }
 
-        public Tuple<bool, string> ValidateParameters(Person person)
+        public void ValidateParameters(Person person)
         {
             if (person.Symbol.ToString().Length != this.syzeSymbol || char.IsDigit(person.Symbol) || char.IsLetter(person.Symbol))
             {
-                return new Tuple<bool, string>(false, $"The {nameof(person.Symbol)} field should not contain letters or numbers.");
+                throw new ArgumentException($"The {nameof(person.Symbol)} field should not contain letters or numbers.");
             }
-
-            return new Tuple<bool, string>(true, string.Empty);
         }
     }
 }

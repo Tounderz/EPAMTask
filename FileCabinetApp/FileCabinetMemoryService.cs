@@ -18,9 +18,16 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
+        private readonly IRecordValidator recordValidator;
+
+        public FileCabinetMemoryService(IRecordValidator recordValidator)
+        {
+            this.recordValidator = recordValidator;
+        }
 
         public int CreateRecord(Person person)
         {
+            this.recordValidator.ValidateParameters(person);
             var record = this.GetFileCabinetRecord(person, this.list.Count + 1);
             this.list.Add(record);
             this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
@@ -32,6 +39,7 @@ namespace FileCabinetApp
 
         public void EditRecord(int id, Person person)
         {
+            this.recordValidator.ValidateParameters(person);
             var record = this.GetFileCabinetRecord(person, id);
             this.RemoveDitionaryItem(id, this.firstNameDictionary);
             this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);

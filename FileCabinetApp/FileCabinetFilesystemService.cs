@@ -20,6 +20,7 @@ namespace FileCabinetApp
     public class FileCabinetFilesystemService : IFileCabinetService
     {
         private readonly FileStream fileStream;
+        private readonly IRecordValidator recordValidator;
         private List<FileCabinetRecord> list = new ();
         private readonly List<FileCabinetRecord> isDeleteRecords = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
@@ -30,9 +31,10 @@ namespace FileCabinetApp
         private readonly byte[] statusInBytes = new byte[sizeof(short)];
         private readonly byte[] recordIdInBytes = new byte[sizeof(int)];
 
-        public FileCabinetFilesystemService(FileStream fileStream)
+        public FileCabinetFilesystemService(FileStream fileStream, IRecordValidator recordValidator)
         {
             this.fileStream = fileStream;
+            this.recordValidator = recordValidator;
         }
 
         public int CreateRecord(Person person)
@@ -51,7 +53,7 @@ namespace FileCabinetApp
                 this.recordId = BitConverter.ToInt32(recordBytes, this.statusInBytes.Length) + 1;
             }
 
-            var record = this.GetFileCabinetRecord(person, this.recordId);
+            var record = this.CreateRecord(person, this.recordId);
             this.ConvertRecordToBytes(record);
             return this.recordId;
         }
@@ -63,7 +65,7 @@ namespace FileCabinetApp
             file.Read(recordBytes, 0, recordBytes.Length);
             this.list = this.ConvertBytesToRecord(recordBytes);
             FileCabinetRecord record = this.list.Find(i => i.Id == id);
-            record = this.GetFileCabinetRecord(person, record.Id);
+            record = this.CreateRecord(person, record.Id);
             this.ConvertRecordToBytes(record);
         }
 
@@ -93,8 +95,9 @@ namespace FileCabinetApp
             binaryWriter.Write(recordBytes);
         }
 
-        private FileCabinetRecord GetFileCabinetRecord(Person person, int id) // создание объекта FileCabinetRecord
+        private FileCabinetRecord CreateRecord(Person person, int id) // создание объекта FileCabinetRecord
         {
+            this.recordValidator.ValidateParameters(person);
             var record = new FileCabinetRecord
             {
                 Id = id,

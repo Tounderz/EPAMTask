@@ -18,9 +18,10 @@ namespace FileCabinetApp
     {
         private static bool isRunning = true;
         private static IRecordValidator recordValidator = new ValidatorBuilder().CreateDefault();
-        private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService();
+        private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService(recordValidator);
         private static FileStream fileStream;
         private static readonly List<string> ParametersList = new () { "--validation-rules", "-v", "--storage", "-s" };
+        private static string nameValidator = "default";
 
         public static void Main(string[] args)
         {
@@ -74,8 +75,8 @@ namespace FileCabinetApp
             var startCommandHandler = new StartCommandHandler(fileCabinetService);
             var exitCommandHandler = new ExitCommandHandler(GetIsRunning, fileStream);
             var listCommandHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
-            var createCommandHandler = new CreateCommandHandler(fileCabinetService, recordValidator);
-            var editCommandHandler = new EditCommandHandler(fileCabinetService, recordValidator);
+            var createCommandHandler = new CreateCommandHandler(fileCabinetService, nameValidator);
+            var editCommandHandler = new EditCommandHandler(fileCabinetService, nameValidator);
             var findCommandHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportCommandHandler = new ExportCommandHandler(fileCabinetService);
             var importCommandHandler = new ImportCommandHandler(fileCabinetService);
@@ -117,6 +118,7 @@ namespace FileCabinetApp
                         if (string.Equals(rulesValidetion[(i * 2) + 1], ConstParameters.CustomValidatorName))
                         {
                             recordValidator = new ValidatorBuilder().CreateCustom();
+                            nameValidator = "custom";
                             Console.WriteLine("Using custom validation rules.");
                         }
                         else if (string.Equals(rulesValidetion[(i * 2) + 1], ConstParameters.DefaultValidatorName))
@@ -131,7 +133,7 @@ namespace FileCabinetApp
                         if (string.Equals(rulesValidetion[(2 * i) + 1], ConstParameters.FileServiceName))
                         {
                             fileStream = new FileStream("cabinet-records.db", FileMode.OpenOrCreate);
-                            fileCabinetService = new FileCabinetFilesystemService(fileStream);
+                            fileCabinetService = new FileCabinetFilesystemService(fileStream, recordValidator);
                             Console.WriteLine("Using file service rules.");
                         }
                         else if (string.Equals(rulesValidetion[(2 * i) + 1], ConstParameters.MemoryServiceName))

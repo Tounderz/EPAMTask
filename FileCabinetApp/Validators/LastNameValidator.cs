@@ -19,14 +19,12 @@ namespace FileCabinetApp.Validators
             this.maxLength = maxLength;
         }
 
-        public Tuple<bool, string> ValidateParameters(Person person)
+        public void ValidateParameters(Person person)
         {
             if (person.LastName.Length < this.minLength || person.LastName.Length > this.maxLength)
             {
-                return new Tuple<bool, string>(false, $"The {nameof(person.LastName)} size is from {this.minLength} to {this.maxLength} characters.");
+                throw new ArgumentException($"The {nameof(person.LastName)} size is from {this.minLength} to {this.maxLength} characters.");
             }
-
-            return new Tuple<bool, string>(true, string.Empty);
         }
     }
 }

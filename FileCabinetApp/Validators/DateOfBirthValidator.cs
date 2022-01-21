@@ -19,14 +19,12 @@ namespace FileCabinetApp.Validators
             this.of = of;
         }
 
-        public Tuple<bool, string> ValidateParameters(Person person)
+        public void ValidateParameters(Person person)
         {
             if (person.DateOfBirth > this.of || person.DateOfBirth < this.from)
             {
-                return new Tuple<bool, string>(false, $"{nameof(person.DateOfBirth)} - Minimum date of birth {this.from:dd/MM/yyyy}, and maximum - {this.of:dd/MM/yyyy}.");
+                throw new ArgumentException($"{nameof(person.DateOfBirth)} - Minimum date of birth {this.from:dd/MM/yyyy}, and maximum - {this.of:dd/MM/yyyy}.");
             }
-
-            return new Tuple<bool, string>(true, string.Empty);
         }
     }
 }

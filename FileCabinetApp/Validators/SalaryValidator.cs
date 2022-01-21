@@ -10,23 +10,21 @@ namespace FileCabinetApp.Validators
 {
     public class SalaryValidator : IRecordValidator
     {
-        private readonly decimal minSalary;
-        private readonly decimal maxSalary;
+        private readonly int minSalary;
+        private readonly int maxSalary;
 
-        public SalaryValidator(decimal minSalary, decimal maxSalary)
+        public SalaryValidator(int minSalary, int maxSalary)
         {
             this.minSalary = minSalary;
             this.maxSalary = maxSalary;
         }
 
-        public Tuple<bool, string> ValidateParameters(Person person)
+        public void ValidateParameters(Person person)
         {
             if (person.Salary < this.minSalary || person.Salary > this.maxSalary)
             {
-                return new Tuple<bool, string>(false, $"The salary should not be less than {this.minSalary} or more than a {this.maxSalary}.");
+                throw new ArgumentException($"The salary should not be less than {this.minSalary} or more than a {this.maxSalary}.");
             }
-
-            return new Tuple<bool, string>(true, string.Empty);
         }
     }
 }
