@@ -10,7 +10,6 @@ using System.Xml;
 #pragma warning disable SA1600
 #pragma warning disable S1450
 #pragma warning disable SA1201
-#pragma warning disable SA1203
 #pragma warning disable S125
 
 namespace FileCabinetApp
@@ -22,7 +21,6 @@ namespace FileCabinetApp
         private FileCabinetRecordXmlWriter fileCabinetRecordXmlWriter;
         private FileCabinetRecordCsvReader fileCabinetRecordCsvReader;
         private FileCabinetRecordXmlReader fileCabinetRecordXmlReader;
-        private const string ColumnNames = "Id,First Name,Last Name,Date of birth,Age,Salary,Symbol";
 
         public ReadOnlyCollection<FileCabinetRecord> Records { get; }
 
@@ -37,7 +35,7 @@ namespace FileCabinetApp
         public void SaveToCsv(StreamWriter streamWriter)
         {
             this.fileCabinetRecordCsvWriter = new FileCabinetRecordCsvWriter(streamWriter);
-            streamWriter.WriteLine(ColumnNames);
+            streamWriter.WriteLine(ConstParameters.ColumnNames);
             foreach (var item in this.records)
             {
                 this.fileCabinetRecordCsvWriter.Write(item);

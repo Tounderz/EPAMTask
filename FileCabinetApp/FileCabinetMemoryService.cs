@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using FileCabinetApp.Validators;
 
 #pragma warning disable CA1822
 #pragma warning disable SA1600
 #pragma warning disable CA1305
-#pragma warning disable SA1203
 #pragma warning disable SA1202
 
 namespace FileCabinetApp
@@ -18,33 +18,35 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
-        private const string FormatDate = "yyyy-MMM-dd";
+        private readonly IRecordValidator recordValidator;
+
+        public FileCabinetMemoryService(IRecordValidator recordValidator)
+        {
+            this.recordValidator = recordValidator;
+        }
 
         public int CreateRecord(Person person)
         {
+            this.recordValidator.ValidateParameters(person);
             var record = this.GetFileCabinetRecord(person, this.list.Count + 1);
             this.list.Add(record);
             this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
             this.AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
-            this.AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
+            this.AddDitionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
 
             return record.Id;
         }
 
         public void EditRecord(int id, Person person)
         {
-            if (id > this.list.Count || id < 1)
-            {
-                throw new ArgumentException(null, nameof(id));
-            }
-
+            this.recordValidator.ValidateParameters(person);
             var record = this.GetFileCabinetRecord(person, id);
             this.RemoveDitionaryItem(id, this.firstNameDictionary);
             this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
             this.RemoveDitionaryItem(id, this.lastNameDictionary);
             this.AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
             this.RemoveDitionaryItem(id, this.dateOfBirthDictionary);
-            this.AddDitionaryItem(record.DateOfBirth.ToString(FormatDate), record, this.dateOfBirthDictionary);
+            this.AddDitionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
             this.list[id - 1] = record;
         }
 
