@@ -23,6 +23,11 @@ namespace FileCabinetApp
         public const string MemoryServiceName = "memory";
         public const string FileServiceName = "file";
         public const string StopWatchLineParameter = "-use-stopwatch";
+        public const string LoggerLineParameter = "-use-logger";
+        public const string LongValidatorLineParameter = "--validation-rules";
+        public const string ShortValidatorLineParameter = "-v";
+        public const string LongTypeLineParameter = "--storage";
+        public const string ShortTypeLineParameter = "-s";
 
         public const string Help = "help";
         public const string StartName = "start";
@@ -44,10 +49,10 @@ namespace FileCabinetApp
 
         public const string ColumnNames = "Id,First Name,Last Name,Date of birth,Age,Salary,Symbol";
 
-        public const string JsonPathName = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\";
+        public const string ValidationRulesPathName = @"C:\Users\basta\source\repos\EPAMTask\FileCabinetApp\";
 
-        private static readonly List<string> ParametersListValue = new () { "--validation-rules", "-v", "--storage", "-s", "-use-stopwatch" };
-
-        public static List<string> ParametersList => ParametersListValue;
+        public const string LoggerPathName = "serviceLogger.txt";
+        public const string DBPathName = "cabinet-records.db";
+        public const string ValidationRulesFileName = "validation-rules.json";
     }
 }

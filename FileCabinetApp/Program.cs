@@ -21,6 +21,15 @@ namespace FileCabinetApp
         private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService(recordValidator);
         private static FileStream fileStream;
         private static string nameValidator = ConstParameters.DefaultValidatorName;
+        private static readonly List<string> ParametersListValue = new ()
+        {
+            ConstParameters.LongValidatorLineParameter,
+            ConstParameters.ShortValidatorLineParameter,
+            ConstParameters.LongTypeLineParameter,
+            ConstParameters.ShortTypeLineParameter,
+            ConstParameters.StopWatchLineParameter,
+            ConstParameters.LoggerLineParameter,
+        };
 
         public static void Main(string[] args)
         {
@@ -99,7 +108,7 @@ namespace FileCabinetApp
         {
             foreach (var item in fileCabinetRecords)
             {
-                Console.WriteLine($"# {item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth:yyyy-MMM-dd}, {item.Age}, {item.Salary}, {item.Symbol}");
+                Console.WriteLine($"# {item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth.ToString(ConstParameters.FormatDate)}, {item.Age}, {item.Salary}, {item.Symbol}");
             }
         }
 
@@ -107,14 +116,15 @@ namespace FileCabinetApp
         {
             string parametorLine = string.Join(' ', args).ToLower();
             string[] rulesValidetion = parametorLine.Trim(' ').Split(' ', '=');
-            List<string> listCommandLineParameter = rulesValidetion.Where(i => ConstParameters.ParametersList.Any(y => y.Equals(i))).ToList();
+            List<string> listCommandLineParameter = rulesValidetion.Where(i => ParametersListValue.Any(y => y.Equals(i))).ToList();
             bool checkStopWatch = listCommandLineParameter.Contains(ConstParameters.StopWatchLineParameter);
+            bool ckeckLogger = listCommandLineParameter.Contains(ConstParameters.LoggerLineParameter);
             for (int i = 0; i < listCommandLineParameter.Count; i++)
             {
                 switch (listCommandLineParameter[i].ToLower())
                 {
-                    case "--validation-rules":
-                    case "-v":
+                    case ConstParameters.LongValidatorLineParameter:
+                    case ConstParameters.ShortValidatorLineParameter:
                         if (string.Equals(rulesValidetion[(i * 2) + 1], ConstParameters.CustomValidatorName))
                         {
                             recordValidator = new ValidatorBuilder().CreateCustom();
@@ -129,11 +139,11 @@ namespace FileCabinetApp
 
                         break;
 
-                    case "--storage":
-                    case "-s":
+                    case ConstParameters.LongTypeLineParameter:
+                    case ConstParameters.ShortTypeLineParameter:
                         if (string.Equals(rulesValidetion[(2 * i) + 1], ConstParameters.FileServiceName))
                         {
-                            fileStream = new FileStream("cabinet-records.db", FileMode.OpenOrCreate);
+                            fileStream = new FileStream(ConstParameters.DBPathName, FileMode.OpenOrCreate);
                             fileCabinetService = new FileCabinetFilesystemService(fileStream, recordValidator);
                             Console.WriteLine("Using file service rules.");
                         }
@@ -153,6 +163,13 @@ namespace FileCabinetApp
                 if (checkStopWatch)
                 {
                     fileCabinetService = new ServiceMeter(fileCabinetService);
+                    Console.WriteLine("Using ServiceMeter");
+                }
+
+                if (ckeckLogger)
+                {
+                    fileCabinetService = new ServiceLogger(fileCabinetService);
+                    Console.WriteLine("Using ServiceLogger");
                 }
             }
         }

@@ -18,8 +18,8 @@ namespace FileCabinetApp
         {
             this.nameValidator = nameValidator;
             this.configuration = new ConfigurationBuilder()
-                .SetBasePath(ConstParameters.JsonPathName)
-                .AddJsonFile("validation-rules.json")
+                .SetBasePath(ConstParameters.ValidationRulesPathName)
+                .AddJsonFile(ConstParameters.ValidationRulesFileName)
                 .Build();
         }
 

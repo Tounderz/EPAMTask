@@ -26,7 +26,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             int result = this.fileCabinetService.CreateRecord(person);
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'CreateRecord' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"Create method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return result;
         }
 
@@ -36,7 +36,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             this.fileCabinetService.EditRecord(id, person);
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'EditRecord' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"Edit method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
         }
 
         public void RemoveRecord(int id)
@@ -45,7 +45,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             this.fileCabinetService.RemoveRecord(id);
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'RemoveRecord' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"Remove method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
         }
 
         public FileCabinetServiceSnapshot MakeSnapshot()
@@ -59,7 +59,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             this.fileCabinetService.Restore(snapshot);
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'Restore' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"Restore method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
         }
 
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
@@ -68,7 +68,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.GetRecords();
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'GetRecords' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"List method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
 
@@ -78,7 +78,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             Tuple<int, int> result = this.fileCabinetService.GetRecordsCount();
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'GetRecordsCount' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"Start method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return result;
         }
 
@@ -88,7 +88,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             Tuple<int, int> result = this.fileCabinetService.PurgeRecord();
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'PurgeRecord' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"Purge method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return result;
         }
 
@@ -98,7 +98,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByFirstName(firstName);
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'FindByFirstName' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"FindByFirstName method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
 
@@ -108,7 +108,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByLastName(lastName);
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'FindByLastName' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"FindByLastName method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
 
@@ -118,7 +118,7 @@ namespace FileCabinetApp
             this.stopwatch.Start();
             ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
             this.stopwatch.Stop();
-            Console.WriteLine($"Executing the 'FindByDateOfBirth' method took {this.stopwatch.ElapsedTicks} ticks");
+            Console.WriteLine($"FindByDateOfBirth method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
 
