@@ -15,9 +15,9 @@ namespace FileCabinetApp.CommandHandlers
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
         private ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords;
-        private readonly Action<IEnumerable<FileCabinetRecord>> action;
+        private readonly Action<IRecordIterator> action;
 
-        public FindCommandHandler(IFileCabinetService service, Action<IEnumerable<FileCabinetRecord>> action)
+        public FindCommandHandler(IFileCabinetService service, Action<IRecordIterator> action)
             : base(service)
         {
             this.action = action;
@@ -34,6 +34,7 @@ namespace FileCabinetApp.CommandHandlers
                 string[] arrParameters = parameters.Split(' ');
                 string searchСriteria = arrParameters[0].ToLower();
                 string nameParameter = arrParameters[1].Trim('"').ToUpper();
+                IRecordIterator recordIterator;
                 switch (searchСriteria)
                 {
                     case "firstname":
@@ -45,8 +46,8 @@ namespace FileCabinetApp.CommandHandlers
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByFirstName(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                recordIterator = this.service.FindByFirstName(nameParameter);
+                                this.action(recordIterator);
                                 break;
                             }
                         }
@@ -60,8 +61,8 @@ namespace FileCabinetApp.CommandHandlers
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByLastName(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                recordIterator = this.service.FindByLastName(nameParameter);
+                                this.action(recordIterator);
                                 break;
                             }
                         }
@@ -75,8 +76,8 @@ namespace FileCabinetApp.CommandHandlers
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByDateOfBirth(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                recordIterator = this.service.FindByDateOfBirth(nameParameter);
+                                this.action(recordIterator);
                                 break;
                             }
                         }
