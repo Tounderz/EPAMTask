@@ -120,22 +120,22 @@ namespace FileCabinetApp
             throw new NotImplementedException();
         }
 
-        public IRecordIterator FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             return this.firstNameDictionary.TryGetValue(firstName, out List<FileCabinetRecord> records) ?
-                new MemoryIterator(records) : new MemoryIterator(new List<FileCabinetRecord>());
+                records : new List<FileCabinetRecord>();
         }
 
-        public IRecordIterator FindByLastName(string lastName)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastName)
         {
             return this.lastNameDictionary.TryGetValue(lastName, out List<FileCabinetRecord> records) ?
-                new MemoryIterator(records) : new MemoryIterator(new List<FileCabinetRecord>());
+                records : new List<FileCabinetRecord>();
         }
 
-        public IRecordIterator FindByDateOfBirth(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
             return this.dateOfBirthDictionary.TryGetValue(dateOfBirth, out List<FileCabinetRecord> records) ?
-                new MemoryIterator(records) : new MemoryIterator(new List<FileCabinetRecord>());
+                records : new List<FileCabinetRecord>();
         }
 
         private void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь

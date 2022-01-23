@@ -27,10 +27,10 @@ namespace FileCabinetApp
 
         Tuple<int, int> PurgeRecord();
 
-        IRecordIterator FindByFirstName(string firstName);
+        IEnumerable<FileCabinetRecord> FindByFirstName(string firstName);
 
-        IRecordIterator FindByLastName(string lastName);
+        IEnumerable<FileCabinetRecord> FindByLastName(string lastName);
 
-        IRecordIterator FindByDateOfBirth(string dateOfBirth);
+        IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth);
    }
 }

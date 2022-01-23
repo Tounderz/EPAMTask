@@ -85,7 +85,7 @@ namespace FileCabinetApp
             var listCommandHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var createCommandHandler = new CreateCommandHandler(fileCabinetService, nameValidator);
             var editCommandHandler = new EditCommandHandler(fileCabinetService, nameValidator);
-            var findCommandHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrintFind);
+            var findCommandHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportCommandHandler = new ExportCommandHandler(fileCabinetService);
             var importCommandHandler = new ImportCommandHandler(fileCabinetService);
             var removeCommandHandler = new RemoveCommandHandler(fileCabinetService);
@@ -102,15 +102,6 @@ namespace FileCabinetApp
             startCommandHandler.SetNext(listCommandHandler);
             listCommandHandler.SetNext(printMissedCommandInfoHandler);
             return helpCommandHandler;
-        }
-
-        private static void DefaultRecordPrintFind(IRecordIterator recordIterator)
-        {
-            while (recordIterator.HasMore())
-            {
-                var record = recordIterator.GetNext();
-                Console.WriteLine($"# {record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth.ToString(ConstParameters.FormatDate)}, {record.Age}, {record.Salary}, {record.Symbol}");
-            }
         }
 
         private static void DefaultRecordPrint(IEnumerable<FileCabinetRecord> fileCabinetRecords) // метод для вывода в консоль данных

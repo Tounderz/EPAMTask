@@ -105,12 +105,12 @@ namespace FileCabinetApp
             return result;
         }
 
-        public IRecordIterator FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() FirstName = '{firstName}'.");
-            IRecordIterator fileCabinetRecords = this.fileCabinetService.FindByFirstName(firstName);
-            if (fileCabinetRecords.GetCount() > 0)
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByFirstName(firstName);
+            if (fileCabinetRecords.Any())
             {
                 textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by FirstName = '{firstName}'.");
             }
@@ -122,12 +122,12 @@ namespace FileCabinetApp
             return fileCabinetRecords;
         }
 
-        public IRecordIterator FindByLastName(string lastName)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastName)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() LastName = '{lastName}'.");
-            IRecordIterator fileCabinetRecords = this.fileCabinetService.FindByLastName(lastName);
-            if (fileCabinetRecords.GetCount() > 0)
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByLastName(lastName);
+            if (fileCabinetRecords.Any())
             {
                 textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by LastName = '{lastName}'.");
             }
@@ -139,12 +139,12 @@ namespace FileCabinetApp
             return fileCabinetRecords;
         }
 
-        public IRecordIterator FindByDateOfBirth(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() DateOfBirt = '{dateOfBirth}'.");
-            IRecordIterator fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
-            if (fileCabinetRecords.GetCount() > 0)
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
+            if (fileCabinetRecords.Any())
             {
                 textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by DateOfBirt = '{dateOfBirth}'.");
             }
@@ -155,9 +155,5 @@ namespace FileCabinetApp
 
             return fileCabinetRecords;
         }
-
-        public void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) => throw new NotImplementedException();
-
-        public void RemoveDictionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) => throw new NotImplementedException();
     }
 }

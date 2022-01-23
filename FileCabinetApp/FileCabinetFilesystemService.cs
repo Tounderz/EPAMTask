@@ -12,7 +12,6 @@ using FileCabinetApp.Validators;
 #pragma warning disable SA1214
 #pragma warning disable SA1202
 #pragma warning disable SA1305
-#pragma warning disable S1854
 
 namespace FileCabinetApp
 {
@@ -22,9 +21,9 @@ namespace FileCabinetApp
         private readonly IRecordValidator recordValidator;
         private List<FileCabinetRecord> list = new ();
         private readonly List<FileCabinetRecord> isDeleteRecords = new ();
-        private readonly SortedDictionary<string, List<int>> firstNameDictionary = new ();
-        private readonly SortedDictionary<string, List<int>> lastNameDictionary = new ();
-        private readonly SortedDictionary<string, List<int>> dateOfBirthDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
         private int recordId = 0;
         private short status = 0;
         private readonly byte[] statusInBytes = new byte[sizeof(short)];
@@ -40,11 +39,9 @@ namespace FileCabinetApp
                 byte[] recordBytes = new byte[this.fileStream.Length];
                 this.fileStream.Read(recordBytes, 0, recordBytes.Length);
                 this.list = this.ConvertBytesToListRecord(recordBytes);
-                int index = 1;
                 for (int i = 0; i < this.list.Count; i++)
                 {
-                    this.AddInAllDictionaryNewItem(this.list[i], index);
-                    index++;
+                    this.AddInAllDictionaryItem(this.list[i]);
                 }
             }
         }
@@ -67,8 +64,9 @@ namespace FileCabinetApp
             }
 
             var record = this.GetFileCabinetRecord(person, this.recordId);
-            this.AddInAllDictionaryNewItem(record, ((int)this.fileStream.Length / ConstParameters.RecordLength) + 1);
+            this.AddInAllDictionaryItem(record);
             this.ConvertRecordToBytes(record);
+
             return this.recordId;
         }
 
@@ -80,10 +78,9 @@ namespace FileCabinetApp
             file.Read(recordBytes, 0, recordBytes.Length);
             this.list = this.ConvertBytesToListRecord(recordBytes);
             FileCabinetRecord record = this.list.Find(i => i.Id == id);
-            int position = this.GetPositionFromFile(record.Id);
-            this.RemoveInAllDictionaryItem(record, position);
+            this.RemoveInAllDictionaryItem(record);
             record = this.GetFileCabinetRecord(person, record.Id);
-            this.AddInAllDictionaryNewItem(record, position);
+            this.AddInAllDictionaryItem(record);
             this.ConvertRecordToBytes(record);
         }
 
@@ -105,8 +102,7 @@ namespace FileCabinetApp
             while (idRecord != id);
 
             var record = this.list.Find(i => i.Id == idRecord);
-            int position = this.GetPositionFromFile(record.Id);
-            this.RemoveInAllDictionaryItem(record, position);
+            this.RemoveInAllDictionaryItem(record);
 
             byte[] arrBytes = BitConverter.GetBytes(this.status);
             Array.Copy(arrBytes, 0, recordBytes, 0, 2);
@@ -225,76 +221,62 @@ namespace FileCabinetApp
             return Tuple.Create(count, this.list.Count + count);
         }
 
-        public IRecordIterator FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            var isFinded = this.dateOfBirthDictionary.TryGetValue(firstName, out List<int> list);
-            if (!isFinded)
-            {
-                return new FilesystemIterator(this, new List<int>());
-            }
-            else
-            {
-                return new FilesystemIterator(this, list);
-            }
+            List<FileCabinetRecord> lastNameList = this.firstNameDictionary[firstName];
+            return lastNameList.AsReadOnly();
         }
 
-        public IRecordIterator FindByLastName(string lastName)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastName)
         {
-            var isFinded = this.dateOfBirthDictionary.TryGetValue(lastName, out List<int> list);
-            if (!isFinded)
-            {
-                return new FilesystemIterator(this, new List<int>());
-            }
-            else
-            {
-                return new FilesystemIterator(this, list);
-            }
+            List<FileCabinetRecord> lastNameList = this.lastNameDictionary[lastName];
+            return lastNameList.AsReadOnly();
         }
 
-        public IRecordIterator FindByDateOfBirth(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
-            var isFinded = this.dateOfBirthDictionary.TryGetValue(dateOfBirth, out List<int> list);
-            if (!isFinded)
-            {
-                return new FilesystemIterator(this, new List<int>());
-            }
-            else
-            {
-                return new FilesystemIterator(this, list);
-            }
+            List<FileCabinetRecord> dateOfBirthList = this.dateOfBirthDictionary[dateOfBirth];
+            return dateOfBirthList.AsReadOnly();
         }
 
-        public void AddDictionaryItem(string key, int position, SortedDictionary<string, List<int>> dictionary)
+        private void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
             if (!dictionary.ContainsKey(keyStr))
             {
-                dictionary.Add(keyStr, new List<int>() { position });
+                dictionary.Add(keyStr, new List<FileCabinetRecord>());
             }
 
-            dictionary[keyStr].Add(position);
+            dictionary[keyStr].Add(record);
         }
 
-        private void AddInAllDictionaryNewItem(FileCabinetRecord record, int position)
+        private void AddInAllDictionaryItem(FileCabinetRecord record)
         {
-            this.AddDictionaryItem(record.FirstName, position, this.firstNameDictionary);
-            this.AddDictionaryItem(record.LastName, position, this.lastNameDictionary);
-            this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), position, this.dateOfBirthDictionary);
+            this.AddDictionaryItem(record.FirstName, record, this.firstNameDictionary);
+            this.AddDictionaryItem(record.LastName, record, this.lastNameDictionary);
+            this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
         }
 
-        private void RemoveDictionaryItem(string key, int position, SortedDictionary<string, List<int>> dictionary)
+        private void RemoveDictionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary)
         {
-            if (dictionary.ContainsKey(key.ToUpper(CultureInfo.InvariantCulture)))
+            foreach (var item in dictionary)
             {
-                dictionary[key].Remove(position);
+                foreach (var el in item.Value)
+                {
+                    if (el.Id == id)
+                    {
+                        item.Value.Remove(el);
+                        break;
+                    }
+                }
             }
         }
 
-        private void RemoveInAllDictionaryItem(FileCabinetRecord record, int position)
+        private void RemoveInAllDictionaryItem(FileCabinetRecord record)
         {
-            this.RemoveDictionaryItem(record.FirstName, position, this.firstNameDictionary);
-            this.RemoveDictionaryItem(record.LastName, position, this.lastNameDictionary);
-            this.RemoveDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), position, this.dateOfBirthDictionary);
+            this.RemoveDictionaryItem(record.Id, this.firstNameDictionary);
+            this.RemoveDictionaryItem(record.Id, this.lastNameDictionary);
+            this.RemoveDictionaryItem(record.Id, this.dateOfBirthDictionary);
         }
 
         private void ConvertRecordToBytes(FileCabinetRecord record) // convert record to bytes
@@ -437,33 +419,6 @@ namespace FileCabinetApp
             record.Symbol = reader.ReadChar();
 
             return record;
-        }
-
-        public int GetPositionFromFile(int id)
-        {
-            using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            byte[] recordBytes = new byte[ConstParameters.RecordLength];
-            int position = 1;
-            int offset = 0;
-            do
-            {
-                file.Seek(offset, SeekOrigin.Begin);
-                recordBytes = new byte[ConstParameters.RecordLength];
-                file.Read(recordBytes, 0, recordBytes.Length);
-                offset += ConstParameters.RecordLength;
-                int fileId = BitConverter.ToInt32(recordBytes, this.statusInBytes.Length);
-                if (fileId == id)
-                {
-                    return position;
-                }
-                else
-                {
-                    position++;
-                }
-            }
-            while (file.CanRead);
-
-            return -1;
         }
 
         public FileCabinetRecord ReadByPosition(int position)

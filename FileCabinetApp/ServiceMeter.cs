@@ -92,38 +92,34 @@ namespace FileCabinetApp
             return result;
         }
 
-        public IRecordIterator FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            IRecordIterator fileCabinetRecords = this.fileCabinetService.FindByFirstName(firstName);
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByFirstName(firstName);
             this.stopwatch.Stop();
             Console.WriteLine($"FindByFirstName method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
 
-        public IRecordIterator FindByLastName(string lastName)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastName)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            IRecordIterator fileCabinetRecords = this.fileCabinetService.FindByLastName(lastName);
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByLastName(lastName);
             this.stopwatch.Stop();
             Console.WriteLine($"FindByLastName method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
 
-        public IRecordIterator FindByDateOfBirth(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            IRecordIterator fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
             this.stopwatch.Stop();
             Console.WriteLine($"FindByDateOfBirth method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
-
-        public void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) => throw new NotImplementedException();
-
-        public void RemoveDictionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) => throw new NotImplementedException();
     }
 }
