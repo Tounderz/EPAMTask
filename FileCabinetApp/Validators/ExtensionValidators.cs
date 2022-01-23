@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,13 +12,11 @@ namespace FileCabinetApp.Validators
     {
         public static IRecordValidator CreateDefault(this ValidatorBuilder builder)
         {
-
             return CreateValidator(ConstParameters.DefaultValidatorName);
         }
 
         public static IRecordValidator CreateCustom(this ValidatorBuilder builder)
         {
-
             return CreateValidator(ConstParameters.CustomValidatorName);
         }
 

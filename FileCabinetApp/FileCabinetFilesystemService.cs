@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -12,8 +12,6 @@ using FileCabinetApp.Validators;
 #pragma warning disable SA1214
 #pragma warning disable SA1202
 #pragma warning disable SA1305
-#pragma warning disable SA1515
-#pragma warning disable S125
 
 namespace FileCabinetApp
 {
@@ -35,6 +33,17 @@ namespace FileCabinetApp
         {
             this.fileStream = fileStream;
             this.recordValidator = recordValidator;
+
+            if (this.fileStream.Length != 0)
+            {
+                byte[] recordBytes = new byte[this.fileStream.Length];
+                this.fileStream.Read(recordBytes, 0, recordBytes.Length);
+                this.list = this.ConvertBytesToListRecord(recordBytes);
+                for (int i = 0; i < this.list.Count; i++)
+                {
+                    this.AddInAllDictionaryItem(this.list[i]);
+                }
+            }
         }
 
         public int CreateRecord(Person person)
@@ -54,8 +63,10 @@ namespace FileCabinetApp
                 this.recordId = BitConverter.ToInt32(recordBytes, this.statusInBytes.Length) + 1;
             }
 
-            var record = this.CreateRecord(person, this.recordId);
+            var record = this.GetFileCabinetRecord(person, this.recordId);
+            this.AddInAllDictionaryItem(record);
             this.ConvertRecordToBytes(record);
+
             return this.recordId;
         }
 
@@ -65,9 +76,11 @@ namespace FileCabinetApp
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[file.Length];
             file.Read(recordBytes, 0, recordBytes.Length);
-            this.list = this.ConvertBytesToRecord(recordBytes);
+            this.list = this.ConvertBytesToListRecord(recordBytes);
             FileCabinetRecord record = this.list.Find(i => i.Id == id);
-            record = this.CreateRecord(person, record.Id);
+            this.RemoveInAllDictionaryItem(record);
+            record = this.GetFileCabinetRecord(person, record.Id);
+            this.AddInAllDictionaryItem(record);
             this.ConvertRecordToBytes(record);
         }
 
@@ -88,6 +101,9 @@ namespace FileCabinetApp
             }
             while (idRecord != id);
 
+            var record = this.list.Find(i => i.Id == idRecord);
+            this.RemoveInAllDictionaryItem(record);
+
             byte[] arrBytes = BitConverter.GetBytes(this.status);
             Array.Copy(arrBytes, 0, recordBytes, 0, 2);
 
@@ -97,9 +113,8 @@ namespace FileCabinetApp
             binaryWriter.Write(recordBytes);
         }
 
-        private FileCabinetRecord CreateRecord(Person person, int id) // создание объекта FileCabinetRecord
+        private FileCabinetRecord GetFileCabinetRecord(Person person, int id) // создание объекта FileCabinetRecord
         {
-            this.recordValidator.ValidateParameters(person);
             var record = new FileCabinetRecord
             {
                 Id = id,
@@ -119,7 +134,7 @@ namespace FileCabinetApp
             using FileStream file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[file.Length];
             file.Read(recordBytes, 0, recordBytes.Length);
-            this.list = this.ConvertBytesToRecord(recordBytes);
+            this.list = this.ConvertBytesToListRecord(recordBytes);
             return new FileCabinetServiceSnapshot(this.list.ToArray());
         }
 
@@ -162,7 +177,7 @@ namespace FileCabinetApp
             {
                 byte[] recordBytes = new byte[file.Length];
                 file.Read(recordBytes, 0, recordBytes.Length);
-                this.list = this.ConvertBytesToRecord(recordBytes);
+                this.list = this.ConvertBytesToListRecord(recordBytes);
             }
 
             return this.list.AsReadOnly();
@@ -174,7 +189,7 @@ namespace FileCabinetApp
             {
                 byte[] recordBytes = new byte[file.Length];
                 file.Read(recordBytes, 0, recordBytes.Length);
-                this.list = this.ConvertBytesToRecord(recordBytes);
+                this.list = this.ConvertBytesToListRecord(recordBytes);
             }
 
             return Tuple.Create(this.list.Count, this.isDeleteRecords.Count);
@@ -185,7 +200,7 @@ namespace FileCabinetApp
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[file.Length];
             file.Read(recordBytes, 0, recordBytes.Length);
-            this.list = this.ConvertBytesToRecord(recordBytes);
+            this.list = this.ConvertBytesToListRecord(recordBytes);
 
             this.fileStream.SetLength(0);
 
@@ -197,16 +212,6 @@ namespace FileCabinetApp
                 byte[] lastName = this.ConvertNameToBytes(this.list[i].LastName);
                 var record = this.list[i];
                 this.GetBinaryWriter(binaryWriter, this.status, record.Id, firstName, lastName, record);
-                // binaryWriter.Write(this.status);
-                // binaryWriter.Write(record.Id);
-                // binaryWriter.Write(firstName);
-                // binaryWriter.Write(lastName);
-                // binaryWriter.Write(record.DateOfBirth.Year);
-                // binaryWriter.Write(record.DateOfBirth.Month);
-                // binaryWriter.Write(record.DateOfBirth.Day);
-                // binaryWriter.Write(record.Age);
-                // binaryWriter.Write(record.Salary);
-                // binaryWriter.Write(record.Symbol);
                 binaryWriter.Flush();
             }
 
@@ -216,55 +221,25 @@ namespace FileCabinetApp
             return Tuple.Create(count, this.list.Count + count);
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            this.firstNameDictionary.Clear();
-            byte[] recordBytes = new byte[file.Length];
-            file.Read(recordBytes, 0, recordBytes.Length);
-            this.list = this.ConvertBytesToRecord(recordBytes);
-            foreach (var item in this.list)
-            {
-                this.AddDitionaryItem(item.FirstName, item, this.firstNameDictionary);
-            }
-
-            List<FileCabinetRecord> firstNameList = this.firstNameDictionary[firstName];
-            return firstNameList.AsReadOnly();
+            List<FileCabinetRecord> lastNameList = this.firstNameDictionary[firstName];
+            return lastNameList.AsReadOnly();
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastName)
         {
-            using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            this.lastNameDictionary.Clear();
-            byte[] recordBytes = new byte[file.Length];
-            file.Read(recordBytes, 0, recordBytes.Length);
-            this.list = this.ConvertBytesToRecord(recordBytes);
-            foreach (var item in this.list)
-            {
-                this.AddDitionaryItem(item.LastName, item, this.lastNameDictionary);
-            }
-
-            List<FileCabinetRecord> firstNameList = this.lastNameDictionary[lastName];
-            return firstNameList.AsReadOnly();
+            List<FileCabinetRecord> lastNameList = this.lastNameDictionary[lastName];
+            return lastNameList.AsReadOnly();
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
-            using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            this.dateOfBirthDictionary.Clear();
-            byte[] recordBytes = new byte[file.Length];
-            file.Read(recordBytes, 0, recordBytes.Length);
-            this.list = this.ConvertBytesToRecord(recordBytes);
-            foreach (var item in this.list)
-            {
-                this.AddDitionaryItem(item.DateOfBirth.ToString(ConstParameters.FormatDate), item, this.dateOfBirthDictionary);
-            }
-
-            List<FileCabinetRecord> firstNameList = this.dateOfBirthDictionary[dateOfBirth];
-            return firstNameList.AsReadOnly();
+            List<FileCabinetRecord> dateOfBirthList = this.dateOfBirthDictionary[dateOfBirth];
+            return dateOfBirthList.AsReadOnly();
         }
 
-        public void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)
+        private void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
             if (!dictionary.ContainsKey(keyStr))
@@ -275,7 +250,14 @@ namespace FileCabinetApp
             dictionary[keyStr].Add(record);
         }
 
-        public void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary)
+        private void AddInAllDictionaryItem(FileCabinetRecord record)
+        {
+            this.AddDictionaryItem(record.FirstName, record, this.firstNameDictionary);
+            this.AddDictionaryItem(record.LastName, record, this.lastNameDictionary);
+            this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
+        }
+
+        private void RemoveDictionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary)
         {
             foreach (var item in dictionary)
             {
@@ -290,6 +272,13 @@ namespace FileCabinetApp
             }
         }
 
+        private void RemoveInAllDictionaryItem(FileCabinetRecord record)
+        {
+            this.RemoveDictionaryItem(record.Id, this.firstNameDictionary);
+            this.RemoveDictionaryItem(record.Id, this.lastNameDictionary);
+            this.RemoveDictionaryItem(record.Id, this.dateOfBirthDictionary);
+        }
+
         private void ConvertRecordToBytes(FileCabinetRecord record) // convert record to bytes
         {
             if (record == null)
@@ -297,9 +286,9 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(record));
             }
 
-            byte[] arrBytes = new byte[ConstParameters.RecordLength];
+            byte[] recordBytes = new byte[ConstParameters.RecordLength];
 
-            using MemoryStream memoryStream = new (arrBytes);
+            using MemoryStream memoryStream = new (recordBytes);
             using BinaryWriter binaryWriter = new (memoryStream);
             byte[] firstName = this.ConvertNameToBytes(record.FirstName);
             byte[] lastName = this.ConvertNameToBytes(record.LastName);
@@ -323,16 +312,6 @@ namespace FileCabinetApp
             }
 
             this.GetBinaryWriter(binary, this.status, this.recordId, firstName, lastName, record);
-            // binary.Write(this.status);
-            // binary.Write(this.recordId);
-            // binary.Write(firstName);
-            // binary.Write(lastName);
-            // binary.Write(record.DateOfBirth.Year);
-            // binary.Write(record.DateOfBirth.Month);
-            // binary.Write(record.DateOfBirth.Day);
-            // binary.Write(record.Age);
-            // binary.Write(record.Salary);
-            // binary.Write(record.Symbol);
             binary.Flush();
         }
 
@@ -365,7 +344,7 @@ namespace FileCabinetApp
             return name;
         }
 
-        private List<FileCabinetRecord> ConvertBytesToRecord(byte[] recordBytes) // convert bytes to record
+        private List<FileCabinetRecord> ConvertBytesToListRecord(byte[] recordBytes) // convert bytes to record
         {
             if (recordBytes is null)
             {

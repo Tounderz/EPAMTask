@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,21 +7,15 @@ using System.Threading.Tasks;
 
 #pragma warning disable SA1600
 #pragma warning disable SA1202
-#pragma warning disable S1450
-#pragma warning disable SA1214
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
-        private ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords;
         private readonly Action<IEnumerable<FileCabinetRecord>> action;
 
         public FindCommandHandler(IFileCabinetService service, Action<IEnumerable<FileCabinetRecord>> action)
-            : base(service)
-        {
-            this.action = action;
-        }
+            : base(service) => this.action = action;
 
         private void Find(string parameters) // поиск всех одинаковых данных одного из полей, при помощи словаря
         {
@@ -34,6 +28,7 @@ namespace FileCabinetApp.CommandHandlers
                 string[] arrParameters = parameters.Split(' ');
                 string searchСriteria = arrParameters[0].ToLower();
                 string nameParameter = arrParameters[1].Trim('"').ToUpper();
+                IEnumerable<FileCabinetRecord> fileCabinetRecords;
                 switch (searchСriteria)
                 {
                     case "firstname":
@@ -45,8 +40,8 @@ namespace FileCabinetApp.CommandHandlers
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByFirstName(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                fileCabinetRecords = this.service.FindByFirstName(nameParameter);
+                                this.action(fileCabinetRecords);
                                 break;
                             }
                         }
@@ -60,8 +55,8 @@ namespace FileCabinetApp.CommandHandlers
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByLastName(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                fileCabinetRecords = this.service.FindByLastName(nameParameter);
+                                this.action(fileCabinetRecords);
                                 break;
                             }
                         }
@@ -75,8 +70,8 @@ namespace FileCabinetApp.CommandHandlers
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByDateOfBirth(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                fileCabinetRecords = this.service.FindByDateOfBirth(nameParameter);
+                                this.action(fileCabinetRecords);
                                 break;
                             }
                         }

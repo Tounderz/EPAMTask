@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -20,7 +20,6 @@ namespace FileCabinetApp
         private static IRecordValidator recordValidator = new ValidatorBuilder().CreateDefault();
         private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService(recordValidator);
         private static FileStream fileStream;
-
         private static string nameValidator = ConstParameters.DefaultValidatorName;
         private static readonly List<string> ParametersListValue = new ()
         {
@@ -124,7 +123,6 @@ namespace FileCabinetApp
             {
                 switch (listCommandLineParameter[i].ToLower())
                 {
-
                     case ConstParameters.LongValidatorLineParameter:
                     case ConstParameters.ShortValidatorLineParameter:
                         if (string.Equals(rulesValidetion[(i * 2) + 1], ConstParameters.CustomValidatorName))
@@ -140,7 +138,6 @@ namespace FileCabinetApp
                         }
 
                         break;
-
 
                     case ConstParameters.LongTypeLineParameter:
                     case ConstParameters.ShortTypeLineParameter:
