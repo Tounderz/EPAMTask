@@ -131,5 +131,35 @@ namespace FileCabinetApp
             Console.WriteLine($"FindByDateOfBirth method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
+
+        public IEnumerable<FileCabinetRecord> FindByAge(string age)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(age);
+            this.stopwatch.Stop();
+            Console.WriteLine($"FindByAge method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySalary(string salary)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(salary);
+            this.stopwatch.Stop();
+            Console.WriteLine($"FindBySalary method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySymbol(string symbol)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(symbol);
+            this.stopwatch.Stop();
+            Console.WriteLine($"FindBySymbol method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return fileCabinetRecords;
+        }
     }
 }

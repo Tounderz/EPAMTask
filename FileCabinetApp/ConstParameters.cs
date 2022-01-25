@@ -40,6 +40,7 @@ namespace FileCabinetApp
         public const string ExportName = "export";
         public const string ImportName = "import";
         public const string RemoveName = "remove";
+        public const string DeleteName = "delete";
         public const string PurgeName = "purge";
 
         public const string FormatDate = "yyyy-MMM-dd";

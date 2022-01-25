@@ -24,6 +24,9 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> ageDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> salatyDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> symbolDictionary = new ();
         private int recordId = 0;
         private short status = 0;
         private readonly byte[] statusInBytes = new byte[sizeof(short)];
@@ -250,6 +253,24 @@ namespace FileCabinetApp
             return dateOfBirthList.AsReadOnly();
         }
 
+        public IEnumerable<FileCabinetRecord> FindByAge(string age)
+        {
+            List<FileCabinetRecord> ageList = this.firstNameDictionary[age];
+            return ageList.AsReadOnly();
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySalary(string salary)
+        {
+            List<FileCabinetRecord> salaryList = this.firstNameDictionary[salary];
+            return salaryList.AsReadOnly();
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySymbol(string symbol)
+        {
+            List<FileCabinetRecord> symbolList = this.firstNameDictionary[symbol];
+            return symbolList.AsReadOnly();
+        }
+
         private void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
@@ -266,6 +287,9 @@ namespace FileCabinetApp
             this.AddDictionaryItem(record.FirstName, record, this.firstNameDictionary);
             this.AddDictionaryItem(record.LastName, record, this.lastNameDictionary);
             this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
+            this.AddDictionaryItem(record.Age.ToString(), record, this.ageDictionary);
+            this.AddDictionaryItem(record.Salary.ToString(), record, this.salatyDictionary);
+            this.AddDictionaryItem(record.Symbol.ToString(), record, this.symbolDictionary);
         }
 
         private void RemoveDictionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary)
@@ -288,6 +312,9 @@ namespace FileCabinetApp
             this.RemoveDictionaryItem(record.Id, this.firstNameDictionary);
             this.RemoveDictionaryItem(record.Id, this.lastNameDictionary);
             this.RemoveDictionaryItem(record.Id, this.dateOfBirthDictionary);
+            this.RemoveDictionaryItem(record.Id, this.ageDictionary);
+            this.RemoveDictionaryItem(record.Id, this.salatyDictionary);
+            this.RemoveDictionaryItem(record.Id, this.symbolDictionary);
         }
 
         private void ConvertRecordToBytes(FileCabinetRecord record) // convert record to bytes

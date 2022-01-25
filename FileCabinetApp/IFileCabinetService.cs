@@ -34,5 +34,11 @@ namespace FileCabinetApp
         IEnumerable<FileCabinetRecord> FindByLastName(string lastName);
 
         IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth);
-   }
+
+        IEnumerable<FileCabinetRecord> FindByAge(string age);
+
+        IEnumerable<FileCabinetRecord> FindBySalary(string salary);
+
+        IEnumerable<FileCabinetRecord> FindBySymbol(string symbol);
+    }
 }

@@ -173,5 +173,56 @@ namespace FileCabinetApp
 
             return fileCabinetRecords;
         }
+
+        public IEnumerable<FileCabinetRecord> FindByAge(string age)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() Age = '{age}'.");
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(age);
+            if (fileCabinetRecords.Any())
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by Age = '{age}'.");
+            }
+            else
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() no record(s) found by Age = '{age}'.");
+            }
+
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySalary(string salary)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() Salary = '{salary}'.");
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(salary);
+            if (fileCabinetRecords.Any())
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by Salary = '{salary}'.");
+            }
+            else
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() no record(s) found by Salary = '{salary}'.");
+            }
+
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySymbol(string symbol)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() Symbol = '{symbol}'.");
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(symbol);
+            if (fileCabinetRecords.Any())
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by Symbol = '{symbol}'.");
+            }
+            else
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() no record(s) found by Symbol = '{symbol}'.");
+            }
+
+            return fileCabinetRecords;
+        }
     }
 }

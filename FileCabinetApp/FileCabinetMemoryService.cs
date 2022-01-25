@@ -18,6 +18,9 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> ageDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> salatyDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> symbolDictionary = new ();
         private readonly IRecordValidator recordValidator;
 
         public FileCabinetMemoryService(IRecordValidator recordValidator)
@@ -148,6 +151,24 @@ namespace FileCabinetApp
                 records : new List<FileCabinetRecord>();
         }
 
+        public IEnumerable<FileCabinetRecord> FindByAge(string age)
+        {
+            return this.ageDictionary.TryGetValue(age, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySalary(string salary)
+        {
+            return this.salatyDictionary.TryGetValue(salary, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySymbol(string symbol)
+        {
+            return this.symbolDictionary.TryGetValue(symbol, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
+        }
+
         private void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
@@ -164,6 +185,9 @@ namespace FileCabinetApp
             this.AddDictionaryItem(record.FirstName, record, this.firstNameDictionary);
             this.AddDictionaryItem(record.LastName, record, this.lastNameDictionary);
             this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
+            this.AddDictionaryItem(record.Age.ToString(), record, this.ageDictionary);
+            this.AddDictionaryItem(record.Salary.ToString(), record, this.salatyDictionary);
+            this.AddDictionaryItem(record.Symbol.ToString(), record, this.symbolDictionary);
         }
 
         private void RemoveDictionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) // удаление данных из словаря по id
@@ -186,6 +210,9 @@ namespace FileCabinetApp
             this.RemoveDictionaryItem(id, this.firstNameDictionary);
             this.RemoveDictionaryItem(id, this.lastNameDictionary);
             this.RemoveDictionaryItem(id, this.dateOfBirthDictionary);
+            this.RemoveDictionaryItem(id, this.ageDictionary);
+            this.RemoveDictionaryItem(id, this.salatyDictionary);
+            this.RemoveDictionaryItem(id, this.symbolDictionary);
         }
     }
 }

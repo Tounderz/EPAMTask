@@ -194,7 +194,6 @@ namespace FileCabinetApp
             while (true);
         }
 
-        // insert (firstname, lastname, dateofbirth, id, salary, symbol) values ('dfs4', 'dsdsf', '1.1.1999', '1', '1242142', '$')
         public static Person NewPersonInsert(string nameValidator, string firstName, string lastName, string dateOfBirth, string salary, string symbol)
         {
             ValidatorParameters(nameValidator);

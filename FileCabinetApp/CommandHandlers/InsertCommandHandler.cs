@@ -68,6 +68,7 @@ namespace FileCabinetApp.CommandHandlers
                                 symbol = valueList[i];
                                 break;
                             default:
+                                Console.WriteLine("This criterion by which you add an entry is missing!");
                                 break;
                         }
                     }

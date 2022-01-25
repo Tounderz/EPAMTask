@@ -23,7 +23,8 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "export", "writing to a 'csv or xml' file", "The 'export' command writes a file in csv or xml format" },
             new string[] { "import", "importing records from a format file 'csv' or 'xml'", "The import command imports data from files in 'csv' or 'xml' format" },
             new string[] { "remove", "remove record by id.", "The 'remove' command record by id." },
-            new string[] {"insert", "", "the 'insert' command is to add a record using the transmitted data.Inserts a record using the transmitted data." },
+            new string[] { "insert", "insert(add) a record", "the 'insert' command is to add a record using the transmitted data.Inserts a record using the transmitted data." },
+            new string[] { "delete", "delete record by parameter", "The 'delete' command record by parameter." },
         };
 
         private static void PrintHelp(string parameters)
