@@ -13,6 +13,8 @@ namespace FileCabinetApp
    {
         int CreateRecord(Person person);
 
+        int InsertRecord(int id, Person person);
+
         void EditRecord(int id, Person person);
 
         void RemoveRecord(int id);

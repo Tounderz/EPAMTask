@@ -7,21 +7,15 @@ using System.Threading.Tasks;
 
 #pragma warning disable SA1600
 #pragma warning disable SA1202
-#pragma warning disable S1450
-#pragma warning disable SA1214
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
-        private ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords;
         private readonly Action<IEnumerable<FileCabinetRecord>> action;
 
         public FindCommandHandler(IFileCabinetService service, Action<IEnumerable<FileCabinetRecord>> action)
-            : base(service)
-        {
-            this.action = action;
-        }
+            : base(service) => this.action = action;
 
         private void Find(string parameters) // поиск всех одинаковых данных одного из полей, при помощи словаря
         {

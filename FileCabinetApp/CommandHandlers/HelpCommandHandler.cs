@@ -15,7 +15,7 @@ namespace FileCabinetApp.CommandHandlers
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
-            new string[] { "start", "start the application", "The 'start' command outputs the amount of data in the shee" },
+            new string[] { "stat", "stat the application", "The 'stat' command outputs the amount of data in the shee" },
             new string[] { "create", "create a record", "The 'create' command will create a new record in the sheet." },
             new string[] { "list", "output list", "Commands 'list' outputs list." },
             new string[] { "edit", "editor record by id", "The 'edit' command allows you to edit data by id." },
@@ -23,6 +23,7 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "export", "writing to a 'csv or xml' file", "The 'export' command writes a file in csv or xml format" },
             new string[] { "import", "importing records from a format file 'csv' or 'xml'", "The import command imports data from files in 'csv' or 'xml' format" },
             new string[] { "remove", "remove record by id.", "The 'remove' command record by id." },
+            new string[] {"insert", "", "the 'insert' command is to add a record using the transmitted data.Inserts a record using the transmitted data." },
         };
 
         private static void PrintHelp(string parameters)

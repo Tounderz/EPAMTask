@@ -70,6 +70,17 @@ namespace FileCabinetApp
             return this.recordId;
         }
 
+        public int InsertRecord(int id, Person person)
+        {
+            this.recordValidator.ValidateParameters(person);
+            this.recordId = id;
+            var record = this.GetFileCabinetRecord(person, this.recordId);
+            this.AddInAllDictionaryItem(record);
+            this.ConvertRecordToBytes(record);
+
+            return this.recordId;
+        }
+
         public void EditRecord(int id, Person person)
         {
             this.recordValidator.ValidateParameters(person);
@@ -389,46 +400,6 @@ namespace FileCabinetApp
             }
 
             return records;
-        }
-
-        private FileCabinetRecord ConvertBytesToRecord(byte[] recordBytes) // convert bytes to record
-        {
-            if (recordBytes is null)
-            {
-                throw new ArgumentNullException(nameof(recordBytes));
-            }
-
-            using MemoryStream stream = new (recordBytes);
-            using BinaryReader reader = new (stream);
-            reader.BaseStream.Position = 0;
-            FileCabinetRecord record = new ();
-            this.status = reader.ReadInt16();
-            record.Id = reader.ReadInt32();
-            byte[] firstNameBytes = reader.ReadBytes(ConstParameters.MaxLengthString);
-            string bytesToFirstName = Encoding.ASCII.GetString(firstNameBytes, 0, firstNameBytes.Length);
-            record.FirstName = bytesToFirstName.Replace("\0", string.Empty);
-            byte[] lastNameBytes = reader.ReadBytes(ConstParameters.MaxLengthString);
-            string bytesToLastName = Encoding.ASCII.GetString(lastNameBytes, 0, lastNameBytes.Length);
-            record.LastName = bytesToLastName.Replace("\0", string.Empty);
-            int dateOfYear = reader.ReadInt32();
-            int dateOfMonth = reader.ReadInt32();
-            int dateOfDay = reader.ReadInt32();
-            record.DateOfBirth = new DateTime(dateOfYear, dateOfMonth, dateOfDay);
-            record.Age = reader.ReadInt16();
-            record.Salary = reader.ReadDecimal();
-            record.Symbol = reader.ReadChar();
-
-            return record;
-        }
-
-        public FileCabinetRecord ReadByPosition(int position)
-        {
-            using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            file.Seek((ConstParameters.RecordLength * position) - ConstParameters.RecordLength, SeekOrigin.Begin);
-            var bytes = new byte[ConstParameters.RecordLength];
-            file.Read(bytes, 0, ConstParameters.RecordLength);
-            var record = this.ConvertBytesToRecord(bytes);
-            return record;
         }
     }
 }

@@ -35,6 +35,16 @@ namespace FileCabinetApp
             return record.Id;
         }
 
+        public int InsertRecord(int id, Person person)
+        {
+            this.recordValidator.ValidateParameters(person);
+            var record = this.GetFileCabinetRecord(person, id);
+            this.list.Add(record);
+            this.AddInAllDictionaryNewItem(record);
+
+            return record.Id;
+        }
+
         public void EditRecord(int id, Person person)
         {
             this.recordValidator.ValidateParameters(person);

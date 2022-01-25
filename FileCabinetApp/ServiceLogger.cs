@@ -36,6 +36,24 @@ namespace FileCabinetApp
             return result;
         }
 
+        public int InsertRecord(int id, Person person)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Insert() with " +
+                $"Id = '{id}', " +
+                $"FirstName = '{person.FirstName}', " +
+                $"LastName = '{person.LastName}', " +
+                $"DateOfBirth = '{person.DateOfBirth}', " +
+                $"Age = '{person.Age}', " +
+                $"Salary = '{person.Salary}', " +
+                $"Symbol = '{person.Symbol}'.");
+
+            int result = this.fileCabinetService.InsertRecord(id, person);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Insert() returned '{result}'.");
+
+            return result;
+        }
+
         public void EditRecord(int id, Person person)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);

@@ -30,6 +30,16 @@ namespace FileCabinetApp
             return result;
         }
 
+        public int InsertRecord(int id, Person person)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            int result = this.fileCabinetService.InsertRecord(id, person);
+            this.stopwatch.Stop();
+            Console.WriteLine($"Insert method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return result;
+        }
+
         public void EditRecord(int id, Person person)
         {
             this.stopwatch.Reset();

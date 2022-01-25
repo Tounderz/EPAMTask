@@ -30,10 +30,11 @@ namespace FileCabinetApp
         public const string ShortTypeLineParameter = "-s";
 
         public const string Help = "help";
-        public const string StartName = "start";
+        public const string StatName = "stat";
         public const string ListName = "list";
         public const string ExitName = "exit";
         public const string CreateName = "create";
+        public const string InsertName = "insert";
         public const string EditName = "edit";
         public const string FindName = "find";
         public const string ExportName = "export";
