@@ -29,7 +29,8 @@ namespace FileCabinetApp
         public const string LongTypeLineParameter = "--storage";
         public const string ShortTypeLineParameter = "-s";
 
-        public const string Help = "help";
+        public const string HelpName = "help";
+        public const string HelpFullName = "helpfull";
         public const string StatName = "stat";
         public const string ListName = "list";
         public const string ExitName = "exit";
