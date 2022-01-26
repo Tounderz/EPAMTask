@@ -39,38 +39,36 @@ namespace FileCabinetApp.CommandHandlers
                 {
                     if (valueList.Length != 6 || parametersList.Length != 6)
                     {
-                        Console.WriteLine("Incorrect input. It is required to pass 6 fields.");
+                        throw new ArgumentException("Incorrect input. It is required to pass 6 fields.");
                     }
                     else
                     {
-                        Console.WriteLine("This id is busy, try again by specifying a non-existing id");
+                        throw new ArgumentException("This id is busy, try again by specifying a non-existing id");
                     }
                 }
-                else
+
+                for (int i = 0; i < parametersList.Length; i++)
                 {
-                    for (int i = 0; i < parametersList.Length; i++)
+                    switch (parametersList[i])
                     {
-                        switch (parametersList[i])
-                        {
-                            case "firstname":
-                                firstName = valueList[i];
-                                break;
-                            case "lastname":
-                                lastName = valueList[i];
-                                break;
-                            case "dateofbirth":
-                                dateOfBirth = valueList[i];
-                                break;
-                            case "salary":
-                                salary = valueList[i];
-                                break;
-                            case "symbol":
-                                symbol = valueList[i];
-                                break;
-                            default:
-                                Console.WriteLine("This criterion by which you add an entry is missing!");
-                                break;
-                        }
+                        case "firstname":
+                            firstName = valueList[i];
+                            break;
+                        case "lastname":
+                            lastName = valueList[i];
+                            break;
+                        case "dateofbirth":
+                            dateOfBirth = valueList[i];
+                            break;
+                        case "salary":
+                            salary = valueList[i];
+                            break;
+                        case "symbol":
+                            symbol = valueList[i];
+                            break;
+                        default:
+                            Console.WriteLine("This criterion by which you add an entry is missing!");
+                            break;
                     }
 
                     var person = CreatingPerson.NewPersonInsert(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
@@ -80,7 +78,7 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                if (ex is FormatException || ex is IndexOutOfRangeException || ex is ArgumentNullException)
+                if (ex is FormatException || ex is IndexOutOfRangeException || ex is ArgumentNullException || ex is ArgumentException)
                 {
                     Console.WriteLine(ex.Message);
                 }

@@ -25,6 +25,7 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "remove", "remove record by id.", "The 'remove' command record by id." },
             new string[] { "insert", "insert(add) a record", "the 'insert' command is to add a record using the transmitted data.Inserts a record using the transmitted data." },
             new string[] { "delete", "delete record by parameter", "The 'delete' command record by parameter." },
+            new string[] { "update", "update record by parameter", "The 'update' command allows you to update data by parameter(s)." },
         };
 
         private static void PrintHelp(string parameters)

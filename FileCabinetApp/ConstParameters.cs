@@ -36,6 +36,7 @@ namespace FileCabinetApp
         public const string CreateName = "create";
         public const string InsertName = "insert";
         public const string EditName = "edit";
+        public const string UpdateName = "update";
         public const string FindName = "find";
         public const string ExportName = "export";
         public const string ImportName = "import";
@@ -56,5 +57,7 @@ namespace FileCabinetApp
         public const string LoggerPathName = "serviceLogger.txt";
         public const string DBPathName = "cabinet-records.db";
         public const string ValidationRulesFileName = "validation-rules.json";
+
+        public const string UpdateAnd = "and";
     }
 }

@@ -29,7 +29,7 @@ namespace FileCabinetApp.CommandHandlers
                 switch (nameParameter)
                 {
                     case "id":
-                        this.RemoveRecordById(int.Parse(valueParameter));
+                        this.DeleteRecordById(int.Parse(valueParameter));
                         break;
                     case "firstname":
                         this.list = this.service.FindByFirstName(valueParameter).ToList();
@@ -69,7 +69,7 @@ namespace FileCabinetApp.CommandHandlers
             }
         }
 
-        private void RemoveRecordById(int id)
+        private void DeleteRecordById(int id)
         {
             var record = this.service.GetRecords().ToList().Find(i => i.Id == id);
             if (record != null)
