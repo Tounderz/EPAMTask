@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,20 +19,26 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { ConstParameters.StatName, "stat the application", "The 'stat' command outputs the amount of data in the shee" },
             new string[] { ConstParameters.CreateName, "create a record", "The 'create' command will create a new record in the sheet." },
             new string[] { ConstParameters.ListName, "output list", "Commands 'list' outputs list." },
-            new string[] { ConstParameters.FindName, "search model: find search parameter \"search criteria\"",
+            new string[]
+            {
+                ConstParameters.FindName, "search model: find search parameter \"search criteria\"",
                 "Search by parameters 'firstname or lastname or dateofbirth or age or salary or symbol', search model: find search parameter \"search criteria\".",
             },
             new string[] { ConstParameters.ExportName, "writing to a 'csv or xml' file", "The 'export' command writes a file in csv or xml format" },
             new string[] { ConstParameters.ImportName, "importing records from a format file 'csv' or 'xml'", "The import command imports data from files in 'csv' or 'xml' format" },
             new string[] { ConstParameters.PurgeName, "Removes 'voids' in the data file", "The command defragments the data file - removes 'voids' in the data file formed by records with the IsDeleted bit set." },
-            new string[] { ConstParameters.InsertName, "insert(add) a record",
+            new string[]
+            {
+                ConstParameters.InsertName, "insert(add) a record",
                 "The 'insert' command is to add a record using the transmitted data. Inserts a record using the transmitted data. " +
                 "Command example (the order in the first parentheses must match the order given after values): " +
                 "insert (dateofbirth,lastname,firstname,id,salary,symbol) " +
                 "values ('value dateofbirth','value lastname','value firstname','value id', 'value salary', 'value symbol') ",
             },
             new string[] { ConstParameters.DeleteName, "delete record by parameter", "The 'delete' command record by parameter. Command example: delete where parameterName='parameterValue'." },
-            new string[] { ConstParameters.UpdateName, "update record by parameter",
+            new string[]
+            {
+                ConstParameters.UpdateName, "update record by parameter",
                 "The 'update' command allows you to update data by parameter(s). " +
                 "Command example: update set parameterName='parameterValue' (parameterNames: firstname, lastname, dateofbirth, salary, symbol) " +
                 "where (search criteria for records to change, you can specify several through the 'and' operator) parameterName='parameterValue' (parameterNames: id, firstname, lastname, dateofbirth, age, salary, symbol)",
