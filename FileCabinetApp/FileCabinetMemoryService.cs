@@ -18,6 +18,9 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> ageDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> salatyDictionary = new ();
+        private readonly Dictionary<string, List<FileCabinetRecord>> symbolDictionary = new ();
         private readonly IRecordValidator recordValidator;
 
         public FileCabinetMemoryService(IRecordValidator recordValidator)
@@ -30,36 +33,38 @@ namespace FileCabinetApp
             this.recordValidator.ValidateParameters(person);
             var record = this.GetFileCabinetRecord(person, this.list.Count + 1);
             this.list.Add(record);
-            this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
-            this.AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
-            this.AddDitionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
+            this.AddInAllDictionaryNewItem(record);
 
             return record.Id;
         }
 
-        public void EditRecord(int id, Person person)
+        public int InsertRecord(int id, Person person)
         {
             this.recordValidator.ValidateParameters(person);
             var record = this.GetFileCabinetRecord(person, id);
-            this.RemoveDitionaryItem(id, this.firstNameDictionary);
-            this.AddDitionaryItem(record.FirstName, record, this.firstNameDictionary);
-            this.RemoveDitionaryItem(id, this.lastNameDictionary);
-            this.AddDitionaryItem(record.LastName, record, this.lastNameDictionary);
-            this.RemoveDitionaryItem(id, this.dateOfBirthDictionary);
-            this.AddDitionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
+            this.list.Add(record);
+            this.AddInAllDictionaryNewItem(record);
+
+            return record.Id;
+        }
+
+        public void UpdateRecord(int id, Person person)
+        {
+            this.recordValidator.ValidateParameters(person);
+            var record = this.GetFileCabinetRecord(person, id);
+            this.RemoveInAllDictionaryItem(id);
+            this.AddInAllDictionaryNewItem(record);
             this.list[id - 1] = record;
         }
 
-        public void RemoveRecord(int id)
+        public void DeleteRecord(int id)
         {
             FileCabinetRecord record = this.list.Find(i => i.Id == id);
             this.list.Remove(record);
-            this.RemoveDitionaryItem(id, this.firstNameDictionary);
-            this.RemoveDitionaryItem(id, this.lastNameDictionary);
-            this.RemoveDitionaryItem(id, this.dateOfBirthDictionary);
+            this.RemoveInAllDictionaryItem(id);
         }
 
-        private FileCabinetRecord GetFileCabinetRecord(Person person, int id)
+        private FileCabinetRecord GetFileCabinetRecord(Person person, int id) // создание объекта FileCabinetRecord
         {
             var record = new FileCabinetRecord
             {
@@ -128,25 +133,43 @@ namespace FileCabinetApp
             throw new NotImplementedException();
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            List<FileCabinetRecord> firstNameList = this.firstNameDictionary[firstName];
-            return firstNameList.AsReadOnly();
+            return this.firstNameDictionary.TryGetValue(firstName, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastName)
         {
-            List<FileCabinetRecord> lastNameList = this.lastNameDictionary[lastName];
-            return lastNameList.AsReadOnly();
+            return this.lastNameDictionary.TryGetValue(lastName, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
-            List<FileCabinetRecord> dateOfBirthList = this.dateOfBirthDictionary[dateOfBirth];
-            return dateOfBirthList.AsReadOnly();
+            return this.dateOfBirthDictionary.TryGetValue(dateOfBirth, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
         }
 
-        public void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь
+        public IEnumerable<FileCabinetRecord> FindByAge(string age)
+        {
+            return this.ageDictionary.TryGetValue(age, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySalary(string salary)
+        {
+            return this.salatyDictionary.TryGetValue(salary, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySymbol(string symbol)
+        {
+            return this.symbolDictionary.TryGetValue(symbol, out List<FileCabinetRecord> records) ?
+                records : new List<FileCabinetRecord>();
+        }
+
+        private void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) // добавление данных в словарь
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
             if (!dictionary.ContainsKey(keyStr))
@@ -157,7 +180,17 @@ namespace FileCabinetApp
             dictionary[keyStr].Add(record);
         }
 
-        public void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) // удаление данных из словаря по id
+        private void AddInAllDictionaryNewItem(FileCabinetRecord record)
+        {
+            this.AddDictionaryItem(record.FirstName, record, this.firstNameDictionary);
+            this.AddDictionaryItem(record.LastName, record, this.lastNameDictionary);
+            this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
+            this.AddDictionaryItem(record.Age.ToString(), record, this.ageDictionary);
+            this.AddDictionaryItem(record.Salary.ToString(), record, this.salatyDictionary);
+            this.AddDictionaryItem(record.Symbol.ToString(), record, this.symbolDictionary);
+        }
+
+        private void RemoveDictionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) // удаление данных из словаря по id
         {
             foreach (var item in dictionary)
             {
@@ -170,6 +203,16 @@ namespace FileCabinetApp
                     }
                 }
             }
+        }
+
+        private void RemoveInAllDictionaryItem(int id)
+        {
+            this.RemoveDictionaryItem(id, this.firstNameDictionary);
+            this.RemoveDictionaryItem(id, this.lastNameDictionary);
+            this.RemoveDictionaryItem(id, this.dateOfBirthDictionary);
+            this.RemoveDictionaryItem(id, this.ageDictionary);
+            this.RemoveDictionaryItem(id, this.salatyDictionary);
+            this.RemoveDictionaryItem(id, this.symbolDictionary);
         }
     }
 }

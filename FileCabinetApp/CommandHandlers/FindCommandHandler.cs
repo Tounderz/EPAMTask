@@ -7,83 +7,120 @@ using System.Threading.Tasks;
 
 #pragma warning disable SA1600
 #pragma warning disable SA1202
-#pragma warning disable S1450
-#pragma warning disable SA1214
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
-        private ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords;
         private readonly Action<IEnumerable<FileCabinetRecord>> action;
 
         public FindCommandHandler(IFileCabinetService service, Action<IEnumerable<FileCabinetRecord>> action)
-            : base(service)
-        {
-            this.action = action;
-        }
+            : base(service) => this.action = action;
 
         private void Find(string parameters) // поиск всех одинаковых данных одного из полей, при помощи словаря
         {
-            if (string.IsNullOrEmpty(parameters))
-            {
-                Console.WriteLine("Specify the search criteria");
-            }
-            else
+            try
             {
                 string[] arrParameters = parameters.Split(' ');
                 string searchСriteria = arrParameters[0].ToLower();
                 string nameParameter = arrParameters[1].Trim('"').ToUpper();
+                IEnumerable<FileCabinetRecord> fileCabinetRecords;
                 switch (searchСriteria)
                 {
                     case "firstname":
                         {
-                            if (string.IsNullOrEmpty(nameParameter) || this.service.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == nameParameter.ToLower()) == null)
+                            if (this.service.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == nameParameter.ToLower()) == null)
                             {
                                 Console.WriteLine("Specify the search criteria");
                                 break;
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByFirstName(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                fileCabinetRecords = this.service.FindByFirstName(nameParameter);
+                                this.action(fileCabinetRecords);
                                 break;
                             }
                         }
 
                     case "lastname":
                         {
-                            if (string.IsNullOrEmpty(nameParameter) || this.service.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == nameParameter.ToLower()) == null)
+                            if (this.service.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == nameParameter.ToLower()) == null)
                             {
                                 Console.WriteLine("Specify the search criteria");
                                 break;
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByLastName(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                fileCabinetRecords = this.service.FindByLastName(nameParameter);
+                                this.action(fileCabinetRecords);
                                 break;
                             }
                         }
 
                     case "dateofbirth":
                         {
-                            if (string.IsNullOrEmpty(nameParameter) || (this.service.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == nameParameter.ToLower()) == null))
+                            if (this.service.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == nameParameter.ToLower()) == null)
                             {
                                 Console.WriteLine("You didn't enter the search parameter or you entered it incorrectly. It takes a year (xxxx), a month (the first three letters), a day with two digits if the date is less than 10, then add 0 (xx)");
                                 break;
                             }
                             else
                             {
-                                this.fileCabinetRecords = this.service.FindByDateOfBirth(nameParameter);
-                                this.action(this.fileCabinetRecords);
+                                fileCabinetRecords = this.service.FindByDateOfBirth(nameParameter);
+                                this.action(fileCabinetRecords);
                                 break;
                             }
+                        }
+
+                    case "age":
+                        if (this.service.GetRecords().FirstOrDefault(i => i.Age == int.Parse(nameParameter)) == null)
+                        {
+                            Console.WriteLine("Specify the search criteria");
+                            break;
+                        }
+                        else
+                        {
+                            fileCabinetRecords = this.service.FindByAge(nameParameter);
+                            this.action(fileCabinetRecords);
+                            break;
+                        }
+
+                    case "salary":
+                        if (this.service.GetRecords().FirstOrDefault(i => i.Salary == decimal.Parse(nameParameter)) == null)
+                        {
+                            Console.WriteLine("Specify the search criteria");
+                            break;
+                        }
+                        else
+                        {
+                            fileCabinetRecords = this.service.FindBySalary(nameParameter);
+                            this.action(fileCabinetRecords);
+                            break;
+                        }
+
+                    case "symbol":
+                        if (this.service.GetRecords().FirstOrDefault(i => i.Symbol == char.Parse(nameParameter)) == null)
+                        {
+                            Console.WriteLine("Specify the search criteria");
+                            break;
+                        }
+                        else
+                        {
+                            fileCabinetRecords = this.service.FindBySymbol(nameParameter);
+                            this.action(fileCabinetRecords);
+                            break;
                         }
 
                     default:
                         Console.WriteLine("Incorrect input!");
                         break;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is FormatException || ex is ArgumentNullException || ex is ArgumentException || ex is ArgumentOutOfRangeException)
+                {
+                    Console.WriteLine(ex.Message);
                 }
             }
         }

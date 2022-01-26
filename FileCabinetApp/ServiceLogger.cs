@@ -36,7 +36,25 @@ namespace FileCabinetApp
             return result;
         }
 
-        public void EditRecord(int id, Person person)
+        public int InsertRecord(int id, Person person)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Insert() with " +
+                $"Id = '{id}', " +
+                $"FirstName = '{person.FirstName}', " +
+                $"LastName = '{person.LastName}', " +
+                $"DateOfBirth = '{person.DateOfBirth}', " +
+                $"Age = '{person.Age}', " +
+                $"Salary = '{person.Salary}', " +
+                $"Symbol = '{person.Symbol}'.");
+
+            int result = this.fileCabinetService.InsertRecord(id, person);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Insert() returned '{result}'.");
+
+            return result;
+        }
+
+        public void UpdateRecord(int id, Person person)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Edit() with " +
@@ -48,16 +66,16 @@ namespace FileCabinetApp
                 $"Salary = '{person.Salary}', " +
                 $"Symbol = '{person.Symbol}'.");
 
-            this.fileCabinetService.EditRecord(id, person);
+            this.fileCabinetService.UpdateRecord(id, person);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Edit() edited entry by '{id}'.");
         }
 
-        public void RemoveRecord(int id)
+        public void DeleteRecord(int id)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Edit() with " +
                 $"id = '{id}'.");
-            this.fileCabinetService.RemoveRecord(id);
+            this.fileCabinetService.DeleteRecord(id);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Edit() deleting an entry by '{id}'.");
         }
 
@@ -105,12 +123,12 @@ namespace FileCabinetApp
             return result;
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
+        public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() FirstName = '{firstName}'.");
-            ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByFirstName(firstName);
-            if (fileCabinetRecords.Count > 0)
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByFirstName(firstName);
+            if (fileCabinetRecords.Any())
             {
                 textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by FirstName = '{firstName}'.");
             }
@@ -122,12 +140,12 @@ namespace FileCabinetApp
             return fileCabinetRecords;
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
+        public IEnumerable<FileCabinetRecord> FindByLastName(string lastName)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() LastName = '{lastName}'.");
-            ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByLastName(lastName);
-            if (fileCabinetRecords.Count > 0)
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByLastName(lastName);
+            if (fileCabinetRecords.Any())
             {
                 textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by LastName = '{lastName}'.");
             }
@@ -139,12 +157,12 @@ namespace FileCabinetApp
             return fileCabinetRecords;
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
+        public IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() DateOfBirt = '{dateOfBirth}'.");
-            ReadOnlyCollection<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
-            if (fileCabinetRecords.Count > 0)
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
+            if (fileCabinetRecords.Any())
             {
                 textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by DateOfBirt = '{dateOfBirth}'.");
             }
@@ -156,8 +174,55 @@ namespace FileCabinetApp
             return fileCabinetRecords;
         }
 
-        public void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary) => throw new NotImplementedException();
+        public IEnumerable<FileCabinetRecord> FindByAge(string age)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() Age = '{age}'.");
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(age);
+            if (fileCabinetRecords.Any())
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by Age = '{age}'.");
+            }
+            else
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() no record(s) found by Age = '{age}'.");
+            }
 
-        public void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary) => throw new NotImplementedException();
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySalary(string salary)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() Salary = '{salary}'.");
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(salary);
+            if (fileCabinetRecords.Any())
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by Salary = '{salary}'.");
+            }
+            else
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() no record(s) found by Salary = '{salary}'.");
+            }
+
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySymbol(string symbol)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() Symbol = '{symbol}'.");
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(symbol);
+            if (fileCabinetRecords.Any())
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by Symbol = '{symbol}'.");
+            }
+            else
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() no record(s) found by Symbol = '{symbol}'.");
+            }
+
+            return fileCabinetRecords;
+        }
     }
 }

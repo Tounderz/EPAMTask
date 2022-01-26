@@ -21,6 +21,7 @@ namespace FileCabinetApp
         private static DateTime minDate;
         private static DateTime maxDate;
         private static int symbolLength;
+        private static string parameter;
 
         private static T ReadInput<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
         {
@@ -158,6 +159,67 @@ namespace FileCabinetApp
             {
                 return new Tuple<bool, string>(true, null);
             }
+        }
+
+        private static T ReadInputInsert<T>(Func<string, Tuple<bool, string, T>> converter, Func<T, Tuple<bool, string>> validator)
+        {
+            do
+            {
+                T value;
+
+                var input = parameter;
+                var conversionResult = converter(input);
+
+                if (!conversionResult.Item1)
+                {
+                    Console.WriteLine($"Conversion failed: {conversionResult.Item2}. Please, correct your input.");
+                    return default;
+                }
+                else
+                {
+                    value = conversionResult.Item3;
+                }
+
+                var validationResult = validator(value);
+                if (!validationResult.Item1)
+                {
+                    Console.WriteLine($"Validation failed: {validationResult.Item2}. Please, correct your input.");
+                    return default;
+                }
+                else
+                {
+                    return value;
+                }
+            }
+            while (true);
+        }
+
+        public static Person NewPersonInsert(string nameValidator, string firstName, string lastName, string dateOfBirth, string salary, string symbol)
+        {
+            ValidatorParameters(nameValidator);
+            parameter = firstName;
+            firstName = ReadInputInsert(StringConverter, FirstNameValidator);
+            parameter = lastName;
+            lastName = ReadInputInsert(StringConverter, LastNameValidator);
+            parameter = dateOfBirth;
+            DateTime date = ReadInputInsert(DateConverter, DateOfBirthValidator);
+            short age = Convert.ToInt16(DateTime.Now.Year - date.Year);
+            parameter = salary;
+            decimal sal = ReadInputInsert(DecimalConverter, SalaryValidator);
+            parameter = symbol;
+            char symb = ReadInputInsert(CharConverter, SymbolValidator);
+
+            var person = new Person
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                DateOfBirth = date,
+                Age = age,
+                Salary = sal,
+                Symbol = symb,
+            };
+
+            return person;
         }
 
         public static Person NewPerson(string nameValidator)

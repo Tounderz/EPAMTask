@@ -13,9 +13,11 @@ namespace FileCabinetApp
    {
         int CreateRecord(Person person);
 
-        void EditRecord(int id, Person person);
+        int InsertRecord(int id, Person person);
 
-        void RemoveRecord(int id);
+        void UpdateRecord(int id, Person person);
+
+        void DeleteRecord(int id);
 
         FileCabinetServiceSnapshot MakeSnapshot();
 
@@ -27,14 +29,16 @@ namespace FileCabinetApp
 
         Tuple<int, int> PurgeRecord();
 
-        ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName);
+        IEnumerable<FileCabinetRecord> FindByFirstName(string firstName);
 
-        ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName);
+        IEnumerable<FileCabinetRecord> FindByLastName(string lastName);
 
-        ReadOnlyCollection<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth);
+        IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth);
 
-        void AddDitionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary); // добавление данных в словарь
+        IEnumerable<FileCabinetRecord> FindByAge(string age);
 
-        void RemoveDitionaryItem(int id, Dictionary<string, List<FileCabinetRecord>> dictionary); // удаление данных из словаря по id
-   }
+        IEnumerable<FileCabinetRecord> FindBySalary(string salary);
+
+        IEnumerable<FileCabinetRecord> FindBySymbol(string symbol);
+    }
 }
