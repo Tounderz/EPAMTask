@@ -1,26 +1,26 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#pragma warning disable SA1202
 #pragma warning disable SA1600
+#pragma warning disable SA1202
 #pragma warning disable S1172
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class PurgeCommandHandler : ServiceCommandHandlerBase
+    public class StatCommandHandler : ServiceCommandHandlerBase
     {
-        public PurgeCommandHandler(IFileCabinetService service)
+        public StatCommandHandler(IFileCabinetService service)
             : base(service)
         {
         }
 
-        private void Purge(string parameters)
+        private void Stat(string parameters) // вывод количества объектов в списке
         {
-            Tuple<int, int> tuple = this.service.PurgeRecord();
-            Console.WriteLine($"Data file processing is completed: {tuple.Item1} of {tuple.Item2} records were purged.");
+            var recordsCount = this.service.GetRecordsCount();
+            Console.WriteLine($"{recordsCount.Item1} record(s).\n{recordsCount.Item2} delete record(s)");
         }
 
         public override AppCommandRequest Handle(AppCommandRequest request)
@@ -30,9 +30,9 @@ namespace FileCabinetApp.CommandHandlers
                 throw new ArgumentException($"The {nameof(request)} is null.");
             }
 
-            if (request.Command.ToLower() == ConstParameters.PurgeName)
+            if (request.Command.ToLower() == ConstParameters.StatName)
             {
-                this.Purge(request.Parameters);
+                this.Stat(request.Parameters);
                 return null;
             }
             else

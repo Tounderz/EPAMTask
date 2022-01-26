@@ -30,20 +30,30 @@ namespace FileCabinetApp
             return result;
         }
 
-        public void EditRecord(int id, Person person)
+        public int InsertRecord(int id, Person person)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            this.fileCabinetService.EditRecord(id, person);
+            int result = this.fileCabinetService.InsertRecord(id, person);
+            this.stopwatch.Stop();
+            Console.WriteLine($"Insert method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return result;
+        }
+
+        public void UpdateRecord(int id, Person person)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            this.fileCabinetService.UpdateRecord(id, person);
             this.stopwatch.Stop();
             Console.WriteLine($"Edit method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
         }
 
-        public void RemoveRecord(int id)
+        public void DeleteRecord(int id)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            this.fileCabinetService.RemoveRecord(id);
+            this.fileCabinetService.DeleteRecord(id);
             this.stopwatch.Stop();
             Console.WriteLine($"Remove method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
         }
@@ -119,6 +129,36 @@ namespace FileCabinetApp
             IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(dateOfBirth);
             this.stopwatch.Stop();
             Console.WriteLine($"FindByDateOfBirth method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindByAge(string age)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(age);
+            this.stopwatch.Stop();
+            Console.WriteLine($"FindByAge method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySalary(string salary)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(salary);
+            this.stopwatch.Stop();
+            Console.WriteLine($"FindBySalary method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return fileCabinetRecords;
+        }
+
+        public IEnumerable<FileCabinetRecord> FindBySymbol(string symbol)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            IEnumerable<FileCabinetRecord> fileCabinetRecords = this.fileCabinetService.FindByDateOfBirth(symbol);
+            this.stopwatch.Stop();
+            Console.WriteLine($"FindBySymbol method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return fileCabinetRecords;
         }
     }

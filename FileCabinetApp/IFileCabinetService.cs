@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,9 +13,11 @@ namespace FileCabinetApp
    {
         int CreateRecord(Person person);
 
-        void EditRecord(int id, Person person);
+        int InsertRecord(int id, Person person);
 
-        void RemoveRecord(int id);
+        void UpdateRecord(int id, Person person);
+
+        void DeleteRecord(int id);
 
         FileCabinetServiceSnapshot MakeSnapshot();
 
@@ -32,5 +34,11 @@ namespace FileCabinetApp
         IEnumerable<FileCabinetRecord> FindByLastName(string lastName);
 
         IEnumerable<FileCabinetRecord> FindByDateOfBirth(string dateOfBirth);
-   }
+
+        IEnumerable<FileCabinetRecord> FindByAge(string age);
+
+        IEnumerable<FileCabinetRecord> FindBySalary(string salary);
+
+        IEnumerable<FileCabinetRecord> FindBySymbol(string symbol);
+    }
 }

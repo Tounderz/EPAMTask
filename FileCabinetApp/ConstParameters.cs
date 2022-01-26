@@ -29,16 +29,18 @@ namespace FileCabinetApp
         public const string LongTypeLineParameter = "--storage";
         public const string ShortTypeLineParameter = "-s";
 
-        public const string Help = "help";
-        public const string StartName = "start";
+        public const string HelpName = "help";
+        public const string HelpFullName = "helpfull";
+        public const string StatName = "stat";
         public const string ListName = "list";
         public const string ExitName = "exit";
         public const string CreateName = "create";
-        public const string EditName = "edit";
+        public const string InsertName = "insert";
+        public const string UpdateName = "update";
         public const string FindName = "find";
         public const string ExportName = "export";
         public const string ImportName = "import";
-        public const string RemoveName = "remove";
+        public const string DeleteName = "delete";
         public const string PurgeName = "purge";
 
         public const string FormatDate = "yyyy-MMM-dd";
@@ -54,5 +56,7 @@ namespace FileCabinetApp
         public const string LoggerPathName = "serviceLogger.txt";
         public const string DBPathName = "cabinet-records.db";
         public const string ValidationRulesFileName = "validation-rules.json";
+
+        public const string UpdateAnd = "and";
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,10 +11,61 @@ namespace FileCabinetApp.CommandHandlers
 {
     public class PrintMissedCommandInfoHandler : CommandHandlerBase
     {
-        private static void PrintMissedCommandInfo(string command)
+        private static List<string> commandNames = new ()
         {
-            Console.WriteLine($"There is no '{command}' command.");
+            ConstParameters.HelpName,
+            ConstParameters.HelpFullName,
+            ConstParameters.StatName,
+            ConstParameters.ListName,
+            ConstParameters.ExitName,
+            ConstParameters.CreateName,
+            ConstParameters.InsertName,
+            ConstParameters.UpdateName,
+            ConstParameters.FindName,
+            ConstParameters.ExportName,
+            ConstParameters.ImportName,
+            ConstParameters.DeleteName,
+            ConstParameters.PurgeName,
+        };
+
+        private static IEnumerable<string> similarCommands;
+
+        private static void PrintMissedCommandInfo(AppCommandRequest request)
+        {
+            Console.WriteLine($"There is no '{request.Command}' command. See 'help'.");
+            similarCommands = GetSimilarCommands(request);
+            Print();
             Console.WriteLine();
+        }
+
+        private static void Print()
+        {
+            if (similarCommands.Count() == 1)
+            {
+                Console.WriteLine("The most similar command is:");
+                Console.WriteLine("\t{0}", similarCommands.ToArray());
+            }
+            else if (similarCommands.Count() > 1)
+            {
+                Console.WriteLine("The most similar commands are:");
+                foreach (var command in similarCommands)
+                {
+                    Console.WriteLine("\t{0}", command);
+                }
+            }
+        }
+
+        private static IEnumerable<string> GetSimilarCommands(AppCommandRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            string requestCommandSymbols = request.Command.ToUpper();
+            var commandsIntersactions = commandNames.Select(i => (i, i.ToUpper())).Select(j => (j.i, j.Item2.Intersect(requestCommandSymbols).Count()));
+            int max = commandsIntersactions.Max(i => i.Item2);
+            return max > 2 ? commandsIntersactions.Where(i => i.Item2.Equals(max)).Select(j => j.i) : Enumerable.Empty<string>();
         }
 
         public override AppCommandRequest Handle(AppCommandRequest request)
@@ -24,7 +75,7 @@ namespace FileCabinetApp.CommandHandlers
                 throw new ArgumentException($"The {nameof(request)} is null.");
             }
 
-            PrintMissedCommandInfo(request.Command);
+            PrintMissedCommandInfo(request);
             return null;
         }
     }

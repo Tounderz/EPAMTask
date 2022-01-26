@@ -80,27 +80,29 @@ namespace FileCabinetApp
         {
             var printMissedCommandInfoHandler = new PrintMissedCommandInfoHandler();
             var helpCommandHandler = new HelpCommandHandler();
-            var startCommandHandler = new StartCommandHandler(fileCabinetService);
+            var statCommandHandler = new StatCommandHandler(fileCabinetService);
             var exitCommandHandler = new ExitCommandHandler(GetIsRunning, fileStream);
             var listCommandHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var createCommandHandler = new CreateCommandHandler(fileCabinetService, nameValidator);
-            var editCommandHandler = new EditCommandHandler(fileCabinetService, nameValidator);
+            var insertCommandHandler = new InsertCommandHandler(fileCabinetService, nameValidator);
+            var updateCommandHandler = new UpdateCommandHandler(fileCabinetService, nameValidator);
             var findCommandHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportCommandHandler = new ExportCommandHandler(fileCabinetService);
             var importCommandHandler = new ImportCommandHandler(fileCabinetService);
-            var removeCommandHandler = new RemoveCommandHandler(fileCabinetService);
+            var deleteCommandHandler = new DeleteCommandHandler(fileCabinetService);
             var purgeCommandHandler = new PurgeCommandHandler(fileCabinetService);
-            helpCommandHandler.SetNext(createCommandHandler);
-            createCommandHandler.SetNext(editCommandHandler);
-            editCommandHandler.SetNext(exitCommandHandler);
-            exitCommandHandler.SetNext(exportCommandHandler);
-            exportCommandHandler.SetNext(findCommandHandler);
-            findCommandHandler.SetNext(importCommandHandler);
-            importCommandHandler.SetNext(purgeCommandHandler);
-            purgeCommandHandler.SetNext(removeCommandHandler);
-            removeCommandHandler.SetNext(startCommandHandler);
-            startCommandHandler.SetNext(listCommandHandler);
-            listCommandHandler.SetNext(printMissedCommandInfoHandler);
+            helpCommandHandler.SetNext(statCommandHandler);
+            statCommandHandler.SetNext(exitCommandHandler);
+            exitCommandHandler.SetNext(listCommandHandler);
+            listCommandHandler.SetNext(createCommandHandler);
+            createCommandHandler.SetNext(insertCommandHandler);
+            insertCommandHandler.SetNext(updateCommandHandler);
+            updateCommandHandler.SetNext(findCommandHandler);
+            findCommandHandler.SetNext(exportCommandHandler);
+            exportCommandHandler.SetNext(importCommandHandler);
+            importCommandHandler.SetNext(deleteCommandHandler);
+            deleteCommandHandler.SetNext(purgeCommandHandler);
+            purgeCommandHandler.SetNext(printMissedCommandInfoHandler);
             return helpCommandHandler;
         }
 
