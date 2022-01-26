@@ -48,7 +48,7 @@ namespace FileCabinetApp
             return record.Id;
         }
 
-        public void EditRecord(int id, Person person)
+        public void UpdateRecord(int id, Person person)
         {
             this.recordValidator.ValidateParameters(person);
             var record = this.GetFileCabinetRecord(person, id);
@@ -57,7 +57,7 @@ namespace FileCabinetApp
             this.list[id - 1] = record;
         }
 
-        public void RemoveRecord(int id)
+        public void DeleteRecord(int id)
         {
             FileCabinetRecord record = this.list.Find(i => i.Id == id);
             this.list.Remove(record);

@@ -74,7 +74,7 @@ namespace FileCabinetApp.CommandHandlers
             var record = this.service.GetRecords().ToList().Find(i => i.Id == id);
             if (record != null)
             {
-                this.service.RemoveRecord(id);
+                this.service.DeleteRecord(id);
                 Console.WriteLine($"Record {id} is deleted.");
             }
             else
@@ -89,7 +89,7 @@ namespace FileCabinetApp.CommandHandlers
             int count = 0;
             for (int i = 0; i < this.list.Count; i++)
             {
-                this.service.RemoveRecord(this.list[i].Id);
+                this.service.DeleteRecord(this.list[i].Id);
                 stringBuilder.Append($"#{this.list[i].Id}, ");
                 count++;
             }

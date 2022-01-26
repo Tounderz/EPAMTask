@@ -85,12 +85,10 @@ namespace FileCabinetApp
             var listCommandHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var createCommandHandler = new CreateCommandHandler(fileCabinetService, nameValidator);
             var insertCommandHandler = new InsertCommandHandler(fileCabinetService, nameValidator);
-            var editCommandHandler = new EditCommandHandler(fileCabinetService, nameValidator);
             var updateCommandHandler = new UpdateCommandHandler(fileCabinetService, nameValidator);
             var findCommandHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
             var exportCommandHandler = new ExportCommandHandler(fileCabinetService);
             var importCommandHandler = new ImportCommandHandler(fileCabinetService);
-            var removeCommandHandler = new RemoveCommandHandler(fileCabinetService);
             var deleteCommandHandler = new DeleteCommandHandler(fileCabinetService);
             var purgeCommandHandler = new PurgeCommandHandler(fileCabinetService);
             helpCommandHandler.SetNext(statCommandHandler);
@@ -98,13 +96,11 @@ namespace FileCabinetApp
             exitCommandHandler.SetNext(listCommandHandler);
             listCommandHandler.SetNext(createCommandHandler);
             createCommandHandler.SetNext(insertCommandHandler);
-            insertCommandHandler.SetNext(editCommandHandler);
-            editCommandHandler.SetNext(updateCommandHandler);
+            insertCommandHandler.SetNext(updateCommandHandler);
             updateCommandHandler.SetNext(findCommandHandler);
             findCommandHandler.SetNext(exportCommandHandler);
             exportCommandHandler.SetNext(importCommandHandler);
-            importCommandHandler.SetNext(removeCommandHandler);
-            removeCommandHandler.SetNext(deleteCommandHandler);
+            importCommandHandler.SetNext(deleteCommandHandler);
             deleteCommandHandler.SetNext(purgeCommandHandler);
             purgeCommandHandler.SetNext(printMissedCommandInfoHandler);
             return helpCommandHandler;

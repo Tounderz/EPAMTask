@@ -84,7 +84,7 @@ namespace FileCabinetApp
             return this.recordId;
         }
 
-        public void EditRecord(int id, Person person)
+        public void UpdateRecord(int id, Person person)
         {
             this.recordValidator.ValidateParameters(person);
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -98,7 +98,7 @@ namespace FileCabinetApp
             this.ConvertRecordToBytes(record);
         }
 
-        public void RemoveRecord(int id)
+        public void DeleteRecord(int id)
         {
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[ConstParameters.RecordLength];

@@ -35,12 +35,10 @@ namespace FileCabinetApp
         public const string ExitName = "exit";
         public const string CreateName = "create";
         public const string InsertName = "insert";
-        public const string EditName = "edit";
         public const string UpdateName = "update";
         public const string FindName = "find";
         public const string ExportName = "export";
         public const string ImportName = "import";
-        public const string RemoveName = "remove";
         public const string DeleteName = "delete";
         public const string PurgeName = "purge";
 

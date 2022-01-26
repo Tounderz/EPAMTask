@@ -40,20 +40,20 @@ namespace FileCabinetApp
             return result;
         }
 
-        public void EditRecord(int id, Person person)
+        public void UpdateRecord(int id, Person person)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            this.fileCabinetService.EditRecord(id, person);
+            this.fileCabinetService.UpdateRecord(id, person);
             this.stopwatch.Stop();
             Console.WriteLine($"Edit method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
         }
 
-        public void RemoveRecord(int id)
+        public void DeleteRecord(int id)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            this.fileCabinetService.RemoveRecord(id);
+            this.fileCabinetService.DeleteRecord(id);
             this.stopwatch.Stop();
             Console.WriteLine($"Remove method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
         }

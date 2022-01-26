@@ -133,7 +133,7 @@ namespace FileCabinetApp.CommandHandlers
             }
 
             var person = CreatingPerson.NewPersonInsert(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
-            this.service.EditRecord(record.Id, person);
+            this.service.UpdateRecord(record.Id, person);
         }
 
         private void GetRecordsListSeach(string key, string value)

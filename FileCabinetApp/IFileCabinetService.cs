@@ -15,9 +15,9 @@ namespace FileCabinetApp
 
         int InsertRecord(int id, Person person);
 
-        void EditRecord(int id, Person person);
+        void UpdateRecord(int id, Person person);
 
-        void RemoveRecord(int id);
+        void DeleteRecord(int id);
 
         FileCabinetServiceSnapshot MakeSnapshot();
 

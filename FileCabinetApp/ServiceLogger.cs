@@ -54,7 +54,7 @@ namespace FileCabinetApp
             return result;
         }
 
-        public void EditRecord(int id, Person person)
+        public void UpdateRecord(int id, Person person)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Edit() with " +
@@ -66,16 +66,16 @@ namespace FileCabinetApp
                 $"Salary = '{person.Salary}', " +
                 $"Symbol = '{person.Symbol}'.");
 
-            this.fileCabinetService.EditRecord(id, person);
+            this.fileCabinetService.UpdateRecord(id, person);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Edit() edited entry by '{id}'.");
         }
 
-        public void RemoveRecord(int id)
+        public void DeleteRecord(int id)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Edit() with " +
                 $"id = '{id}'.");
-            this.fileCabinetService.RemoveRecord(id);
+            this.fileCabinetService.DeleteRecord(id);
             textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Edit() deleting an entry by '{id}'.");
         }
 
