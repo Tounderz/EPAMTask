@@ -29,6 +29,8 @@ namespace FileCabinetApp
 
         Tuple<int, int> PurgeRecord();
 
+        FileCabinetRecord FindById(int id);
+
         IEnumerable<FileCabinetRecord> FindByFirstName(string firstName);
 
         IEnumerable<FileCabinetRecord> FindByLastName(string lastName);

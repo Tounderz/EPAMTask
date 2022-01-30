@@ -27,7 +27,7 @@ namespace FileCabinetApp.CommandHandlers
                 IEnumerable<FileCabinetRecord> fileCabinetRecords;
                 switch (searchСriteria)
                 {
-                    case "firstname":
+                    case ConstParameters.FirstName:
                         {
                             if (this.service.GetRecords().FirstOrDefault(i => i.FirstName.ToLower() == nameParameter.ToLower()) == null)
                             {
@@ -42,7 +42,7 @@ namespace FileCabinetApp.CommandHandlers
                             }
                         }
 
-                    case "lastname":
+                    case ConstParameters.LastName:
                         {
                             if (this.service.GetRecords().FirstOrDefault(i => i.LastName.ToLower() == nameParameter.ToLower()) == null)
                             {
@@ -57,7 +57,7 @@ namespace FileCabinetApp.CommandHandlers
                             }
                         }
 
-                    case "dateofbirth":
+                    case ConstParameters.DateOfBirth:
                         {
                             if (this.service.GetRecords().FirstOrDefault(i => i.DateOfBirth.ToString("yyyy-MMM-dd").ToLower() == nameParameter.ToLower()) == null)
                             {
@@ -72,7 +72,7 @@ namespace FileCabinetApp.CommandHandlers
                             }
                         }
 
-                    case "age":
+                    case ConstParameters.Age:
                         if (this.service.GetRecords().FirstOrDefault(i => i.Age == int.Parse(nameParameter)) == null)
                         {
                             Console.WriteLine("Specify the search criteria");
@@ -85,7 +85,7 @@ namespace FileCabinetApp.CommandHandlers
                             break;
                         }
 
-                    case "salary":
+                    case ConstParameters.Salary:
                         if (this.service.GetRecords().FirstOrDefault(i => i.Salary == decimal.Parse(nameParameter)) == null)
                         {
                             Console.WriteLine("Specify the search criteria");
@@ -98,7 +98,7 @@ namespace FileCabinetApp.CommandHandlers
                             break;
                         }
 
-                    case "symbol":
+                    case ConstParameters.Symbol:
                         if (this.service.GetRecords().FirstOrDefault(i => i.Symbol == char.Parse(nameParameter)) == null)
                         {
                             Console.WriteLine("Specify the search criteria");

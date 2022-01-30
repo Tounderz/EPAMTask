@@ -22,61 +22,48 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Import(string parameters)
         {
-            if (string.IsNullOrEmpty(parameters))
+            try
             {
-                Console.WriteLine("Specify the search criteria");
-            }
-            else
-            {
-                string[] parameterArray = parameters.Split();
-                string fileType = parameterArray[0];
-                string pathName = parameterArray.Last();
+                if (string.IsNullOrEmpty(parameters))
+                {
+                    throw new ArgumentException("Incorrect input!");
+                }
+
+                string[] arrParameters = parameters.Split();
+                if (arrParameters.Length != 2)
+                {
+                    throw new ArgumentException("You didn't specify the file type or path(or file name)");
+                }
+
+                string fileType = arrParameters[0].ToLower();
+                string pathName = arrParameters.Last();
                 string fileName = Path.GetFileName(pathName);
+                string typeFile = Path.GetExtension(fileName).TrimStart('.').ToLower();
+                if (fileType != typeFile)
+                {
+                    throw new ArgumentException("Incorrect input! 1. import csv(or xml) filename.csv(or xml) ; 2. import csv(or xml) full address to the file'\'filename.csv(or xml)!");
+                }
+
+                if (!File.Exists(pathName))
+                {
+                    throw new ArgumentException($"Import error: file {pathName} is not exist.");
+                }
 
                 switch (fileType)
                 {
-                    case "csv":
-                        try
-                        {
-                            if (File.Exists(fileName))
-                            {
-                                this.GetLoadFromCsv(fileName, pathName);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Import error: file {pathName} is not exist.");
-                            }
-                        }
-                        catch (DirectoryNotFoundException)
-                        {
-                            Console.WriteLine("Incorrect input! 1. import csv filename.csv ; 2. import csv full address to the file'\'filename.csv");
-                        }
-
+                    case ConstParameters.CsvType:
+                        this.GetLoadFromCsv(fileName, pathName);
                         break;
-
-                    case "xml":
-                        try
-                        {
-                            if (File.Exists(fileName))
-                            {
-                                this.GetLoadFromXml(fileName, pathName);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Import error: file {pathName} is not exist.");
-                            }
-                        }
-                        catch (DirectoryNotFoundException)
-                        {
-                            Console.WriteLine("Incorrect input! 1. import xml filename.csv ; 2. import xml full address to the file'\'filename.csv");
-                        }
-
+                    case ConstParameters.XmlType:
+                        this.GetLoadFromXml(fileName, pathName);
                         break;
-
                     default:
-                        Console.WriteLine("Incorrect input! 1. import csv (or xml) filename.csv ; 2. import csv (or xml) full address to the file'\'filename.csv");
-                        break;
+                        throw new ArgumentException("Incorrect input! 1. import csv(or xml) filename.csv(or xml); 2. import csv(or xml) full address to the file'\'filename.csv(or xml)!");
                 }
+            }
+            catch (Exception ex)
+            {
+                ConstParameters.PrintException(ex);
             }
         }
 

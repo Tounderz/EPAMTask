@@ -9,12 +9,14 @@ using FileCabinetApp.Validators;
 #pragma warning disable SA1600
 #pragma warning disable CA1305
 #pragma warning disable SA1202
+#pragma warning disable SA1305
 
 namespace FileCabinetApp
 {
     public class FileCabinetMemoryService : IFileCabinetService
     {
         private readonly List<FileCabinetRecord> list = new ();
+        private readonly Dictionary<int, FileCabinetRecord> idDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
@@ -133,6 +135,11 @@ namespace FileCabinetApp
             throw new NotImplementedException();
         }
 
+        public FileCabinetRecord FindById(int id)
+        {
+            return this.idDictionary[id];
+        }
+
         public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             return this.firstNameDictionary.TryGetValue(firstName, out List<FileCabinetRecord> records) ?
@@ -180,8 +187,17 @@ namespace FileCabinetApp
             dictionary[keyStr].Add(record);
         }
 
+        private void AddDictionaryId(FileCabinetRecord record)
+        {
+            if (!this.idDictionary.ContainsKey(record.Id))
+            {
+                this.idDictionary.Add(record.Id, record);
+            }
+        }
+
         private void AddInAllDictionaryNewItem(FileCabinetRecord record)
         {
+            this.AddDictionaryId(record);
             this.AddDictionaryItem(record.FirstName, record, this.firstNameDictionary);
             this.AddDictionaryItem(record.LastName, record, this.lastNameDictionary);
             this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
@@ -205,8 +221,17 @@ namespace FileCabinetApp
             }
         }
 
+        private void RemoveDictionaryId(int id)
+        {
+            if (this.idDictionary.ContainsKey(id))
+            {
+                this.idDictionary.Remove(id);
+            }
+        }
+
         private void RemoveInAllDictionaryItem(int id)
         {
+            this.RemoveDictionaryId(id);
             this.RemoveDictionaryItem(id, this.firstNameDictionary);
             this.RemoveDictionaryItem(id, this.lastNameDictionary);
             this.RemoveDictionaryItem(id, this.dateOfBirthDictionary);

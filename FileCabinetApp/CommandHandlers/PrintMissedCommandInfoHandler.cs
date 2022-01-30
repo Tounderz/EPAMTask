@@ -22,6 +22,7 @@ namespace FileCabinetApp.CommandHandlers
             ConstParameters.InsertName,
             ConstParameters.UpdateName,
             ConstParameters.FindName,
+            ConstParameters.SelectName,
             ConstParameters.ExportName,
             ConstParameters.ImportName,
             ConstParameters.DeleteName,

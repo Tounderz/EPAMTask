@@ -28,30 +28,30 @@ namespace FileCabinetApp.CommandHandlers
                 string valueParameter = arrParameters[2].Trim('\'', ' ').ToUpper();
                 switch (nameParameter)
                 {
-                    case "id":
+                    case ConstParameters.Id:
                         this.DeleteRecordById(int.Parse(valueParameter));
                         break;
-                    case "firstname":
+                    case ConstParameters.FirstName:
                         this.list = this.service.FindByFirstName(valueParameter).ToList();
                         this.DeleteRecordByParameter(valueParameter);
                         break;
-                    case "lastname":
+                    case ConstParameters.LastName:
                         this.list = this.service.FindByLastName(valueParameter).ToList();
                         this.DeleteRecordByParameter(valueParameter);
                         break;
-                    case "dateofbirth":
+                    case ConstParameters.DateOfBirth:
                         this.list = this.service.FindByDateOfBirth(valueParameter).ToList();
                         this.DeleteRecordByParameter(valueParameter);
                         break;
-                    case "age":
+                    case ConstParameters.Age:
                         this.list = this.service.FindByAge(valueParameter).ToList();
                         this.DeleteRecordByParameter(valueParameter);
                         break;
-                    case "salary":
+                    case ConstParameters.Salary:
                         this.list = this.service.FindBySalary(valueParameter).ToList();
                         this.DeleteRecordByParameter(valueParameter);
                         break;
-                    case "symbol":
+                    case ConstParameters.Symbol:
                         this.list = this.service.FindBySymbol(valueParameter).ToList();
                         this.DeleteRecordByParameter(valueParameter);
                         break;
@@ -62,10 +62,7 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                if (ex is FormatException || ex is ArgumentNullException || ex is ArgumentOutOfRangeException)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                ConstParameters.PrintException(ex);
             }
         }
 

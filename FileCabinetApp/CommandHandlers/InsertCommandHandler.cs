@@ -51,19 +51,19 @@ namespace FileCabinetApp.CommandHandlers
                 {
                     switch (parametersList[i])
                     {
-                        case "firstname":
+                        case ConstParameters.FirstName:
                             firstName = valueList[i];
                             break;
-                        case "lastname":
+                        case ConstParameters.LastName:
                             lastName = valueList[i];
                             break;
-                        case "dateofbirth":
+                        case ConstParameters.DateOfBirth:
                             dateOfBirth = valueList[i];
                             break;
-                        case "salary":
+                        case ConstParameters.Salary:
                             salary = valueList[i];
                             break;
-                        case "symbol":
+                        case ConstParameters.Symbol:
                             symbol = valueList[i];
                             break;
                         default:
@@ -78,10 +78,7 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                if (ex is FormatException || ex is IndexOutOfRangeException || ex is ArgumentNullException || ex is ArgumentException)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                ConstParameters.PrintException(ex);
             }
         }
 
