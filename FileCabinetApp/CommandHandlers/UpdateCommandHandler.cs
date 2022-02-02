@@ -33,47 +33,28 @@ namespace FileCabinetApp.CommandHandlers
 
                 var newParameters = SeachMethods.GetListParameters(arrParameters[0].Replace(ConstParameters.Set, string.Empty, StringComparison.OrdinalIgnoreCase).Trim());
                 string[] interimParameters = arrParameters[1].Trim().Split();
-                if (interimParameters.Length == 1 || interimParameters[0] == " " || interimParameters[0] == string.Empty)
-                {
-                    throw new ArgumentException("The minimum number of search criteria is one!");
-                }
-
-                Tuple<int, string[]> seachCountAnd = SeachMethods.SeachCountAnd(interimParameters);
-                interimParameters = seachCountAnd.Item2;
-                int countAnd = seachCountAnd.Item1;
-
-                IEnumerable<(string key, string value)> seachParameters = SeachMethods.GetListParameters(string.Join(string.Empty, interimParameters));
-                if (!seachParameters.Any())
-                {
-                    throw new ArgumentException($"Incorrect data entry for the search!");
-                }
-
-                this.fileCabinetRecords = SeachMethods.GetRecordsList(countAnd, seachParameters, this.service);
-
+                this.fileCabinetRecords = SeachMethods.GetRecordsList(interimParameters, this.service, ConstParameters.UpdateName);
                 StringBuilder stringBuilder = new ();
-                if (this.fileCabinetRecords.Count <= 0)
+                for (int i = 0; i < this.fileCabinetRecords.Count; i++)
                 {
-                    throw new ArgumentException("There is no record(s) with these search parameters!");
-                }
-                else if (this.fileCabinetRecords.Count == 1)
-                {
-                    foreach (var item in this.fileCabinetRecords)
+                    this.GetRecordNewParameter(newParameters, this.fileCabinetRecords[i]);
+                    if (i + 1 == this.fileCabinetRecords.Count)
                     {
-                        this.GetRecordNewParameter(newParameters, item);
-                        stringBuilder.Append($"# {item.Id}");
+                        stringBuilder.Append($"#{this.fileCabinetRecords[i].Id}");
                     }
+                    else
+                    {
+                        stringBuilder.Append($"#{this.fileCabinetRecords[i].Id}, ");
+                    }
+                }
 
-                    Console.WriteLine($"Update {stringBuilder} is record");
+                if (this.fileCabinetRecords.Count == 1)
+                {
+                    Console.WriteLine($"Record {stringBuilder} is updated.");
                 }
                 else
                 {
-                    foreach (var item in this.fileCabinetRecords)
-                    {
-                        this.GetRecordNewParameter(newParameters, item);
-                        stringBuilder.Append($"# {item.Id}, ");
-                    }
-
-                    Console.WriteLine($"Update {stringBuilder} are record");
+                    Console.WriteLine($"Records {stringBuilder} are updated.");
                 }
             }
             catch (Exception ex)
@@ -109,12 +90,11 @@ namespace FileCabinetApp.CommandHandlers
                         symbol = value;
                         break;
                     default:
-                        Console.WriteLine("This criterion is missing!");
-                        break;
+                        throw new ArgumentException(ConstParameters.IncorrectInput);
                 }
             }
 
-            var person = CreatingPerson.NewPersonInsert(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
+            var person = CreatingPerson.NewPersonInsertAndUpdate(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
             this.service.UpdateRecord(record.Id, person);
         }
 

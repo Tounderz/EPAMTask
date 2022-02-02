@@ -33,12 +33,10 @@ namespace FileCabinetApp
         public const string HelpName = "help";
         public const string HelpFullName = "helpfull";
         public const string StatName = "stat";
-        public const string ListName = "list";
         public const string ExitName = "exit";
         public const string CreateName = "create";
         public const string InsertName = "insert";
         public const string UpdateName = "update";
-        public const string FindName = "find";
         public const string ExportName = "export";
         public const string ImportName = "import";
         public const string DeleteName = "delete";
@@ -67,6 +65,8 @@ namespace FileCabinetApp
         public const string Where = "where";
         public const string Set = "set";
         public const string AllParametersPrint = "all";
+        public const int MinCriteriaDeleteOrUpdate = 1;
+        public const int MinCriteriaSelect = 2;
 
         public const string Id = "id";
         public const string FirstName = "firstname";
@@ -87,6 +87,8 @@ namespace FileCabinetApp
         public const string SideLine = "|";
         public const string Corner = "+";
         public const char Line = '-';
+
+        public const string IncorrectInput = "This criterion is missing!";
 
         public static void PrintException(Exception ex)
         {

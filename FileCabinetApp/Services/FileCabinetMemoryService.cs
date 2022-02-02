@@ -7,7 +7,6 @@ using FileCabinetApp.Validators;
 
 #pragma warning disable CA1822
 #pragma warning disable SA1600
-#pragma warning disable CA1305
 #pragma warning disable SA1202
 #pragma warning disable SA1305
 

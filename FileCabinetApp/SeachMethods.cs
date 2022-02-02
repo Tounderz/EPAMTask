@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace FileCabinetApp
         private static IFileCabinetService service;
         private static List<FileCabinetRecord> records = new ();
         private static List<FileCabinetRecord> interimRecords = new ();
+        private static Dictionary<string, List<string>> cache = new ();
 
         public static IEnumerable<(string key, string value)> GetListParameters(string parameters)
         {
@@ -22,10 +24,25 @@ namespace FileCabinetApp
             foreach (var item in arrKeyValue)
             {
                 string[] interim = item.Split('=');
-                result.Add((interim[0].Trim().ToLower(), interim[1].Trim('\'', ' ')));
+                string key = interim[0].Trim().ToLower();
+                string value = interim[1].Trim('\'', ' ').ToLower();
+                result.Add((key, value));
             }
 
             return result;
+        }
+
+        private static void AddDictionaryCache(string key, string value)
+        {
+            if (!cache.ContainsKey(key))
+            {
+                cache.Add(key, new List<string>());
+            }
+
+            if (!cache[key].Contains(value))
+            {
+                cache[key].Add(value);
+            }
         }
 
         public static Tuple<int, string[]> SeachCountAnd(string[] interimParameters)
@@ -89,12 +106,14 @@ namespace FileCabinetApp
 
                     case ConstParameters.Symbol:
                         char symbol = char.Parse(value);
-                        interimRecords = service.FindBySymbol(symbol.ToString().ToUpper()).ToList();
+                        interimRecords = service.FindBySymbol(symbol.ToString()).ToList();
                         AddRecordInList(interimRecords);
                         break;
                     default:
-                        throw new ArgumentException("Incorrect input!");
+                        throw new ArgumentException(ConstParameters.IncorrectInput);
                 }
+
+                Memoization.AddCache(records);
             }
             catch (Exception ex)
             {
@@ -114,11 +133,11 @@ namespace FileCabinetApp
                         break;
 
                     case ConstParameters.FirstName:
-                        records = records.Where(i => i.FirstName.ToLower() == value.ToLower()).ToList();
+                        records = records.Where(i => i.FirstName.ToLower() == value).ToList();
                         break;
 
                     case ConstParameters.LastName:
-                        records = records.Where(i => i.LastName.ToLower() == value.ToLower()).ToList();
+                        records = records.Where(i => i.LastName.ToLower() == value).ToList();
                         break;
 
                     case ConstParameters.DateOfBirth:
@@ -141,7 +160,7 @@ namespace FileCabinetApp
                         records = records.Where(i => i.Symbol == symbol).ToList();
                         break;
                     default:
-                        throw new ArgumentException("Incorrect input!");
+                        throw new ArgumentException(ConstParameters.IncorrectInput);
                 }
             }
             catch (Exception ex)
@@ -150,24 +169,74 @@ namespace FileCabinetApp
             }
         }
 
-        public static List<FileCabinetRecord> GetRecordsList(int count, IEnumerable<(string key, string value)> seachParameters, IFileCabinetService fileCabinetService)
+        public static List<FileCabinetRecord> GetRecordsList(string[] interimParameters, IFileCabinetService fileCabinetService, string nameMethod)
         {
             records.Clear();
             service = fileCabinetService;
-            foreach (var (key, value) in seachParameters)
+            Tuple<int, string[]> seachCountAnd = SeachCountAnd(interimParameters);
+            interimParameters = seachCountAnd.Item2;
+            int countAnd = seachCountAnd.Item1;
+            IEnumerable<(string key, string value)> seachCriteria = GetListParameters(string.Join(string.Empty, interimParameters));
+            CheckCountSeachParameters(seachCriteria, nameMethod);
+            if (service is FileCabinetMemoryService)
             {
-                Find(key, value);
+                foreach (var (key, value) in seachCriteria)
+                {
+                    if (cache.Any(i => i.Key == key && i.Value.Contains(value)))
+                    {
+                        records = Memoization.SeachInCache(key, value);
+                    }
+                    else
+                    {
+                        Find(key, value);
+                        AddDictionaryCache(key, value);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var (key, value) in seachCriteria)
+                {
+                    Find(key, value);
+                }
             }
 
-            if (count > 0)
+            if (countAnd > 0)
             {
-                foreach (var (key, value) in seachParameters)
+                foreach (var (key, value) in seachCriteria)
                 {
                     SortingByMultipleCriteria(key, value);
                 }
             }
 
+            if (nameMethod == ConstParameters.InsertName || nameMethod == ConstParameters.UpdateName || nameMethod == ConstParameters.DeleteName)
+            {
+                Memoization.ClearCache();
+                cache.Clear();
+            }
+
+            CheckRecordsCount();
             return records;
+        }
+
+        private static void CheckCountSeachParameters(IEnumerable<(string key, string value)> seachParameters, string nameMethod)
+        {
+            if (!seachParameters.Any() && (nameMethod == ConstParameters.DeleteName || nameMethod == ConstParameters.UpdateName))
+            {
+                throw new ArgumentException("The minimum number of search criteria is one!");
+            }
+            else if (seachParameters.Count() < 2 && nameMethod == ConstParameters.SelectName)
+            {
+                throw new ArgumentException("Incorrect data entry for the search!");
+            }
+        }
+
+        private static void CheckRecordsCount()
+        {
+            if (records.Count < 1)
+            {
+                throw new ArgumentException("There is no record(s) with these search parameters!");
+            }
         }
 
         private static void AddRecordInList(List<FileCabinetRecord> fileCabinetRecords)

@@ -77,15 +77,16 @@ namespace FileCabinetApp.Table
                     }
                 }
 
-                // строка разделения после каждой записи
                 Console.WriteLine($"{line}{ConstParameters.SideLine}");
-                this.lengths.ForEach(l => Console.Write($"{ConstParameters.Corner}{ConstParameters.Line}{new string(ConstParameters.Line, l)}{ConstParameters.Line}"));
-                Console.WriteLine(ConstParameters.Corner);
+
+                // строка разделения после каждой записи
+                // this.lengths.ForEach(l => Console.Write($"{ConstParameters.Corner}{ConstParameters.Line}{new string(ConstParameters.Line, l)}{ConstParameters.Line}"));
+                // Console.WriteLine(ConstParameters.Corner);
             }
 
             // строка разделения только после всех записей
-            // this.lengths.ForEach(l => Console.Write($"{ConstParameters.Corner}{ConstParameters.Line}{new string(ConstParameters.Line, l)}{ConstParameters.Line}"));
-            // Console.WriteLine(ConstParameters.Corner);
+            this.lengths.ForEach(l => Console.Write($"{ConstParameters.Corner}{ConstParameters.Line}{new string(ConstParameters.Line, l)}{ConstParameters.Line}"));
+            Console.WriteLine(ConstParameters.Corner);
         }
     }
 }

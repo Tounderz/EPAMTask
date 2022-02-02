@@ -194,7 +194,7 @@ namespace FileCabinetApp
             while (true);
         }
 
-        public static Person NewPersonInsert(string nameValidator, string firstName, string lastName, string dateOfBirth, string salary, string symbol)
+        public static Person NewPersonInsertAndUpdate(string nameValidator, string firstName, string lastName, string dateOfBirth, string salary, string symbol)
         {
             ValidatorParameters(nameValidator);
             parameter = firstName;

@@ -39,7 +39,7 @@ namespace FileCabinetApp.CommandHandlers
                 string[] arrParameters = parameters.Split(ConstParameters.Where, StringSplitOptions.RemoveEmptyEntries);
 
                 // вывод всех записей в цикле if
-                if (arrParameters.Length == 1 && arrParameters[0] == ConstParameters.AllParametersPrint)
+                if (arrParameters.Length == 1 && (arrParameters[0] == ConstParameters.AllParametersPrint || string.IsNullOrEmpty(arrParameters[0]) || string.IsNullOrWhiteSpace(arrParameters[0])))
                 {
                     this.fileCabinetRecords = this.service.GetRecords().ToList();
                     FormationOfStrings.GetRow(this.columnNamesTable, this.fileCabinetRecords);
@@ -62,30 +62,8 @@ namespace FileCabinetApp.CommandHandlers
                 }
 
                 string[] interimParameters = arrParameters[1].Trim().Split();
-                if (interimParameters.Length < 3)
-                {
-                    throw new ArgumentException("The minimum number of search criteria is two!");
-                }
-
-                Tuple<int, string[]> seachCountAnd = SeachMethods.SeachCountAnd(interimParameters);
-                interimParameters = seachCountAnd.Item2;
-                int countAnd = seachCountAnd.Item1;
-
-                IEnumerable<(string key, string value)> seachParameters = SeachMethods.GetListParameters(string.Join(string.Empty, interimParameters));
-                if (seachParameters.Count() < 2)
-                {
-                    throw new ArgumentException("Incorrect data entry for the search!");
-                }
-
-                this.fileCabinetRecords = SeachMethods.GetRecordsList(countAnd, seachParameters, this.service);
-                if (this.fileCabinetRecords.Count > 0)
-                {
-                    FormationOfStrings.GetRow(columnNamesSorted, this.fileCabinetRecords);
-                }
-                else
-                {
-                    throw new ArgumentException("There is no record(s)with these search parameters!");
-                }
+                this.fileCabinetRecords = SeachMethods.GetRecordsList(interimParameters, this.service, ConstParameters.SelectName);
+                FormationOfStrings.GetRow(columnNamesSorted, this.fileCabinetRecords);
             }
             catch (Exception ex)
             {

@@ -42,7 +42,7 @@ namespace FileCabinetApp
             else
             {
                 Console.WriteLine("Using default validation rules.");
-                Console.WriteLine("Using memory service rules.");
+                Console.WriteLine("Using memory service.");
             }
 
             Console.WriteLine(ConstParameters.HintMessage);
@@ -137,17 +137,17 @@ namespace FileCabinetApp
                         {
                             fileStream = new FileStream(ConstParameters.DBPathName, FileMode.OpenOrCreate);
                             fileCabinetService = new FileCabinetFilesystemService(fileStream, recordValidator);
-                            Console.WriteLine("Using file service rules.");
+                            Console.WriteLine("Using file service.");
                         }
                         else if (string.Equals(rulesValidetion[(2 * i) + 1], ConstParameters.MemoryServiceName))
                         {
-                            Console.WriteLine("Using memory service rules.");
+                            Console.WriteLine("Using memory service.");
                         }
 
                         break;
 
                     default:
-                        Console.WriteLine("Using memory service rules.");
+                        Console.WriteLine("Using memory service.");
                         Console.WriteLine("Using default validation rules.");
                         break;
                 }

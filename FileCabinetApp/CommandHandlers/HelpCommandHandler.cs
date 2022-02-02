@@ -18,12 +18,6 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { ConstParameters.ExitName, "exits the application", "The 'exit' command exits the application." },
             new string[] { ConstParameters.StatName, "stat the application", "The 'stat' command outputs the amount of data in the shee" },
             new string[] { ConstParameters.CreateName, "create a record", "The 'create' command will create a new record in the sheet." },
-            new string[] { ConstParameters.ListName, "output list", "Commands 'list' outputs list." },
-            new string[]
-            {
-                ConstParameters.FindName, "search model: find search parameter \"search criteria\"",
-                "Search by parameters 'firstname or lastname or dateofbirth or age or salary or symbol', search model: find search parameter \"search criteria\".",
-            },
             new string[]
             {
                 ConstParameters.SelectName, "The 'select' command searches by certain criteria.",
