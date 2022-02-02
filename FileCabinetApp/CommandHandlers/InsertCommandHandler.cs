@@ -34,8 +34,8 @@ namespace FileCabinetApp.CommandHandlers
                 string dateOfBirth = string.Empty;
                 string salary = string.Empty;
                 string symbol = string.Empty;
-                var records = this.service.GetRecords();
-                if (valueList.Length != 6 || parametersList.Length != 6 || records.Any(i => i.Id == id))
+                var record = this.service.FindById(id);
+                if (valueList.Length != 6 || parametersList.Length != 6 || record != null)
                 {
                     if (valueList.Length != 6 || parametersList.Length != 6)
                     {
@@ -51,19 +51,19 @@ namespace FileCabinetApp.CommandHandlers
                 {
                     switch (parametersList[i])
                     {
-                        case "firstname":
+                        case ConstParameters.FirstName:
                             firstName = valueList[i];
                             break;
-                        case "lastname":
+                        case ConstParameters.LastName:
                             lastName = valueList[i];
                             break;
-                        case "dateofbirth":
+                        case ConstParameters.DateOfBirth:
                             dateOfBirth = valueList[i];
                             break;
-                        case "salary":
+                        case ConstParameters.Salary:
                             salary = valueList[i];
                             break;
-                        case "symbol":
+                        case ConstParameters.Symbol:
                             symbol = valueList[i];
                             break;
                         default:
@@ -71,17 +71,15 @@ namespace FileCabinetApp.CommandHandlers
                             break;
                     }
 
-                    var person = CreatingPerson.NewPersonInsert(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
+                    var person = CreatingPerson.NewPersonInsertAndUpdate(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
+                    Memoization.ClearCache();
                     this.service.InsertRecord(id, person);
                     Console.WriteLine($"Record # {id} is created");
                 }
             }
             catch (Exception ex)
             {
-                if (ex is FormatException || ex is IndexOutOfRangeException || ex is ArgumentNullException || ex is ArgumentException)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                ConstParameters.PrintException(ex);
             }
         }
 

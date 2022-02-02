@@ -42,7 +42,7 @@ namespace FileCabinetApp
             else
             {
                 Console.WriteLine("Using default validation rules.");
-                Console.WriteLine("Using memory service rules.");
+                Console.WriteLine("Using memory service.");
             }
 
             Console.WriteLine(ConstParameters.HintMessage);
@@ -82,36 +82,26 @@ namespace FileCabinetApp
             var helpCommandHandler = new HelpCommandHandler();
             var statCommandHandler = new StatCommandHandler(fileCabinetService);
             var exitCommandHandler = new ExitCommandHandler(GetIsRunning, fileStream);
-            var listCommandHandler = new ListCommandHandler(fileCabinetService, DefaultRecordPrint);
             var createCommandHandler = new CreateCommandHandler(fileCabinetService, nameValidator);
             var insertCommandHandler = new InsertCommandHandler(fileCabinetService, nameValidator);
             var updateCommandHandler = new UpdateCommandHandler(fileCabinetService, nameValidator);
-            var findCommandHandler = new FindCommandHandler(fileCabinetService, DefaultRecordPrint);
+            var selectCommandHandler = new SelectCommandHandler(fileCabinetService);
             var exportCommandHandler = new ExportCommandHandler(fileCabinetService);
             var importCommandHandler = new ImportCommandHandler(fileCabinetService);
             var deleteCommandHandler = new DeleteCommandHandler(fileCabinetService);
             var purgeCommandHandler = new PurgeCommandHandler(fileCabinetService);
             helpCommandHandler.SetNext(statCommandHandler);
             statCommandHandler.SetNext(exitCommandHandler);
-            exitCommandHandler.SetNext(listCommandHandler);
-            listCommandHandler.SetNext(createCommandHandler);
+            exitCommandHandler.SetNext(createCommandHandler);
             createCommandHandler.SetNext(insertCommandHandler);
             insertCommandHandler.SetNext(updateCommandHandler);
-            updateCommandHandler.SetNext(findCommandHandler);
-            findCommandHandler.SetNext(exportCommandHandler);
+            updateCommandHandler.SetNext(selectCommandHandler);
+            selectCommandHandler.SetNext(exportCommandHandler);
             exportCommandHandler.SetNext(importCommandHandler);
             importCommandHandler.SetNext(deleteCommandHandler);
             deleteCommandHandler.SetNext(purgeCommandHandler);
             purgeCommandHandler.SetNext(printMissedCommandInfoHandler);
             return helpCommandHandler;
-        }
-
-        private static void DefaultRecordPrint(IEnumerable<FileCabinetRecord> fileCabinetRecords) // метод для вывода в консоль данных
-        {
-            foreach (var item in fileCabinetRecords)
-            {
-                Console.WriteLine($"# {item.Id}, {item.FirstName}, {item.LastName}, {item.DateOfBirth.ToString(ConstParameters.FormatDate)}, {item.Age}, {item.Salary}, {item.Symbol}");
-            }
         }
 
         private static void CommandLineOptions(string[] args)
@@ -147,17 +137,17 @@ namespace FileCabinetApp
                         {
                             fileStream = new FileStream(ConstParameters.DBPathName, FileMode.OpenOrCreate);
                             fileCabinetService = new FileCabinetFilesystemService(fileStream, recordValidator);
-                            Console.WriteLine("Using file service rules.");
+                            Console.WriteLine("Using file service.");
                         }
                         else if (string.Equals(rulesValidetion[(2 * i) + 1], ConstParameters.MemoryServiceName))
                         {
-                            Console.WriteLine("Using memory service rules.");
+                            Console.WriteLine("Using memory service.");
                         }
 
                         break;
 
                     default:
-                        Console.WriteLine("Using memory service rules.");
+                        Console.WriteLine("Using memory service.");
                         Console.WriteLine("Using default validation rules.");
                         break;
                 }

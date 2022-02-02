@@ -22,82 +22,53 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Export(string parameters)
         {
-            if (string.IsNullOrEmpty(parameters))
+            try
             {
-                Console.WriteLine("Specify the search criteria");
-            }
-            else
-            {
-                string[] parameterArray = parameters.Split();
-                string fileType = parameterArray[0];
-                string fileName = parameterArray.Last();
-
-                switch (fileType.ToLower())
+                if (string.IsNullOrEmpty(parameters))
                 {
-                    case "csv":
-                        try
-                        {
-                            if (File.Exists(fileName))
-                            {
-                                Console.Write($"File is exist - rewrite {fileName}? [Y/n] ");
-                                string checkToRewrite = Console.ReadLine().ToLower();
-                                if (checkToRewrite == "y")
-                                {
-                                    this.GetSaveToCsv(fileName);
-                                    break;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                this.GetSaveToCsv(fileName);
-                                break;
-                            }
-                        }
-                        catch (DirectoryNotFoundException)
-                        {
-                            Console.WriteLine($"Export failed: can't open file {parameters}");
-                        }
-
-                        break;
-
-                    case "xml":
-                        try
-                        {
-                            if (File.Exists(fileName))
-                            {
-                                Console.Write($"File is exist - rewrite {fileName}? [Y/n] ");
-                                string checkToRewrite = Console.ReadLine().ToLower();
-                                if (checkToRewrite == "y")
-                                {
-                                    this.GetSaveToXml(fileName);
-                                    break;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                this.GetSaveToXml(fileName);
-                                break;
-                            }
-                        }
-                        catch (DirectoryNotFoundException)
-                        {
-                            Console.WriteLine($"Export failed: can't open file {parameters}");
-                        }
-
-                        break;
-
-                    default:
-                        Console.WriteLine("Incorrect input! 1. export csv (or xml) filename.csv ; 2. export csv (or xml) full address to the file'\'filename.csv");
-                        break;
+                    throw new ArgumentException("Incorrect input!");
                 }
+
+                string[] arrParameters = parameters.Split();
+                if (arrParameters.Length != 2)
+                {
+                    throw new ArgumentException("You didn't specify the file type or path(or file name)");
+                }
+
+                string fileType = arrParameters[0].ToLower();
+                string pathName = arrParameters.Last();
+                string fileName = Path.GetFileName(pathName);
+                string typeFile = Path.GetExtension(fileName).TrimStart('.').ToLower();
+                if (fileType != typeFile)
+                {
+                    throw new ArgumentException("Incorrect input! 1. export csv(or xml) filename.csv(or xml) ; 2. export csv(or xml) full address to the file'\'filename.csv(or xml)!");
+                }
+
+                if (File.Exists(pathName))
+                {
+                    Console.Write($"File is exist - rewrite {fileName}? [Y/n]");
+                    string checkToRewrite = Console.ReadLine().ToLower();
+                    if (checkToRewrite == "n")
+                    {
+                        return;
+                    }
+                }
+
+                switch (fileType)
+                {
+                    case ConstParameters.CsvType:
+                        this.GetSaveToCsv(fileName);
+                        break;
+                    case ConstParameters.XmlType:
+                        this.GetSaveToXml(fileName);
+                        break;
+                    default:
+                        throw new ArgumentException("Incorrect input! 1. export csv(or xml) filename.csv(or xml) ; 2. export csv(or xml) full address to the file'\'filename.csv(or xml)!");
+                }
+            }
+            catch (Exception ex)
+            {
+                ConstParameters.PrintException(ex);
             }
         }
 

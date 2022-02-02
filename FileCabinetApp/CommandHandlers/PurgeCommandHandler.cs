@@ -19,7 +19,7 @@ namespace FileCabinetApp.CommandHandlers
 
         private void Purge(string parameters)
         {
-            Tuple<int,int> tuple = this.service.PurgeRecord();
+            Tuple<int, int> tuple = this.service.PurgeRecord();
             Console.WriteLine($"Data file processing is completed: {tuple.Item1} of {tuple.Item2} records were purged.");
         }
 

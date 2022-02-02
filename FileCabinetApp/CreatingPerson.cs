@@ -194,7 +194,7 @@ namespace FileCabinetApp
             while (true);
         }
 
-        public static Person NewPersonInsert(string nameValidator, string firstName, string lastName, string dateOfBirth, string salary, string symbol)
+        public static Person NewPersonInsertAndUpdate(string nameValidator, string firstName, string lastName, string dateOfBirth, string salary, string symbol)
         {
             ValidatorParameters(nameValidator);
             parameter = firstName;
@@ -225,16 +225,16 @@ namespace FileCabinetApp
         public static Person NewPerson(string nameValidator)
         {
             ValidatorParameters(nameValidator);
-            Console.Write($"First name: ");
+            Console.Write($"{ConstParameters.ColumnFirstName}: ");
             string firstName = ReadInput(StringConverter, FirstNameValidator);
-            Console.Write($"Last name: ");
+            Console.Write($"{ConstParameters.ColumnLastName}: ");
             string lastName = ReadInput(StringConverter, LastNameValidator);
-            Console.Write("Date of birth: ");
+            Console.Write($"{ConstParameters.ColumnDateOfBirth}: ");
             DateTime dateOfBirth = ReadInput(DateConverter, DateOfBirthValidator);
             short age = Convert.ToInt16(DateTime.Now.Year - dateOfBirth.Year);
-            Console.Write("Salary: ");
+            Console.Write($"{ConstParameters.ColumnSalary}: ");
             decimal salary = ReadInput(DecimalConverter, SalaryValidator);
-            Console.Write("Any character: ");
+            Console.Write($"{ConstParameters.ColumnSymbol}: ");
             char symbol = ReadInput(CharConverter, SymbolValidator);
 
             var person = new Person

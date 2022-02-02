@@ -102,6 +102,16 @@ namespace FileCabinetApp
             return result;
         }
 
+        public FileCabinetRecord FindById(int id)
+        {
+            this.stopwatch.Reset();
+            this.stopwatch.Start();
+            FileCabinetRecord fileCabinetRecord = this.fileCabinetService.FindById(id);
+            this.stopwatch.Stop();
+            Console.WriteLine($"FindById method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            return fileCabinetRecord;
+        }
+
         public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             this.stopwatch.Reset();

@@ -123,6 +123,23 @@ namespace FileCabinetApp
             return result;
         }
 
+        public FileCabinetRecord FindById(int id)
+        {
+            using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
+            textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Calling Find() Id = '{id}'.");
+            FileCabinetRecord fileCabinetRecord = this.fileCabinetService.FindById(id);
+            if (fileCabinetRecord != null)
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() record(s) found by Id = '{id}'.");
+            }
+            else
+            {
+                textWrite.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm} - Find() no record(s) found by Id = '{id}'.");
+            }
+
+            return fileCabinetRecord;
+        }
+
         public IEnumerable<FileCabinetRecord> FindByFirstName(string firstName)
         {
             using TextWriter textWrite = File.AppendText(ConstParameters.LoggerPathName);
