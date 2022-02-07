@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.Models;
+using FileCabinetApp.Services;
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Interfaces
 {
    public interface IFileCabinetService
    {
-        int CreateRecord(Person person);
+        int CreateRecord(PersonModel person);
 
-        int InsertRecord(int id, Person person);
+        int InsertRecord(int id, PersonModel person);
 
-        void UpdateRecord(int id, Person person);
+        void UpdateRecord(int id, PersonModel person);
 
         void DeleteRecord(int id);
 
@@ -25,9 +24,9 @@ namespace FileCabinetApp
 
         ReadOnlyCollection<FileCabinetRecord> GetRecords();
 
-        Tuple<int, int> GetRecordsCount();
+        ValueTuple<int, int> GetRecordsCount();
 
-        Tuple<int, int> PurgeRecord();
+        ValueTuple<int, int> PurgeRecord();
 
         FileCabinetRecord FindById(int id);
 

@@ -1,23 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.CreatePerson;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Services.Seach;
 
 #pragma warning disable SA1600
-#pragma warning disable SA1202
 #pragma warning disable S3220
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class InsertCommandHandler : ServiceCommandHandlerBase
     {
-        private readonly string nameValidator;
+        private readonly CreatingPerson creatingPerson;
 
         public InsertCommandHandler(IFileCabinetService service, string nameValidator)
             : base(service)
         {
-            this.nameValidator = nameValidator;
+            this.creatingPerson = new CreatingPerson(nameValidator);
+        }
+
+        public override AppCommandRequest Handle(AppCommandRequest request)
+        {
+            if (request is null)
+            {
+                throw new ArgumentException($"The {nameof(request)} is null.");
+            }
+
+            if (request.Command.ToLower() == ConstParameters.Commands.InsertName)
+            {
+                this.Insert(request.Parameters);
+                return null;
+            }
+            else
+            {
+                return base.Handle(request);
+            }
         }
 
         private void Insert(string parameters)
@@ -51,19 +69,19 @@ namespace FileCabinetApp.CommandHandlers
                 {
                     switch (parametersList[i])
                     {
-                        case ConstParameters.FirstName:
+                        case CriteriaNames.FirstName:
                             firstName = valueList[i];
                             break;
-                        case ConstParameters.LastName:
+                        case CriteriaNames.LastName:
                             lastName = valueList[i];
                             break;
-                        case ConstParameters.DateOfBirth:
+                        case CriteriaNames.DateOfBirth:
                             dateOfBirth = valueList[i];
                             break;
-                        case ConstParameters.Salary:
+                        case CriteriaNames.Salary:
                             salary = valueList[i];
                             break;
-                        case ConstParameters.Symbol:
+                        case CriteriaNames.Symbol:
                             symbol = valueList[i];
                             break;
                         default:
@@ -71,7 +89,7 @@ namespace FileCabinetApp.CommandHandlers
                             break;
                     }
 
-                    var person = CreatingPerson.NewPersonInsertAndUpdate(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
+                    var person = this.creatingPerson.AddPersonInsertAndUpdate(firstName, lastName, dateOfBirth, salary, symbol);
                     Memoization.ClearCache();
                     this.service.InsertRecord(id, person);
                     Console.WriteLine($"Record # {id} is created");
@@ -79,25 +97,7 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                ConstParameters.PrintException(ex);
-            }
-        }
-
-        public override AppCommandRequest Handle(AppCommandRequest request)
-        {
-            if (request is null)
-            {
-                throw new ArgumentException($"The {nameof(request)} is null.");
-            }
-
-            if (request.Command.ToLower() == ConstParameters.InsertName)
-            {
-                this.Insert(request.Parameters);
-                return null;
-            }
-            else
-            {
-                return base.Handle(request);
+                PrintException.Print(ex);
             }
         }
     }

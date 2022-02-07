@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Serialization;
-using FileCabinetApp;
+using FileCabinetApp.Models;
+using FileCabinetApp.Models.XmlModels;
 
 #pragma warning disable SA1600
 
@@ -17,7 +14,7 @@ namespace FileCabinetGenerator
         private readonly XmlWriter xmlWriter;
         private readonly XmlSerializer serializer = new (typeof(RecordSerializeble));
         private readonly RecordSerializeble recordsSerializeble = new ();
-        private readonly List<Person> people = new ();
+        private readonly List<PersonXmlModel> people = new ();
 
         public GeneratorRecordXmlWriter(XmlWriter xmlWriter)
         {
@@ -31,14 +28,14 @@ namespace FileCabinetGenerator
             this.serializer.Serialize(this.xmlWriter, this.recordsSerializeble);
         }
 
-        private void PersonSerialize(List<FileCabinetRecord> records) // для листа сериализации
+        private void PersonSerialize(List<FileCabinetRecord> records)
         {
             foreach (var record in records)
             {
-                Person person = new ()
+                PersonXmlModel person = new ()
                 {
                     Id = record.Id.ToString(),
-                    Name = new Name()
+                    Name = new NameXmlModel()
                     {
                         First = record.FirstName.ToString(),
                         Last = record.LastName.ToString(),

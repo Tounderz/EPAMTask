@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Reader;
 
 #pragma warning disable SA1600
 
@@ -12,22 +11,22 @@ namespace FileCabinetApp.Validators
     {
         public static IRecordValidator CreateDefault(this ValidatorBuilder builder)
         {
-            return CreateValidator(ConstParameters.DefaultValidatorName);
+            return CreateValidator(CommandLineParameters.DefaultValidatorName);
         }
 
         public static IRecordValidator CreateCustom(this ValidatorBuilder builder)
         {
-            return CreateValidator(ConstParameters.CustomValidatorName);
+            return CreateValidator(CommandLineParameters.CustomValidatorName);
         }
 
         private static IRecordValidator CreateValidator(string nameValidator)
         {
             ConfigurationReaderJson configurationReaderJson = new (nameValidator);
-            (int firstNameMinLength, int firstNameMaxLength) = configurationReaderJson.FirstNameCreterios();
-            (int lastNameMinLength, int lastNameMaxLength) = configurationReaderJson.LastNameCreterios();
-            (DateTime from, DateTime of) = configurationReaderJson.DateOfBirthCriterions();
-            (int salaryMin, int salaryMax) = configurationReaderJson.SalaryCreterios();
-            int symbolLength = configurationReaderJson.SymbolCreterios();
+            (int firstNameMinLength, int firstNameMaxLength) = configurationReaderJson.FirstNameCriteria();
+            (int lastNameMinLength, int lastNameMaxLength) = configurationReaderJson.LastNameCriteria();
+            (DateTime from, DateTime of) = configurationReaderJson.DateOfBirthCriteria();
+            (int salaryMin, int salaryMax) = configurationReaderJson.SalaryCriteria();
+            int symbolLength = configurationReaderJson.SymbolCriteria();
 
             return new ValidatorBuilder()
                 .ValidateFirstName(firstNameMinLength, firstNameMaxLength)

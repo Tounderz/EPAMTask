@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
 
-#pragma warning disable SA1202
 #pragma warning disable SA1600
-#pragma warning disable S1172
-#pragma warning disable IDE0060
 
 namespace FileCabinetApp.CommandHandlers
 {
@@ -23,17 +17,6 @@ namespace FileCabinetApp.CommandHandlers
             this.fileStream = fileStream;
         }
 
-        private void Exit(string parameters)
-        {
-            if (this.fileStream != null)
-            {
-                this.fileStream.Dispose();
-            }
-
-            Console.WriteLine("Exiting an application...");
-            this.isRunning(false);
-        }
-
         public override AppCommandRequest Handle(AppCommandRequest request)
         {
             if (request == null)
@@ -41,7 +24,7 @@ namespace FileCabinetApp.CommandHandlers
                 throw new ArgumentException($"The {nameof(request)} is null.");
             }
 
-            if (request.Command.ToLower() == ConstParameters.ExitName)
+            if (request.Command.ToLower() == Commands.ExitName)
             {
                 this.Exit(request.Parameters);
                 return null;
@@ -49,6 +32,29 @@ namespace FileCabinetApp.CommandHandlers
             else
             {
                 return base.Handle(request);
+            }
+        }
+
+        private void Exit(string parameters)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(parameters))
+                {
+                    throw new ArgumentException("Incorrect command input!");
+                }
+
+                if (this.fileStream != null)
+                {
+                    this.fileStream.Dispose();
+                }
+
+                Console.WriteLine("Exiting an application...");
+                this.isRunning(false);
+            }
+            catch (Exception ex)
+            {
+                PrintException.Print(ex);
             }
         }
     }

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
 using Microsoft.Extensions.Configuration;
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Reader
 {
     public class ConfigurationReaderJson
     {
@@ -18,12 +15,12 @@ namespace FileCabinetApp
         {
             this.nameValidator = nameValidator;
             this.configuration = new ConfigurationBuilder()
-                .SetBasePath(ConstParameters.ValidationRulesPathName)
-                .AddJsonFile(ConstParameters.ValidationRulesFileName)
+                .SetBasePath(PathName.ValidationRulesPathName)
+                .AddJsonFile(PathName.ValidationRulesFileName)
                 .Build();
         }
 
-        public Tuple<int, int> FirstNameCreterios()
+        public Tuple<int, int> FirstNameCriteria()
         {
             int firstNameMinLength = this.configuration.GetSection(this.nameValidator).GetSection("firstName").GetValue<int>("min");
             int firstNameMaxLength = this.configuration.GetSection(this.nameValidator).GetSection("firstName").GetValue<int>("max");
@@ -31,7 +28,7 @@ namespace FileCabinetApp
             return new Tuple<int, int>(firstNameMinLength, firstNameMaxLength);
         }
 
-        public Tuple<int, int> LastNameCreterios()
+        public Tuple<int, int> LastNameCriteria()
         {
             int lastNameMinLength = this.configuration.GetSection(this.nameValidator).GetSection("lastName").GetValue<int>("min");
             int lastNameMaxLength = this.configuration.GetSection(this.nameValidator).GetSection("lastName").GetValue<int>("max");
@@ -39,7 +36,7 @@ namespace FileCabinetApp
             return new Tuple<int, int>(lastNameMinLength, lastNameMaxLength);
         }
 
-        public Tuple<DateTime, DateTime> DateOfBirthCriterions()
+        public Tuple<DateTime, DateTime> DateOfBirthCriteria()
         {
             var dateOfBirthMin = this.configuration.GetSection(this.nameValidator).GetSection("dateOfBirth").GetValue<DateTime>("from");
             var dateOfBirthMax = this.configuration.GetSection(this.nameValidator).GetSection("dateOfBirth").GetValue<DateTime>("to");
@@ -47,7 +44,7 @@ namespace FileCabinetApp
             return Tuple.Create(dateOfBirthMin, dateOfBirthMax);
         }
 
-        public Tuple<int, int> SalaryCreterios()
+        public Tuple<int, int> SalaryCriteria()
         {
             int salatyMin = this.configuration.GetSection(this.nameValidator).GetSection("salary").GetValue<int>("min");
             int salaryMax = this.configuration.GetSection(this.nameValidator).GetSection("salary").GetValue<int>("max");
@@ -55,7 +52,7 @@ namespace FileCabinetApp
             return new Tuple<int, int>(salatyMin, salaryMax);
         }
 
-        public int SymbolCreterios()
+        public int SymbolCriteria()
         {
             return this.configuration.GetSection(this.nameValidator).GetSection("symbol").GetValue<int>("length");
         }

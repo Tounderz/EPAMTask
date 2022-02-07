@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
 
-#pragma warning disable SA1202
 #pragma warning disable SA1600
 
 namespace FileCabinetApp.CommandHandlers
@@ -13,21 +11,32 @@ namespace FileCabinetApp.CommandHandlers
     {
         private static List<string> commandNames = new ()
         {
-            ConstParameters.HelpName,
-            ConstParameters.HelpFullName,
-            ConstParameters.StatName,
-            ConstParameters.ExitName,
-            ConstParameters.CreateName,
-            ConstParameters.InsertName,
-            ConstParameters.UpdateName,
-            ConstParameters.SelectName,
-            ConstParameters.ExportName,
-            ConstParameters.ImportName,
-            ConstParameters.DeleteName,
-            ConstParameters.PurgeName,
+            Commands.HelpName,
+            Commands.HelpFullName,
+            Commands.StatName,
+            Commands.ExitName,
+            Commands.CreateName,
+            Commands.InsertName,
+            Commands.UpdateName,
+            Commands.SelectName,
+            Commands.ExportName,
+            Commands.ImportName,
+            Commands.DeleteName,
+            Commands.PurgeName,
         };
 
         private static IEnumerable<string> similarCommands;
+
+        public override AppCommandRequest Handle(AppCommandRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentException($"The {nameof(request)} is null.");
+            }
+
+            PrintMissedCommandInfo(request);
+            return null;
+        }
 
         private static void PrintMissedCommandInfo(AppCommandRequest request)
         {
@@ -65,17 +74,6 @@ namespace FileCabinetApp.CommandHandlers
             var commandsIntersactions = commandNames.Select(i => (i, i.ToUpper())).Select(j => (j.i, j.Item2.Intersect(requestCommandSymbols).Count()));
             int max = commandsIntersactions.Max(i => i.Item2);
             return max > 2 ? commandsIntersactions.Where(i => i.Item2.Equals(max)).Select(j => j.i) : Enumerable.Empty<string>();
-        }
-
-        public override AppCommandRequest Handle(AppCommandRequest request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentException($"The {nameof(request)} is null.");
-            }
-
-            PrintMissedCommandInfo(request);
-            return null;
         }
     }
 }

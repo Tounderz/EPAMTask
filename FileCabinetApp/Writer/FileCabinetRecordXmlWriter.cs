@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using FileCabinetApp.Models;
+using FileCabinetApp.Models.XmlModels;
 
-#pragma warning disable SA1600
 #pragma warning disable S125
+#pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Writer
 {
     public class FileCabinetRecordXmlWriter
     {
         private readonly XmlWriter xmlWriter;
-        private readonly List<PersonSerializeble> peopleSerializeble = new ();
+        private readonly List<PersonXmlModel> peopleSerializeble = new ();
         private readonly RecordSerializeble recordsSerializeble = new ();
         private readonly XmlSerializer serializer = new (typeof(RecordSerializeble));
 
@@ -31,14 +29,14 @@ namespace FileCabinetApp
             this.serializer.Serialize(this.xmlWriter, this.recordsSerializeble);
         }
 
-        private void PersonSerialize(List<FileCabinetRecord> records) // для листа сериализации
+        private void PersonSerialize(List<FileCabinetRecord> records)
         {
             foreach (var record in records)
             {
-                PersonSerializeble person = new ()
+                PersonXmlModel person = new ()
                 {
                     Id = record.Id.ToString(),
-                    Name = new Name()
+                    Name = new NameXmlModel()
                     {
                         First = record.FirstName.ToString(),
                         Last = record.LastName.ToString(),
