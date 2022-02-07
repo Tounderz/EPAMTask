@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Models
 {
-    public class Person
+    public class FileCabinetRecord
     {
+        public int Id { get; set; }
+
         public string FirstName { get; set; }
 
         public string LastName { get; set; }

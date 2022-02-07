@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FileCabinetApp;
+using FileCabinetApp.Models;
 
 #pragma warning disable SA1600
 
@@ -19,7 +15,7 @@ namespace FileCabinetGenerator
         private DateTime dateOfBirth;
         private int index = 0;
 
-        public void GeneratorCreateRecord(int startId, int count) // создание объекта FileCabinetRecord и заполнение рандомными данными
+        public void GeneratorCreateRecord(int startId, int count)
         {
             int lastId = startId + count;
             while (startId < lastId)
@@ -46,7 +42,7 @@ namespace FileCabinetGenerator
             return new GeneratorSnapshot(this.records.ToArray());
         }
 
-        private void RandomGenerator() // рандом генератор данных для FileCabinetRecord
+        private void RandomGenerator()
         {
             Random random = new ();
             this.index = random.Next(this.symbolList.Count - 1);

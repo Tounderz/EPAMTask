@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using FileCabinetApp.Models;
+using FileCabinetApp.Models.XmlModels;
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Reader
 {
     public class FileCabinetRecordXmlReader
     {
@@ -28,7 +27,7 @@ namespace FileCabinetApp
             return this.records;
         }
 
-        private void RecordDeserialize(List<PersonSerializeble> people) // для листа сериализации
+        private void RecordDeserialize(List<PersonXmlModel> people)
         {
             foreach (var person in people)
             {

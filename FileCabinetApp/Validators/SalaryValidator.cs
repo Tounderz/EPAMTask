@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Models;
 
 #pragma warning disable SA1600
 
@@ -19,7 +17,7 @@ namespace FileCabinetApp.Validators
             this.maxSalary = maxSalary;
         }
 
-        public void ValidateParameters(Person person)
+        public void ValidateParameters(PersonModel person)
         {
             if (person.Salary < this.minSalary || person.Salary > this.maxSalary)
             {

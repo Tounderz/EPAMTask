@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Models;
 
 #pragma warning disable SA1600
 
@@ -17,7 +17,7 @@ namespace FileCabinetApp.Validators
             this.recordValidators = recordValidators.ToList();
         }
 
-        public void ValidateParameters(Person person)
+        public void ValidateParameters(PersonModel person)
         {
             foreach (var item in this.recordValidators)
             {

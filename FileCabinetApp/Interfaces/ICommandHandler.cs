@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.CommandHandlers;
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp.CommandHandlers
+namespace FileCabinetApp.Interfaces
 {
     public interface ICommandHandler
     {

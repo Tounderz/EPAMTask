@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Models;
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Services
 {
     public class ServiceMeter : IFileCabinetService
     {
@@ -20,7 +19,7 @@ namespace FileCabinetApp
             this.fileCabinetService = fileCabinetService;
         }
 
-        public int CreateRecord(Person person)
+        public int CreateRecord(PersonModel person)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
@@ -30,7 +29,7 @@ namespace FileCabinetApp
             return result;
         }
 
-        public int InsertRecord(int id, Person person)
+        public int InsertRecord(int id, PersonModel person)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
@@ -40,7 +39,7 @@ namespace FileCabinetApp
             return result;
         }
 
-        public void UpdateRecord(int id, Person person)
+        public void UpdateRecord(int id, PersonModel person)
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
@@ -82,21 +81,21 @@ namespace FileCabinetApp
             return fileCabinetRecords;
         }
 
-        public Tuple<int, int> GetRecordsCount()
+        public ValueTuple<int, int> GetRecordsCount()
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            Tuple<int, int> result = this.fileCabinetService.GetRecordsCount();
+            ValueTuple<int, int> result = this.fileCabinetService.GetRecordsCount();
             this.stopwatch.Stop();
-            Console.WriteLine($"Start method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
+            Console.WriteLine($"Stat method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return result;
         }
 
-        public Tuple<int, int> PurgeRecord()
+        public ValueTuple<int, int> PurgeRecord()
         {
             this.stopwatch.Reset();
             this.stopwatch.Start();
-            Tuple<int, int> result = this.fileCabinetService.PurgeRecord();
+            ValueTuple<int, int> result = this.fileCabinetService.PurgeRecord();
             this.stopwatch.Stop();
             Console.WriteLine($"Purge method execution duration is {this.stopwatch.ElapsedTicks} ticks.");
             return result;

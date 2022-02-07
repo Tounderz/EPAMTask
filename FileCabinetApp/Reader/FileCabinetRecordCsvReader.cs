@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.Models;
 
 #pragma warning disable SA1600
-#pragma warning disable SA1108
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Reader
 {
     public class FileCabinetRecordCsvReader
     {
@@ -26,7 +23,8 @@ namespace FileCabinetApp
             string[] arrLine;
             this.reader.BaseStream.Position = 0;
 
-            if (!this.reader.EndOfStream) // для пропуска строки имён столбцов
+            // для пропуска шапки таблицы
+            if (!this.reader.EndOfStream)
             {
                 this.reader.ReadLine();
             }

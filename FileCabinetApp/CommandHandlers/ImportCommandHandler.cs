@@ -1,23 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Services;
 
-#pragma warning disable SA1202
 #pragma warning disable SA1600
-#pragma warning disable S1450
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class ImportCommandHandler : ServiceCommandHandlerBase
     {
-        private FileCabinetServiceSnapshot fileCabinetServiceSnapshot;
+        private readonly FileCabinetServiceSnapshot fileCabinetServiceSnapshot;
 
         public ImportCommandHandler(IFileCabinetService service)
             : base(service)
         {
+            this.fileCabinetServiceSnapshot = this.service.MakeSnapshot();
+        }
+
+        public override AppCommandRequest Handle(AppCommandRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentException($"The {nameof(request)} is null.");
+            }
+
+            if (request.Command.ToLower() == Commands.ImportName)
+            {
+                this.Import(request.Parameters);
+                return null;
+            }
+            else
+            {
+                return base.Handle(request);
+            }
         }
 
         private void Import(string parameters)
@@ -51,10 +69,10 @@ namespace FileCabinetApp.CommandHandlers
 
                 switch (fileType)
                 {
-                    case ConstParameters.CsvType:
+                    case TypeFile.CsvType:
                         this.GetLoadFromCsv(fileName, pathName);
                         break;
-                    case ConstParameters.XmlType:
+                    case TypeFile.XmlType:
                         this.GetLoadFromXml(fileName, pathName);
                         break;
                     default:
@@ -63,31 +81,12 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                ConstParameters.PrintException(ex);
-            }
-        }
-
-        public override AppCommandRequest Handle(AppCommandRequest request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentException($"The {nameof(request)} is null.");
-            }
-
-            if (request.Command.ToLower() == ConstParameters.ImportName)
-            {
-                this.Import(request.Parameters);
-                return null;
-            }
-            else
-            {
-                return base.Handle(request);
+                PrintException.Print(ex);
             }
         }
 
         private void GetLoadFromCsv(string fileNameCsv, string pathName)
         {
-            this.fileCabinetServiceSnapshot = this.service.MakeSnapshot();
             using FileStream fileStream = File.Open(fileNameCsv, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using StreamReader streamReader = new (fileStream.Name, Encoding.ASCII);
             this.fileCabinetServiceSnapshot.LoadFromCsv(streamReader);
@@ -97,7 +96,6 @@ namespace FileCabinetApp.CommandHandlers
 
         private void GetLoadFromXml(string fileNameXml, string pathName)
         {
-            this.fileCabinetServiceSnapshot = this.service.MakeSnapshot();
             using FileStream fileStream = File.Open(fileNameXml, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using StreamReader streamReader = new (fileStream.Name, Encoding.ASCII);
             this.fileCabinetServiceSnapshot.LoadFromXml(streamReader);

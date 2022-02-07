@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using FileCabinetApp.CommandHandlers;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Services;
 using FileCabinetApp.Validators;
 
 #pragma warning disable CA1304
@@ -20,21 +21,21 @@ namespace FileCabinetApp
         private static IRecordValidator recordValidator = new ValidatorBuilder().CreateDefault();
         private static IFileCabinetService fileCabinetService = new FileCabinetMemoryService(recordValidator);
         private static FileStream fileStream;
-        private static string nameValidator = ConstParameters.DefaultValidatorName;
+        private static string nameValidator = CommandLineParameters.DefaultValidatorName;
         private static readonly List<string> ParametersListValue = new ()
         {
-            ConstParameters.LongValidatorLineParameter,
-            ConstParameters.ShortValidatorLineParameter,
-            ConstParameters.LongTypeLineParameter,
-            ConstParameters.ShortTypeLineParameter,
-            ConstParameters.StopWatchLineParameter,
-            ConstParameters.LoggerLineParameter,
+            CommandLineParameters.LongValidatorLineParameter,
+            CommandLineParameters.ShortValidatorLineParameter,
+            CommandLineParameters.LongTypeLineParameter,
+            CommandLineParameters.ShortTypeLineParameter,
+            CommandLineParameters.StopWatchLineParameter,
+            CommandLineParameters.LoggerLineParameter,
         };
 
         public static void Main(string[] args)
         {
-            nameValidator = ConstParameters.DefaultValidatorName;
-            Console.WriteLine($"File Cabinet Application, developed by {ConstParameters.DeveloperName}");
+            nameValidator = CommandLineParameters.DefaultValidatorName;
+            Console.WriteLine($"File Cabinet Application, developed by {ConstStrings.DeveloperName}");
             if (args.Length != 0)
             {
                 CommandLineOptions(args);
@@ -45,7 +46,7 @@ namespace FileCabinetApp
                 Console.WriteLine("Using memory service.");
             }
 
-            Console.WriteLine(ConstParameters.HintMessage);
+            Console.WriteLine(ConstStrings.HintMessage);
             Console.WriteLine();
 
             do
@@ -57,7 +58,7 @@ namespace FileCabinetApp
 
                 if (string.IsNullOrEmpty(command))
                 {
-                    Console.WriteLine(ConstParameters.HintMessage);
+                    Console.WriteLine(ConstStrings.HintMessage);
                     continue;
                 }
 
@@ -109,37 +110,37 @@ namespace FileCabinetApp
             string parametorLine = string.Join(' ', args).ToLower();
             string[] rulesValidetion = parametorLine.Trim(' ').Split(' ', '=');
             List<string> listCommandLineParameter = rulesValidetion.Where(i => ParametersListValue.Any(y => y.Equals(i))).ToList();
-            bool checkStopWatch = listCommandLineParameter.Contains(ConstParameters.StopWatchLineParameter);
-            bool ckeckLogger = listCommandLineParameter.Contains(ConstParameters.LoggerLineParameter);
+            bool checkStopWatch = listCommandLineParameter.Contains(CommandLineParameters.StopWatchLineParameter);
+            bool ckeckLogger = listCommandLineParameter.Contains(CommandLineParameters.LoggerLineParameter);
             for (int i = 0; i < listCommandLineParameter.Count; i++)
             {
                 switch (listCommandLineParameter[i].ToLower())
                 {
-                    case ConstParameters.LongValidatorLineParameter:
-                    case ConstParameters.ShortValidatorLineParameter:
-                        if (string.Equals(rulesValidetion[(i * 2) + 1], ConstParameters.CustomValidatorName))
+                    case CommandLineParameters.LongValidatorLineParameter:
+                    case CommandLineParameters.ShortValidatorLineParameter:
+                        if (string.Equals(rulesValidetion[(i * 2) + 1], CommandLineParameters.CustomValidatorName))
                         {
                             recordValidator = new ValidatorBuilder().CreateCustom();
                             fileCabinetService = new FileCabinetMemoryService(recordValidator);
-                            nameValidator = ConstParameters.CustomValidatorName;
+                            nameValidator = CommandLineParameters.CustomValidatorName;
                             Console.WriteLine("Using custom validation rules.");
                         }
-                        else if (string.Equals(rulesValidetion[(i * 2) + 1], ConstParameters.DefaultValidatorName))
+                        else if (string.Equals(rulesValidetion[(i * 2) + 1], CommandLineParameters.DefaultValidatorName))
                         {
                             Console.WriteLine("Using default validation rules.");
                         }
 
                         break;
 
-                    case ConstParameters.LongTypeLineParameter:
-                    case ConstParameters.ShortTypeLineParameter:
-                        if (string.Equals(rulesValidetion[(2 * i) + 1], ConstParameters.FileServiceName))
+                    case CommandLineParameters.LongTypeLineParameter:
+                    case CommandLineParameters.ShortTypeLineParameter:
+                        if (string.Equals(rulesValidetion[(2 * i) + 1], CommandLineParameters.FileServiceName))
                         {
-                            fileStream = new FileStream(ConstParameters.DBPathName, FileMode.OpenOrCreate);
+                            fileStream = new FileStream(PathName.DBPathName, FileMode.OpenOrCreate);
                             fileCabinetService = new FileCabinetFilesystemService(fileStream, recordValidator);
                             Console.WriteLine("Using file service.");
                         }
-                        else if (string.Equals(rulesValidetion[(2 * i) + 1], ConstParameters.MemoryServiceName))
+                        else if (string.Equals(rulesValidetion[(2 * i) + 1], CommandLineParameters.MemoryServiceName))
                         {
                             Console.WriteLine("Using memory service.");
                         }
@@ -160,7 +161,7 @@ namespace FileCabinetApp
 
                 if (ckeckLogger)
                 {
-                    fileCabinetService = new ServiceLogger(fileCabinetService);
+                    fileCabinetService = new ServiceLogger(fileCabinetService, PathName.LoggerPathName);
                     Console.WriteLine("Using ServiceLogger");
                 }
             }

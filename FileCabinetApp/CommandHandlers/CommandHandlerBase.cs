@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.Interfaces;
 
 #pragma warning disable SA1600
 
@@ -12,13 +9,15 @@ namespace FileCabinetApp.CommandHandlers
     {
         private ICommandHandler nextHandler;
 
-        public ICommandHandler SetNext(ICommandHandler handler) // hardle - обработка ввода
+        // hardle - обработка ввода
+        public ICommandHandler SetNext(ICommandHandler handler)
         {
             this.nextHandler = handler;
             return handler;
         }
 
-        public virtual AppCommandRequest Handle(AppCommandRequest request) // метод возращает запрос, request - запрос на ввод.
+        // метод возращает запрос, request - запрос на ввод.
+        public virtual AppCommandRequest Handle(AppCommandRequest request)
         {
             if (this.nextHandler != null)
             {

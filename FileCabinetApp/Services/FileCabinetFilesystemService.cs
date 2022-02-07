@@ -5,15 +5,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using FileCabinetApp.Validators;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Models;
 
 #pragma warning disable SA1600
 #pragma warning disable CA1822
 #pragma warning disable SA1214
-#pragma warning disable SA1202
 #pragma warning disable SA1305
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Services
 {
     public class FileCabinetFilesystemService : IFileCabinetService
     {
@@ -45,12 +46,12 @@ namespace FileCabinetApp
                 this.list = this.ConvertBytesToListRecord(recordBytes);
                 for (int i = 0; i < this.list.Count; i++)
                 {
-                    this.AddInAllDictionaryItem(this.list[i]);
+                    this.AddAnAllDictionariesItem(this.list[i]);
                 }
             }
         }
 
-        public int CreateRecord(Person person)
+        public int CreateRecord(PersonModel person)
         {
             this.recordValidator.ValidateParameters(person);
             using FileStream file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -60,32 +61,32 @@ namespace FileCabinetApp
             }
             else
             {
-                byte[] recordBytes = new byte[ConstParameters.RecordLength];
-                int offset = (int)file.Length - ConstParameters.RecordLength;
+                byte[] recordBytes = new byte[ConstParametersFileService.RecordLength];
+                int offset = (int)file.Length - ConstParametersFileService.RecordLength;
                 file.Seek(offset, SeekOrigin.Begin);
                 file.Read(recordBytes, 0, recordBytes.Length);
                 this.recordId = BitConverter.ToInt32(recordBytes, this.statusInBytes.Length) + 1;
             }
 
-            var record = this.GetFileCabinetRecord(person, this.recordId);
-            this.AddInAllDictionaryItem(record);
+            var record = this.CreateFileCabinetRecord(person, this.recordId);
+            this.AddAnAllDictionariesItem(record);
             this.ConvertRecordToBytes(record);
 
             return this.recordId;
         }
 
-        public int InsertRecord(int id, Person person)
+        public int InsertRecord(int id, PersonModel person)
         {
             this.recordValidator.ValidateParameters(person);
             this.recordId = id;
-            var record = this.GetFileCabinetRecord(person, this.recordId);
-            this.AddInAllDictionaryItem(record);
+            var record = this.CreateFileCabinetRecord(person, this.recordId);
+            this.AddAnAllDictionariesItem(record);
             this.ConvertRecordToBytes(record);
 
             return this.recordId;
         }
 
-        public void UpdateRecord(int id, Person person)
+        public void UpdateRecord(int id, PersonModel person)
         {
             this.recordValidator.ValidateParameters(person);
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -93,55 +94,39 @@ namespace FileCabinetApp
             file.Read(recordBytes, 0, recordBytes.Length);
             this.list = this.ConvertBytesToListRecord(recordBytes);
             FileCabinetRecord record = this.list.Find(i => i.Id == id);
-            this.RemoveInAllDictionaryItem(record);
-            record = this.GetFileCabinetRecord(person, record.Id);
-            this.AddInAllDictionaryItem(record);
+            this.RemoveAnAllDictionariesItem(record);
+            record = this.CreateFileCabinetRecord(person, record.Id);
+            this.AddAnAllDictionariesItem(record);
             this.ConvertRecordToBytes(record);
         }
 
         public void DeleteRecord(int id)
         {
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            byte[] recordBytes = new byte[ConstParameters.RecordLength];
-            this.status = ConstParameters.IsDelete;
+            byte[] recordBytes = new byte[ConstParametersFileService.RecordLength];
+            this.status = ConstParametersFileService.IsDelete;
             int idRecord = 0;
             int offset = 0;
             do
             {
                 file.Seek(offset, SeekOrigin.Begin);
-                recordBytes = new byte[ConstParameters.RecordLength];
+                recordBytes = new byte[ConstParametersFileService.RecordLength];
                 file.Read(recordBytes, 0, recordBytes.Length);
-                offset += ConstParameters.RecordLength;
+                offset += ConstParametersFileService.RecordLength;
                 idRecord = BitConverter.ToInt32(recordBytes, this.statusInBytes.Length);
             }
             while (idRecord != id);
 
             var record = this.list.Find(i => i.Id == idRecord);
-            this.RemoveInAllDictionaryItem(record);
+            this.RemoveAnAllDictionariesItem(record);
 
             byte[] arrBytes = BitConverter.GetBytes(this.status);
             Array.Copy(arrBytes, 0, recordBytes, 0, 2);
 
-            offset -= ConstParameters.RecordLength;
+            offset -= ConstParametersFileService.RecordLength;
             using BinaryWriter binaryWriter = new (this.fileStream, Encoding.ASCII, true);
             binaryWriter.Seek(offset, SeekOrigin.Begin);
             binaryWriter.Write(recordBytes);
-        }
-
-        private FileCabinetRecord GetFileCabinetRecord(Person person, int id) // создание объекта FileCabinetRecord
-        {
-            var record = new FileCabinetRecord
-            {
-                Id = id,
-                FirstName = person.FirstName,
-                LastName = person.LastName,
-                DateOfBirth = person.DateOfBirth,
-                Age = person.Age,
-                Salary = person.Salary,
-                Symbol = person.Symbol,
-            };
-
-            return record;
         }
 
         public FileCabinetServiceSnapshot MakeSnapshot()
@@ -155,34 +140,53 @@ namespace FileCabinetApp
 
         public void Restore(FileCabinetServiceSnapshot snapshot)
         {
-            ReadOnlyCollection<FileCabinetRecord> record = snapshot.Records;
+            ReadOnlyCollection<FileCabinetRecord> records = snapshot.Records;
             IList<FileCabinetRecord> recordsFromFile = snapshot.RecordsFromFile;
             bool checkId = false;
 
             for (int i = 0; i < recordsFromFile.Count; i++)
             {
-                if (record.Count == 0)
+                try
                 {
-                    this.list.Add(recordsFromFile[i]);
-                }
-                else
-                {
-                    for (int j = 0; j < record.Count; j++)
+                    var person = new PersonModel()
                     {
-                        if (record[j].Id == recordsFromFile[i].Id)
+                        FirstName = recordsFromFile[i].FirstName,
+                        LastName = recordsFromFile[i].LastName,
+                        DateOfBirth = recordsFromFile[i].DateOfBirth,
+                        Age = recordsFromFile[i].Age,
+                        Salary = recordsFromFile[i].Salary,
+                        Symbol = recordsFromFile[i].Symbol,
+                    };
+
+                    this.recordValidator.ValidateParameters(person);
+                    for (int j = 0; j < records.Count; j++)
+                    {
+                        if (records[j].Id == recordsFromFile[i].Id)
                         {
-                            this.list[j] = recordsFromFile[i];
+                            this.UpdateRecord(recordsFromFile[i].Id, person);
                             checkId = true;
-                        }
-                        else if (!checkId)
-                        {
-                            recordsFromFile[i].Id = this.list.Count + 1;
-                            this.list.Add(recordsFromFile[i]);
+                            break;
                         }
                     }
-                }
 
-                checkId = false;
+                    if (!checkId)
+                    {
+                        this.recordId = recordsFromFile[i].Id;
+                        FileCabinetRecord record = this.CreateFileCabinetRecord(person, this.recordId);
+                        this.list.Add(record);
+                        this.AddAnAllDictionariesItem(record);
+                        this.ConvertRecordToBytes(record);
+                    }
+
+                    checkId = false;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is FormatException || ex is ArgumentNullException || ex is ArgumentException || ex is OverflowException)
+                    {
+                        Console.WriteLine($"{recordsFromFile[i].Id}: {ex.Message}");
+                    }
+                }
             }
         }
 
@@ -198,7 +202,7 @@ namespace FileCabinetApp
             return this.list.AsReadOnly();
         }
 
-        public Tuple<int, int> GetRecordsCount()
+        public ValueTuple<int, int> GetRecordsCount()
         {
             using (FileStream file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -207,10 +211,10 @@ namespace FileCabinetApp
                 this.list = this.ConvertBytesToListRecord(recordBytes);
             }
 
-            return Tuple.Create(this.list.Count, this.isDeleteRecords.Count);
+            return ValueTuple.Create(this.list.Count, this.isDeleteRecords.Count);
         }
 
-        public Tuple<int, int> PurgeRecord()
+        public ValueTuple<int, int> PurgeRecord()
         {
             using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] recordBytes = new byte[file.Length];
@@ -233,7 +237,7 @@ namespace FileCabinetApp
             int count = this.isDeleteRecords.Count;
             this.isDeleteRecords.Clear();
 
-            return Tuple.Create(count, this.list.Count + count);
+            return ValueTuple.Create(count, this.list.Count + count);
         }
 
         public FileCabinetRecord FindById(int id)
@@ -277,6 +281,22 @@ namespace FileCabinetApp
             return symbolList.AsReadOnly();
         }
 
+        private FileCabinetRecord CreateFileCabinetRecord(PersonModel person, int id)
+        {
+            var record = new FileCabinetRecord
+            {
+                Id = id,
+                FirstName = person.FirstName,
+                LastName = person.LastName,
+                DateOfBirth = person.DateOfBirth,
+                Age = person.Age,
+                Salary = person.Salary,
+                Symbol = person.Symbol,
+            };
+
+            return record;
+        }
+
         private void AddDictionaryItem(string key, FileCabinetRecord record, Dictionary<string, List<FileCabinetRecord>> dictionary)
         {
             var keyStr = key.ToUpper(CultureInfo.InvariantCulture);
@@ -288,7 +308,7 @@ namespace FileCabinetApp
             dictionary[keyStr].Add(record);
         }
 
-        private void AddDictionaryId(FileCabinetRecord record)
+        private void AddItemDictionaryId(FileCabinetRecord record)
         {
             if (!this.idDictionary.ContainsKey(record.Id))
             {
@@ -296,12 +316,12 @@ namespace FileCabinetApp
             }
         }
 
-        private void AddInAllDictionaryItem(FileCabinetRecord record)
+        private void AddAnAllDictionariesItem(FileCabinetRecord record)
         {
-            this.AddDictionaryId(record);
+            this.AddItemDictionaryId(record);
             this.AddDictionaryItem(record.FirstName, record, this.firstNameDictionary);
             this.AddDictionaryItem(record.LastName, record, this.lastNameDictionary);
-            this.AddDictionaryItem(record.DateOfBirth.ToString(ConstParameters.FormatDate), record, this.dateOfBirthDictionary);
+            this.AddDictionaryItem(record.DateOfBirth.ToString(ConstStrings.FormatDate), record, this.dateOfBirthDictionary);
             this.AddDictionaryItem(record.Age.ToString(), record, this.ageDictionary);
             this.AddDictionaryItem(record.Salary.ToString(), record, this.salatyDictionary);
             this.AddDictionaryItem(record.Symbol.ToString(), record, this.symbolDictionary);
@@ -322,7 +342,7 @@ namespace FileCabinetApp
             }
         }
 
-        private void RemoveDictionaryId(int id)
+        private void RemoveItemDictionaryId(int id)
         {
             if (this.idDictionary.ContainsKey(id))
             {
@@ -330,9 +350,9 @@ namespace FileCabinetApp
             }
         }
 
-        private void RemoveInAllDictionaryItem(FileCabinetRecord record)
+        private void RemoveAnAllDictionariesItem(FileCabinetRecord record)
         {
-            this.RemoveDictionaryId(record.Id);
+            this.RemoveItemDictionaryId(record.Id);
             this.RemoveDictionaryItem(record.Id, this.firstNameDictionary);
             this.RemoveDictionaryItem(record.Id, this.lastNameDictionary);
             this.RemoveDictionaryItem(record.Id, this.dateOfBirthDictionary);
@@ -341,14 +361,14 @@ namespace FileCabinetApp
             this.RemoveDictionaryItem(record.Id, this.symbolDictionary);
         }
 
-        private void ConvertRecordToBytes(FileCabinetRecord record) // convert record to bytes
+        private void ConvertRecordToBytes(FileCabinetRecord record)
         {
             if (record == null)
             {
                 throw new ArgumentNullException(nameof(record));
             }
 
-            byte[] recordBytes = new byte[ConstParameters.RecordLength];
+            byte[] recordBytes = new byte[ConstParametersFileService.RecordLength];
 
             using MemoryStream memoryStream = new (recordBytes);
             using BinaryWriter binaryWriter = new (memoryStream);
@@ -359,7 +379,7 @@ namespace FileCabinetApp
             if (this.list.Exists(i => i.Id == record.Id))
             {
                 using var file = File.Open(this.fileStream.Name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                int offset = (ConstParameters.RecordLength * record.Id) - ConstParameters.RecordLength;
+                int offset = (ConstParametersFileService.RecordLength * record.Id) - ConstParametersFileService.RecordLength;
                 file.Seek(offset, SeekOrigin.Begin);
                 file.Read(this.statusInBytes, 0, this.statusInBytes.Length);
                 this.status = BitConverter.ToInt16(this.statusInBytes, 0);
@@ -369,7 +389,7 @@ namespace FileCabinetApp
             }
             else
             {
-                this.status = ConstParameters.NotDelete;
+                this.status = ConstParametersFileService.NotDelete;
                 binary.Seek(0, SeekOrigin.End);
             }
 
@@ -391,14 +411,14 @@ namespace FileCabinetApp
             binaryWriter.Write(record.Symbol);
         }
 
-        private byte[] ConvertNameToBytes(string value) // convert FirstName and LastName to bytes
+        private byte[] ConvertNameToBytes(string value)
         {
             byte[] nameToBytes = Encoding.ASCII.GetBytes(value);
-            byte[] name = new byte[ConstParameters.MaxLengthString];
+            byte[] name = new byte[ConstParametersFileService.MaxLengthString];
             int nameLengh = nameToBytes.Length;
-            if (nameLengh > ConstParameters.MaxLengthString)
+            if (nameLengh > ConstParametersFileService.MaxLengthString)
             {
-                nameLengh = ConstParameters.MaxLengthString;
+                nameLengh = ConstParametersFileService.MaxLengthString;
             }
 
             Array.Copy(nameToBytes, 0, name, 0, nameLengh);
@@ -406,7 +426,7 @@ namespace FileCabinetApp
             return name;
         }
 
-        private List<FileCabinetRecord> ConvertBytesToListRecord(byte[] recordBytes) // convert bytes to record
+        private List<FileCabinetRecord> ConvertBytesToListRecord(byte[] recordBytes)
         {
             if (recordBytes is null)
             {
@@ -423,10 +443,10 @@ namespace FileCabinetApp
                 var record = new FileCabinetRecord();
                 this.status = reader.ReadInt16();
                 record.Id = reader.ReadInt32();
-                byte[] firstNameBytes = reader.ReadBytes(ConstParameters.MaxLengthString);
+                byte[] firstNameBytes = reader.ReadBytes(ConstParametersFileService.MaxLengthString);
                 string bytesToFirstName = Encoding.ASCII.GetString(firstNameBytes, 0, firstNameBytes.Length);
                 record.FirstName = bytesToFirstName.Replace("\0", string.Empty);
-                byte[] lastNameBytes = reader.ReadBytes(ConstParameters.MaxLengthString);
+                byte[] lastNameBytes = reader.ReadBytes(ConstParametersFileService.MaxLengthString);
                 string bytesToLastName = Encoding.ASCII.GetString(lastNameBytes, 0, lastNameBytes.Length);
                 record.LastName = bytesToLastName.Replace("\0", string.Empty);
                 int dateOfYear = reader.ReadInt32();

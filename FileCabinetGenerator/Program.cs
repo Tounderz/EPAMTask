@@ -128,7 +128,7 @@ namespace FileCabinetGenerator
             }
         }
 
-        private static void GetSaveToCsv(string fileNameCsv) // запись csv
+        private static void GetSaveToCsv(string fileNameCsv)
         {
             using StreamWriter streamWriter = new (fileNameCsv);
             generatorSnapshot = generatorService.MakeSnapshot();
@@ -137,7 +137,7 @@ namespace FileCabinetGenerator
             Console.WriteLine($"All records are exported to file {fileNameCsv}.");
         }
 
-        private static void GetSaveToXml(string fileNameXml) // запись xml
+        private static void GetSaveToXml(string fileNameXml)
         {
             using StreamWriter streamWriter = new (fileNameXml);
             generatorSnapshot = generatorService.MakeSnapshot();

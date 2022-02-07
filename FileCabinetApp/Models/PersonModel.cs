@@ -2,12 +2,10 @@
 
 #pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Models
 {
-    public class FileCabinetRecord
+    public class PersonModel
     {
-        public int Id { get; set; }
-
         public string FirstName { get; set; }
 
         public string LastName { get; set; }

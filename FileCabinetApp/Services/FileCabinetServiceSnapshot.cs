@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.Models;
+using FileCabinetApp.Reader;
+using FileCabinetApp.Writer;
 
-#pragma warning disable SA1600
-#pragma warning disable S1450
 #pragma warning disable SA1201
 #pragma warning disable S125
+#pragma warning disable SA1600
 
-namespace FileCabinetApp
+namespace FileCabinetApp.Services
 {
     public class FileCabinetServiceSnapshot
     {
         private readonly FileCabinetRecord[] records;
-        private FileCabinetRecordCsvWriter fileCabinetRecordCsvWriter;
-        private FileCabinetRecordXmlWriter fileCabinetRecordXmlWriter;
-        private FileCabinetRecordCsvReader fileCabinetRecordCsvReader;
-        private FileCabinetRecordXmlReader fileCabinetRecordXmlReader;
 
         public ReadOnlyCollection<FileCabinetRecord> Records { get; }
 
@@ -34,11 +30,11 @@ namespace FileCabinetApp
 
         public void SaveToCsv(StreamWriter streamWriter)
         {
-            this.fileCabinetRecordCsvWriter = new FileCabinetRecordCsvWriter(streamWriter);
-            streamWriter.WriteLine(ConstParameters.ColumnNames);
+            FileCabinetRecordCsvWriter fileCabinetRecordCsvWriter = new (streamWriter);
+            streamWriter.WriteLine(ColumnNames.StringColumnNamesCsv);
             foreach (var item in this.records)
             {
-                this.fileCabinetRecordCsvWriter.Write(item);
+                fileCabinetRecordCsvWriter.Write(item);
             }
 
             streamWriter.Flush();
@@ -47,8 +43,8 @@ namespace FileCabinetApp
         public void SaveToXml(StreamWriter streamWriter)
         {
             XmlWriter xmlWriter = XmlWriter.Create(streamWriter);
-            this.fileCabinetRecordXmlWriter = new FileCabinetRecordXmlWriter(xmlWriter);
-            this.fileCabinetRecordXmlWriter.Write(this.records.ToList());
+            FileCabinetRecordXmlWriter fileCabinetRecordXmlWriter = new (xmlWriter);
+            fileCabinetRecordXmlWriter.Write(this.records.ToList());
 
             // запись без сериализации
             // xmlWriter.WriteStartDocument();
@@ -64,15 +60,15 @@ namespace FileCabinetApp
 
         public void LoadFromCsv(StreamReader streamReader)
         {
-            this.fileCabinetRecordCsvReader = new FileCabinetRecordCsvReader(streamReader);
-            this.RecordsFromFile = new ReadOnlyCollection<FileCabinetRecord>(this.fileCabinetRecordCsvReader.ReadAll());
+            FileCabinetRecordCsvReader fileCabinetRecordCsvReader = new (streamReader);
+            this.RecordsFromFile = new ReadOnlyCollection<FileCabinetRecord>(fileCabinetRecordCsvReader.ReadAll());
         }
 
         public void LoadFromXml(StreamReader streamReader)
         {
             XmlReader xmlReader = XmlReader.Create(streamReader);
-            this.fileCabinetRecordXmlReader = new FileCabinetRecordXmlReader(xmlReader);
-            this.RecordsFromFile = new ReadOnlyCollection<FileCabinetRecord>(this.fileCabinetRecordXmlReader.ReadAll());
+            FileCabinetRecordXmlReader fileCabinetRecordXmlReader = new (xmlReader);
+            this.RecordsFromFile = new ReadOnlyCollection<FileCabinetRecord>(fileCabinetRecordXmlReader.ReadAll());
         }
     }
 }

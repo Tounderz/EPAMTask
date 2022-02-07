@@ -1,23 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Services;
 
-#pragma warning disable S1450
 #pragma warning disable SA1600
-#pragma warning disable SA1202
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class ExportCommandHandler : ServiceCommandHandlerBase
     {
-        private FileCabinetServiceSnapshot fileCabinetServiceSnapshot;
+        private readonly FileCabinetServiceSnapshot fileCabinetServiceSnapshot;
 
         public ExportCommandHandler(IFileCabinetService service)
             : base(service)
         {
+            this.fileCabinetServiceSnapshot = this.service.MakeSnapshot();
+        }
+
+        public override AppCommandRequest Handle(AppCommandRequest request)
+        {
+            if (request is null)
+            {
+                throw new ArgumentException($"The {nameof(request)} is null.");
+            }
+
+            if (request.Command.ToLower() == Commands.ExportName)
+            {
+                this.Export(request.Parameters);
+                return null;
+            }
+            else
+            {
+                return base.Handle(request);
+            }
         }
 
         private void Export(string parameters)
@@ -56,10 +73,10 @@ namespace FileCabinetApp.CommandHandlers
 
                 switch (fileType)
                 {
-                    case ConstParameters.CsvType:
+                    case TypeFile.CsvType:
                         this.GetSaveToCsv(fileName);
                         break;
-                    case ConstParameters.XmlType:
+                    case TypeFile.XmlType:
                         this.GetSaveToXml(fileName);
                         break;
                     default:
@@ -68,32 +85,13 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                ConstParameters.PrintException(ex);
-            }
-        }
-
-        public override AppCommandRequest Handle(AppCommandRequest request)
-        {
-            if (request is null)
-            {
-                throw new ArgumentException($"The {nameof(request)} is null.");
-            }
-
-            if (request.Command.ToLower() == ConstParameters.ExportName)
-            {
-                this.Export(request.Parameters);
-                return null;
-            }
-            else
-            {
-                return base.Handle(request);
+                PrintException.Print(ex);
             }
         }
 
         private void GetSaveToCsv(string fileNameCsv)
         {
             using StreamWriter streamWriter = new (fileNameCsv);
-            this.fileCabinetServiceSnapshot = this.service.MakeSnapshot();
             this.fileCabinetServiceSnapshot.SaveToCsv(streamWriter);
             streamWriter.Close();
             Console.WriteLine($"All records are exported to file {fileNameCsv}.");
@@ -102,7 +100,6 @@ namespace FileCabinetApp.CommandHandlers
         private void GetSaveToXml(string fileNameXml)
         {
             using StreamWriter streamWriter = new (fileNameXml);
-            this.fileCabinetServiceSnapshot = this.service.MakeSnapshot();
             this.fileCabinetServiceSnapshot.SaveToXml(streamWriter);
             streamWriter.Close();
             Console.WriteLine($"All records are exported to file {fileNameXml}.");

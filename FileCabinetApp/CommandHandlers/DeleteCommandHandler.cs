@@ -1,46 +1,66 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Models;
+using FileCabinetApp.Services.Seach;
 
-#pragma warning disable SA1202
 #pragma warning disable SA1600
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class DeleteCommandHandler : ServiceCommandHandlerBase
     {
-        private List<FileCabinetRecord> list;
+        private List<FileCabinetRecord> records;
 
         public DeleteCommandHandler(IFileCabinetService service)
             : base(service)
         {
         }
 
+        public override AppCommandRequest Handle(AppCommandRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentException($"The {nameof(request)} is null.");
+            }
+
+            if (request.Command.ToLower() == Commands.DeleteName)
+            {
+                this.Delete(request.Parameters);
+                return null;
+            }
+            else
+            {
+                return base.Handle(request);
+            }
+        }
+
         private void Delete(string parameters)
         {
             try
             {
-                string[] arrParameters = parameters.Trim().Split(ConstParameters.Where, StringSplitOptions.RemoveEmptyEntries);
+                FileCabinetSearchService searchService = new (this.service, Commands.DeleteName);
+                string[] arrParameters = parameters.Trim().Split(Separators.Where, StringSplitOptions.RemoveEmptyEntries);
                 string[] interimParameters = arrParameters[0].Trim().Split();
 
-                this.list = SeachMethods.GetRecordsList(interimParameters, this.service, ConstParameters.DeleteName);
+                this.records = searchService.GetRecordsList(interimParameters);
                 StringBuilder stringBuilder = new ();
-                for (int i = 0; i < this.list.Count; i++)
+                for (int i = 0; i < this.records.Count; i++)
                 {
-                    this.service.DeleteRecord(this.list[i].Id);
-                    if (i + 1 == this.list.Count)
+                    this.service.DeleteRecord(this.records[i].Id);
+                    if (i + 1 == this.records.Count)
                     {
-                        stringBuilder.Append($"#{this.list[i].Id}");
+                        stringBuilder.Append($"#{this.records[i].Id}");
                     }
                     else
                     {
-                        stringBuilder.Append($"#{this.list[i].Id}, ");
+                        stringBuilder.Append($"#{this.records[i].Id}, ");
                     }
                 }
 
-                if (this.list.Count == 1)
+                if (this.records.Count == 1)
                 {
                     Console.WriteLine($"Record {stringBuilder} is deleted.");
                 }
@@ -51,25 +71,7 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                ConstParameters.PrintException(ex);
-            }
-        }
-
-        public override AppCommandRequest Handle(AppCommandRequest request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentException($"The {nameof(request)} is null.");
-            }
-
-            if (request.Command.ToLower() == ConstParameters.DeleteName)
-            {
-                this.Delete(request.Parameters);
-                return null;
-            }
-            else
-            {
-                return base.Handle(request);
+                PrintException.Print(ex);
             }
         }
     }

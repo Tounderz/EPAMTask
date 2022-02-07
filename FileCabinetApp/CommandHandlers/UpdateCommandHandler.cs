@@ -1,39 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.ConstParameters;
+using FileCabinetApp.CreatePerson;
+using FileCabinetApp.Interfaces;
+using FileCabinetApp.Models;
+using FileCabinetApp.Services.Seach;
 
 #pragma warning disable SA1600
-#pragma warning disable SA1202
-#pragma warning disable SA1214
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class UpdateCommandHandler : ServiceCommandHandlerBase
     {
+        private readonly CreatingPerson creatingPerson;
         private List<FileCabinetRecord> fileCabinetRecords;
-        private readonly string nameValidator;
 
         public UpdateCommandHandler(IFileCabinetService service, string nameValidator)
             : base(service)
         {
-            this.nameValidator = nameValidator;
+            this.creatingPerson = new CreatingPerson(nameValidator);
+        }
+
+        public override AppCommandRequest Handle(AppCommandRequest request)
+        {
+            if (request is null)
+            {
+                throw new ArgumentException($"The {nameof(request)} is null.");
+            }
+
+            if (request.Command.ToLower() == Commands.UpdateName)
+            {
+                this.Update(request.Parameters);
+                return null;
+            }
+            else
+            {
+                return base.Handle(request);
+            }
         }
 
         private void Update(string parameters)
         {
             try
             {
-                string[] arrParameters = parameters.Trim().Split(ConstParameters.Where, StringSplitOptions.RemoveEmptyEntries);
+                FileCabinetSearchService searchService = new (this.service, Commands.UpdateName);
+                string[] arrParameters = parameters.Trim().Split(Separators.Where, StringSplitOptions.RemoveEmptyEntries);
                 if (arrParameters.Length == 1 || arrParameters[1] == " " || string.IsNullOrEmpty(arrParameters[1]))
                 {
                     throw new ArgumentException("Incorrect call to update parameters!");
                 }
 
-                var newParameters = SeachMethods.GetListParameters(arrParameters[0].Replace(ConstParameters.Set, string.Empty, StringComparison.OrdinalIgnoreCase).Trim());
+                var newParameters = searchService.GetListParameters(arrParameters[0].Replace(Separators.Set, string.Empty, StringComparison.OrdinalIgnoreCase).Trim());
                 string[] interimParameters = arrParameters[1].Trim().Split();
-                this.fileCabinetRecords = SeachMethods.GetRecordsList(interimParameters, this.service, ConstParameters.UpdateName);
+                this.fileCabinetRecords = searchService.GetRecordsList(interimParameters);
                 StringBuilder stringBuilder = new ();
                 for (int i = 0; i < this.fileCabinetRecords.Count; i++)
                 {
@@ -59,7 +79,7 @@ namespace FileCabinetApp.CommandHandlers
             }
             catch (Exception ex)
             {
-                ConstParameters.PrintException(ex);
+                PrintException.Print(ex);
             }
         }
 
@@ -74,46 +94,28 @@ namespace FileCabinetApp.CommandHandlers
             {
                 switch (key.ToLower())
                 {
-                    case ConstParameters.FirstName:
+                    case CriteriaNames.FirstName:
                         firstName = value;
                         break;
-                    case ConstParameters.LastName:
+                    case CriteriaNames.LastName:
                         lastName = value;
                         break;
-                    case ConstParameters.DateOfBirth:
+                    case CriteriaNames.DateOfBirth:
                         dateOfBirth = value;
                         break;
-                    case ConstParameters.Salary:
+                    case CriteriaNames.Salary:
                         salary = value;
                         break;
-                    case ConstParameters.Symbol:
+                    case CriteriaNames.Symbol:
                         symbol = value;
                         break;
                     default:
-                        throw new ArgumentException(ConstParameters.IncorrectInput);
+                        throw new ArgumentException(PrintException.IncorrectInput);
                 }
             }
 
-            var person = CreatingPerson.NewPersonInsertAndUpdate(this.nameValidator, firstName, lastName, dateOfBirth, salary, symbol);
+            var person = this.creatingPerson.AddPersonInsertAndUpdate(firstName, lastName, dateOfBirth, salary, symbol);
             this.service.UpdateRecord(record.Id, person);
-        }
-
-        public override AppCommandRequest Handle(AppCommandRequest request)
-        {
-            if (request is null)
-            {
-                throw new ArgumentException($"The {nameof(request)} is null.");
-            }
-
-            if (request.Command.ToLower() == ConstParameters.UpdateName)
-            {
-                this.Update(request.Parameters);
-                return null;
-            }
-            else
-            {
-                return base.Handle(request);
-            }
         }
     }
 }
